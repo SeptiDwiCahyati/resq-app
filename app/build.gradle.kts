@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.septi.rescuu"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.septi.rescuu"
@@ -40,6 +40,7 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.airbnb.android:lottie:6.3.0")
+    implementation("androidx.core:core:1.15.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

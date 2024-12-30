@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.septi.rescuu.adapter.ActiveTeamsAdapter;
@@ -91,28 +92,38 @@ public class HomeFragment extends Fragment {
     private void showAllActionsDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_all_actions, null);
-        RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
 
+        RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
+        Button btnClose = dialogView.findViewById(R.id.dialog_button_close);
+
+        // Setup RecyclerView
         List<QuickAction> allActions = new ArrayList<>();
-        allActions.add(new QuickAction(("Lapor Kecelakaan"), R.drawable.ic_accident));
-        allActions.add(new QuickAction(("Panggil Ambulans"), R.drawable.ic_ambulance));
-        allActions.add(new QuickAction(("Hubungi Polisi"), R.drawable.ic_police));
-        allActions.add(new QuickAction(("Pemadam Kebakaran"), R.drawable.ic_fire));
-        allActions.add(new QuickAction(("Lapor Kecelakaan"), R.drawable.ic_accident));
-        allActions.add(new QuickAction(("Panggil Ambulans"), R.drawable.ic_ambulance));
-        allActions.add(new QuickAction(("Hubungi Polisi"), R.drawable.ic_police));
-        allActions.add(new QuickAction(("Pemadam Kebakaran"), R.drawable.ic_fire));
+        allActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
+        allActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
+        allActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
+        allActions.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire));
+        allActions.add(new QuickAction("Pertolongan Pertama", R.drawable.ic_fire));
+
+
 
         GridLayoutManager dialogGridManager = new GridLayoutManager(getContext(), 2);
         dialogRecyclerView.setLayoutManager(dialogGridManager);
         dialogRecyclerView.setAdapter(new QuickActionAdapter(allActions));
 
-        builder.setView(dialogView)
-                .setTitle("Semua Aksi Cepat")
-                .setPositiveButton("Tutup", (dialog, which) -> dialog.dismiss());
+        // Buat Dialog
+        androidx.appcompat.app.AlertDialog dialog = builder.setView(dialogView).create();
+        dialog.show();
 
-        builder.create().show();
+        // Set Border Radius di Dialog
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        // Listener untuk Button Close
+        btnClose.setOnClickListener(v -> dialog.dismiss());
     }
+
+
 
     private String truncateText(String text) {
         int maxLength = 14;
