@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.septi.rescuu.adapter.ActiveTeamsAdapter;
 import com.septi.rescuu.adapter.QuickActionAdapter;
 import com.septi.rescuu.adapter.RecentReportsAdapter;
@@ -13,6 +14,7 @@ import com.septi.rescuu.model.RescueTeam;
 import com.septi.rescuu.model.Report;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -45,12 +47,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        // Setup Quick Actions
-        List<QuickAction> quickActions = new ArrayList<>();
-        quickActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
-        quickActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
-        quickActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
-        quickActions.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire));
+
 
         // Setup Active Teams
         List<RescueTeam> activeTeams = new ArrayList<>();
@@ -65,9 +62,47 @@ public class HomeFragment extends Fragment {
         recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
 
 
-        rvQuickActions.setAdapter(new QuickActionAdapter(quickActions));
+        List<QuickAction> quickActions = new ArrayList<>();
+        quickActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
+        quickActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
+        quickActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
+        quickActions.add(new QuickAction("Lihat Semua", R.drawable.ic_chevron_right)); // Add view all option
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        rvQuickActions.setLayoutManager(gridLayoutManager);
+
+        QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
+        adapter.setOnItemClickListener((quickAction, position) -> {
+            if (position == 3) { // "Lihat Semua" position
+                showAllActionsDialog();
+            }
+        });
+
+        rvQuickActions.setAdapter(adapter);
         rvActiveTeams.setAdapter(new ActiveTeamsAdapter(activeTeams));
      rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
+    }
+
+    private void showAllActionsDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_all_actions, null);
+        RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
+
+        List<QuickAction> allActions = new ArrayList<>();
+        allActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
+        allActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
+        allActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
+        allActions.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire));
+
+        GridLayoutManager dialogGridManager = new GridLayoutManager(getContext(), 2);
+        dialogRecyclerView.setLayoutManager(dialogGridManager);
+        dialogRecyclerView.setAdapter(new QuickActionAdapter(allActions));
+
+        builder.setView(dialogView)
+                .setTitle("Semua Aksi Cepat")
+                .setPositiveButton("Tutup", (dialog, which) -> dialog.dismiss());
+
+        builder.create().show();
     }
 
     private void setupClickListeners() {
