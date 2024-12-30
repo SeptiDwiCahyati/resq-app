@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ResQ</string>
+
+    <!-- Landing page -->
+    <string name="welcome_title">ResQ</string>
+    <string name="welcome_tagline">Bantuan darurat dalam genggaman Anda</string>
+    <string name="get_started">Mulai Sekarang</string>
+
+    <!-- Feature cards -->
+    <string name="emergency_title">Panggilan Darurat</string>
+    <string name="emergency_desc">Terintegrasi dengan layanan 112/911 untuk respons cepat</string>
+    <string name="tracking_title">Pelacakan Tim</string>
+    <string name="tracking_desc">Pantau lokasi tim penyelamat secara real-time</string>
+
+    <!-- Bottom sheet -->
+    <string name="close">Tutup</string>
+</resources>

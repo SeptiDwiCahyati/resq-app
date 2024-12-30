@@ -1,0 +1,16 @@
+<resources>
+    <color name="colorPrimary">#D32F2F</color>
+    <color name="colorPrimaryDark">#B71C1C</color>
+    <color name="colorAccent">#FF7043</color>
+    <color name="status_available">#4CAF50</color>
+    <color name="status_busy">#FF7043</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="grey_light">#EEEEEE</color>
+    <color name="grey">#9E9E9E</color>
+    <color name="background">#FAFAFA</color>
+    <color name="red">#D32F2F</color>
+    <color name="text_secondary">#616161</color>
+    <color name="gradient_start">#80000000</color>
+    <color name="gradient_end">#00000000</color>
+</resources>
