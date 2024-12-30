@@ -58,39 +58,72 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        // Setup Active Teams
-        rvActiveTeams.setAdapter(new ActiveTeamsAdapter(DummyData.getActiveTeams()));
+        // Menyiapkan RecyclerView untuk Tim Aktif
+        setupActiveTeamsRecyclerView();
 
-        // Setup Recent Reports
-        rvRecentReports.setAdapter(new RecentReportsAdapter(DummyData.getRecentReports()));
+        // Menyiapkan RecyclerView untuk Laporan Terbaru
+        setupRecentReportsRecyclerView();
 
-        // Setup Quick Actions
-        List<QuickAction> quickActions = DummyData.getQuickActions();
-        // Initial setup with available teams only
+        // Menyiapkan RecyclerView untuk Tindakan Cepat
+        setupQuickActionsRecyclerView();
+    }
+
+    /**
+     * Menyiapkan RecyclerView untuk Tim Aktif.
+     * Menampilkan tim yang tersedia dalam layout horizontal.
+     */
+    private void setupActiveTeamsRecyclerView() {
+        // Mengambil tim aktif yang statusnya "Tersedia"
         List<RescueTeam> availableTeams = DummyData.getActiveTeams().stream()
                 .filter(team -> team.getStatus().equals("Tersedia"))
                 .collect(Collectors.toList());
 
-        // Setup RecyclerView with horizontal layout initially
+        // Menyiapkan layout RecyclerView secara horizontal
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvActiveTeams.setLayoutManager(horizontalLayout);
 
+        // Menetapkan adapter untuk tim aktif
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
         rvActiveTeams.setAdapter(activeTeamsAdapter);
+    }
 
-        setupToggleButton();
+    /**
+     * Menyiapkan RecyclerView untuk Laporan Terbaru.
+     * Menampilkan laporan terbaru dalam format daftar vertikal.
+     */
+    private void setupRecentReportsRecyclerView() {
+        // Mengambil laporan terbaru dari data dummy
+        List<Report> recentReports = DummyData.getRecentReports();
 
+        // Menetapkan adapter untuk laporan terbaru
+        rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
+    }
+
+    /**
+     * Menyiapkan RecyclerView untuk Tindakan Cepat.
+     * Menampilkan tindakan cepat dalam layout grid (4 kolom).
+     */
+    private void setupQuickActionsRecyclerView() {
+        // Mengambil daftar tindakan cepat dari data dummy
+        List<QuickAction> quickActions = DummyData.getQuickActions();
+
+        // Menyiapkan layout GridLayoutManager untuk tindakan cepat (4 kolom)
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
 
+        // Menetapkan adapter untuk tindakan cepat
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
+            // Menangani klik pada tombol "Lihat Semua" (posisi 7)
             if (position == 7) {
                 showAllActionsDialog();
             }
         });
+
+        // Menetapkan adapter ke RecyclerView
         rvQuickActions.setAdapter(adapter);
     }
+
 
     private void setupToggleButton() {
         btnToggleTeams.setText("Tampilkan Semua");
@@ -146,16 +179,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
-
-    private String truncateText(String text) {
-        int maxLength = 14;
-        if (text.length() > maxLength) {
-            return text.substring(0, maxLength - 3) + "...";
-        } else {
-            return text;
-        }
-    }
     private void setupClickListeners() {
         btnEmergency.setOnClickListener(v -> {
             // Handle emergency button click
