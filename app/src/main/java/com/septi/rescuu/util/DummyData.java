@@ -12,11 +12,17 @@ public class DummyData {
 
     public static List<RescueTeam> getActiveTeams() {
         List<RescueTeam> activeTeams = new ArrayList<>();
-        activeTeams.add(new RescueTeam("Tim Alpha", "2 km", "Tersedia"));
-        activeTeams.add(new RescueTeam("Tim Beta", "3.5 km", "Dalam Tugas"));
-        activeTeams.add(new RescueTeam("Tim Delta", "5 km", "Tersedia"));
+        activeTeams.add(new RescueTeam("Basarnas Jakarta", "2 km", "Tersedia"));
+        activeTeams.add(new RescueTeam("PMI Tangerang", "3.5 km", "Dalam Tugas"));
+        activeTeams.add(new RescueTeam("Relawan Indonesia", "5 km", "Tersedia"));
+        activeTeams.add(new RescueTeam("SAR Gunung Jaya", "7 km", "Dalam Tugas"));
+        activeTeams.add(new RescueTeam("Damkar Bandung", "1 km", "Tersedia"));
+        activeTeams.add(new RescueTeam("Tim Evakuasi Surabaya", "8 km", "Tersedia"));
+        activeTeams.add(new RescueTeam("Tim Kesehatan Makassar", "4 km", "Dalam Tugas"));
+        activeTeams.add(new RescueTeam("Relawan Lombok", "6 km", "Tersedia"));
         return activeTeams;
     }
+
 
     public static List<Report> getRecentReports() {
         List<Report> recentReports = new ArrayList<>();
