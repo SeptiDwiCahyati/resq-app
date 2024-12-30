@@ -63,17 +63,22 @@ public class HomeFragment extends Fragment {
 
 
         List<QuickAction> quickActions = new ArrayList<>();
-        quickActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
-        quickActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
-        quickActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
-        quickActions.add(new QuickAction("Lihat Semua", R.drawable.ic_chevron_right)); // Add view all option
+        quickActions.add(new QuickAction(truncateText("Lapor Kecelakaan"), R.drawable.ic_accident));
+        quickActions.add(new QuickAction(truncateText("Panggil Ambulans"), R.drawable.ic_ambulance));
+        quickActions.add(new QuickAction(truncateText("Hubungi Polisi"), R.drawable.ic_police));
+        quickActions.add(new QuickAction(truncateText("Pemadam Kebakaran"), R.drawable.ic_fire));
+        quickActions.add(new QuickAction(truncateText("Lapor Bencana"), R.drawable.ic_fire));
+        quickActions.add(new QuickAction(truncateText("Pertolongan Pertama"), R.drawable.ic_fire));
+        quickActions.add(new QuickAction(truncateText("Evakuasi Segera"), R.drawable.ic_fire));
+        quickActions.add(new QuickAction(truncateText("Lihat Semua"), R.drawable.ic_chevron_right));
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
+        gridLayoutManager.setSpanCount(4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
 
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
-            if (position == 3) { // "Lihat Semua" position
+            if (position == 7) {
                 showAllActionsDialog();
             }
         });
@@ -89,10 +94,14 @@ public class HomeFragment extends Fragment {
         RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
 
         List<QuickAction> allActions = new ArrayList<>();
-        allActions.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
-        allActions.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
-        allActions.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
-        allActions.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire));
+        allActions.add(new QuickAction(("Lapor Kecelakaan"), R.drawable.ic_accident));
+        allActions.add(new QuickAction(("Panggil Ambulans"), R.drawable.ic_ambulance));
+        allActions.add(new QuickAction(("Hubungi Polisi"), R.drawable.ic_police));
+        allActions.add(new QuickAction(("Pemadam Kebakaran"), R.drawable.ic_fire));
+        allActions.add(new QuickAction(("Lapor Kecelakaan"), R.drawable.ic_accident));
+        allActions.add(new QuickAction(("Panggil Ambulans"), R.drawable.ic_ambulance));
+        allActions.add(new QuickAction(("Hubungi Polisi"), R.drawable.ic_police));
+        allActions.add(new QuickAction(("Pemadam Kebakaran"), R.drawable.ic_fire));
 
         GridLayoutManager dialogGridManager = new GridLayoutManager(getContext(), 2);
         dialogRecyclerView.setLayoutManager(dialogGridManager);
@@ -105,6 +114,14 @@ public class HomeFragment extends Fragment {
         builder.create().show();
     }
 
+    private String truncateText(String text) {
+        int maxLength = 14;
+        if (text.length() > maxLength) {
+            return text.substring(0, maxLength - 3) + "...";
+        } else {
+            return text;
+        }
+    }
     private void setupClickListeners() {
         btnEmergency.setOnClickListener(v -> {
             // Handle emergency button click
