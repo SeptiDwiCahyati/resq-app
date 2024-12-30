@@ -159,6 +159,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+
             <!-- Active Teams Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/active_teams_card"
@@ -177,24 +178,42 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/poppins_semibold"
-                        android:text="Tim Rescue Aktif"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:layout_marginBottom="16dp"/>
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins_semibold"
+                            android:text="Tim Rescue Aktif"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp"/>
+
+                        <TextView
+                            android:id="@+id/btn_toggle_teams"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="Tampilkan Semua"
+                            android:textColor="@color/colorPrimary"
+                            android:padding="8dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </RelativeLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_active_teams"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:clipToPadding="false"
-                        android:orientation="horizontal"
-                        android:paddingBottom="8dp"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                        android:paddingBottom="8dp"/>
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Recent Reports Card -->

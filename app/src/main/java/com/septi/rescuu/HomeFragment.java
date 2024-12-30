@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.septi.rescuu.adapter.ActiveTeamsAdapter;
@@ -16,6 +17,7 @@ import com.septi.rescuu.model.Report;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -23,6 +25,7 @@ import com.septi.rescuu.util.DummyData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
 
@@ -30,11 +33,12 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvActiveTeams;
     private RecyclerView rvRecentReports;
     private MaterialButton btnEmergency;
-
+    private TextView btnToggleTeams;
+    private boolean isShowingAllTeams = false;
+    private ActiveTeamsAdapter activeTeamsAdapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-
         initializeViews(view);
         setupRecyclerViews();
         setupClickListeners();
@@ -46,6 +50,11 @@ public class HomeFragment extends Fragment {
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
         rvRecentReports = view.findViewById(R.id.rv_recent_reports);
         btnEmergency = view.findViewById(R.id.btn_emergency);
+        btnToggleTeams = view.findViewById(R.id.btn_toggle_teams);
+
+        if (btnToggleTeams != null) {
+            setupToggleButton();
+        }
     }
 
     private void setupRecyclerViews() {
@@ -57,6 +66,20 @@ public class HomeFragment extends Fragment {
 
         // Setup Quick Actions
         List<QuickAction> quickActions = DummyData.getQuickActions();
+        // Initial setup with available teams only
+        List<RescueTeam> availableTeams = DummyData.getActiveTeams().stream()
+                .filter(team -> team.getStatus().equals("Tersedia"))
+                .collect(Collectors.toList());
+
+        // Setup RecyclerView with horizontal layout initially
+        LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        rvActiveTeams.setLayoutManager(horizontalLayout);
+
+        activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
+        rvActiveTeams.setAdapter(activeTeamsAdapter);
+
+        setupToggleButton();
+
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
 
@@ -67,6 +90,35 @@ public class HomeFragment extends Fragment {
             }
         });
         rvQuickActions.setAdapter(adapter);
+    }
+
+    private void setupToggleButton() {
+        btnToggleTeams.setText("Tampilkan Semua");
+        btnToggleTeams.setOnClickListener(v -> toggleTeamsView());
+    }
+
+    private void toggleTeamsView() {
+        isShowingAllTeams = !isShowingAllTeams;
+
+        // Update button text
+        btnToggleTeams.setText(isShowingAllTeams ? "Kecilkan" : "Tampilkan Semua");
+
+        // Update layout manager
+        rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(),
+                isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,
+                false));
+
+        // Update adapter with new data and layout
+        List<RescueTeam> teams = isShowingAllTeams
+                ? DummyData.getActiveTeams()
+                : DummyData.getActiveTeams().stream()
+                .filter(team -> team.getStatus().equals("Tersedia"))
+                .collect(Collectors.toList());
+
+        activeTeamsAdapter.updateData(teams, isShowingAllTeams);
+
+        // Smooth transition for layout change
+        rvActiveTeams.scheduleLayoutAnimation();
     }
 
     private void showAllActionsDialog() {

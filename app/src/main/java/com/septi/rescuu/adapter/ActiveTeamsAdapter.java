@@ -15,10 +15,18 @@ import java.util.List;
 
 public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.RescueTeamViewHolder> {
     private List<RescueTeam> rescueTeams;
+    private boolean isVerticalLayout;
     private OnItemClickListener listener;
 
     public ActiveTeamsAdapter(List<RescueTeam> rescueTeams) {
         this.rescueTeams = rescueTeams;
+        this.isVerticalLayout = false;
+    }
+
+    public void updateData(List<RescueTeam> newTeams, boolean isVertical) {
+        this.rescueTeams = newTeams;
+        this.isVerticalLayout = isVertical;
+        notifyDataSetChanged();
     }
 
     @NonNull
