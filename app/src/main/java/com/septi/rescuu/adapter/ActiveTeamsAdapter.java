@@ -42,6 +42,13 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
     public void onBindViewHolder(@NonNull RescueTeamViewHolder holder, int position) {
         RescueTeam team = rescueTeams.get(position);
         holder.bind(team);
+
+        // Jika dalam mode vertical, atur lebar card agar match_parent
+        if (isVerticalLayout) {
+            ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            holder.itemView.setLayoutParams(params);
+        }
     }
 
     @Override
@@ -83,10 +90,11 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
             distanceView.setText(team.getDistance());
             statusView.setText(team.getStatus());
 
+            // Atur background dan text color status sesuai kondisi
             int statusColor = team.getStatus().equals("Tersedia") ?
                     R.color.status_available : R.color.status_busy;
             statusView.setTextColor(itemView.getContext().getColor(statusColor));
         }
     }
+    }
 
-}
