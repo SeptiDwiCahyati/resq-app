@@ -23,8 +23,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.septi.rescuu.util.DummyData;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
@@ -38,12 +41,16 @@ public class HomeFragment extends Fragment {
     private ActiveTeamsAdapter activeTeamsAdapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-        initializeViews(view);
-        setupRecyclerViews();
-        setupClickListeners();
+        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        initializeViews(rootView);
 
-        return view;
+        setupClickListeners();
+        setupRecyclerViews(rootView);
+
+        // Menyiapkan RecyclerView
+        setupRecyclerViews(rootView);
+
+        return rootView;
     }
     private void initializeViews(View view) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
@@ -57,12 +64,12 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void setupRecyclerViews() {
+    private void setupRecyclerViews(View rootView) {
         // Menyiapkan RecyclerView untuk Tim Aktif
         setupActiveTeamsRecyclerView();
 
         // Menyiapkan RecyclerView untuk Laporan Terbaru
-        setupRecentReportsRecyclerView();
+        setupRecentReportsRecyclerView(rootView);
 
         // Menyiapkan RecyclerView untuk Tindakan Cepat
         setupQuickActionsRecyclerView();
@@ -91,13 +98,20 @@ public class HomeFragment extends Fragment {
      * Menyiapkan RecyclerView untuk Laporan Terbaru.
      * Menampilkan laporan terbaru dalam format daftar vertikal.
      */
-    private void setupRecentReportsRecyclerView() {
+    private void setupRecentReportsRecyclerView(View rootView) {
         // Mengambil laporan terbaru dari data dummy
         List<Report> recentReports = DummyData.getRecentReports();
 
+        // Ambil referensi TextView untuk tanggal
+        TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
+        String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
+        tvCurrentDate.setText(currentDate);
+
         // Menetapkan adapter untuk laporan terbaru
+        RecyclerView rvRecentReports = rootView.findViewById(R.id.rv_recent_reports);
         rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
     }
+
 
     /**
      * Menyiapkan RecyclerView untuk Tindakan Cepat.

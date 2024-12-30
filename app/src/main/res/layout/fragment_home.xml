@@ -242,7 +242,17 @@
                         android:text="Laporan Terkini"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp"
-                        android:layout_marginBottom="16dp"/>
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Tambahkan TextView untuk tanggal -->
+                    <TextView
+                        android:id="@+id/tv_current_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="31 Desember 2024"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_recent_reports"
@@ -253,6 +263,7 @@
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
