@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -19,11 +20,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.septi.resq.utils.LocationUtils;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
@@ -39,6 +45,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +62,43 @@ public class MapFragment extends Fragment {
     private GeoPoint lastKnownLocation;
     private PulsingLocationOverlay pulsingOverlay;
     private LocationManager locationManager;
+
+
+    // Add these class variables
+    private Uri photoUri;
+    private ImageView imagePreview;
+    private ActivityResultLauncher<Uri> takePicture;
+    private static final String[] REQUIRED_PERMISSIONS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.CAMERA
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Initialize the camera launcher
+        takePicture = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                result -> {
+                    if (result && imagePreview != null) {
+                        imagePreview.setImageURI(photoUri);
+                        imagePreview.setVisibility(View.VISIBLE);
+                    }
+                }
+        );
+    }
+
+    // Add this method to create temporary image file
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
+    }
+
+
     // Constants
     private static final int PERMISSION_REQUEST_CODE = 1;
     private static final int MARKER_SIZE_DP = 40;
@@ -264,52 +309,92 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void showReportDialog( final double latitude, final double longitude ) {
+    // Update your showReportDialog method
+    private void showReportDialog(final double latitude, final double longitude) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
 
         Spinner typeSpinner = dialogView.findViewById(R.id.spinner_emergency_type);
         EditText descriptionEdit = dialogView.findViewById(R.id.edit_description);
+        MaterialButton takePhotoButton = dialogView.findViewById(R.id.btn_take_photo);
+        imagePreview = dialogView.findViewById(R.id.img_preview);
 
         // Setup emergency type spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"Kecelakaan", "Kebakaran", "Bencana Alam", "Kriminal", "Medis", "Lainnya"});
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item,
+                new String[]{"Kecelakaan", "Kebakaran", "Bencana Alam", "Kriminal", "Medis", "Lainnya"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeSpinner.setAdapter(adapter);
 
-        new AlertDialog.Builder(requireContext()).setTitle("Laporkan Kejadian Darurat").setView(dialogView).setPositiveButton("Laporkan", ( dialog, which ) -> {
-            String type = typeSpinner.getSelectedItem().toString();
-            String description = descriptionEdit.getText().toString();
-            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-
-            Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp);
-
-            long id = dbHelper.insertEmergency(emergency);
-            if (id > 0) {
-                // Remove temporary selected location marker
-                if (selectedLocation != null) {
-                    mapView.getOverlays().remove(selectedLocation);
-                    selectedLocation = null;
-                }
-
-                // Create and add permanent marker
-                Marker newMarker = new Marker(mapView);
-                newMarker.setPosition(new GeoPoint(latitude, longitude));
-                updateMarkerInfo(newMarker, emergency);
-
-                mapView.getOverlays().add(newMarker);
-                emergencyMarkers.add(newMarker);
-
-                mapView.invalidate();
-
-                Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
+        // Setup camera button
+        takePhotoButton.setOnClickListener(v -> {
+            if (checkCameraPermission()) {
+                launchCamera();
+            } else {
+                requestCameraPermission();
             }
-        }).setNegativeButton("Batal", ( dialog, which ) -> {
-            // Remove temporary marker on cancel
-            if (selectedLocation != null) {
-                mapView.getOverlays().remove(selectedLocation);
-                selectedLocation = null;
-                mapView.invalidate();
-            }
-        }).show();
+        });
+
+        // Create and show dialog
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Laporkan Kejadian Darurat")
+                .setView(dialogView)
+                .setPositiveButton("Laporkan", (dialog, which) -> {
+                    String type = typeSpinner.getSelectedItem().toString();
+                    String description = descriptionEdit.getText().toString();
+                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                            .format(new Date());
+                    String photoPath = photoUri != null ? photoUri.toString() : null;
+
+                    Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp, photoPath);
+                    // Update your database helper to include the photo path
+                    long id = dbHelper.insertEmergency(emergency);
+
+                    if (id > 0) {
+                        // Remove temporary selected location marker
+                        if (selectedLocation != null) {
+                            mapView.getOverlays().remove(selectedLocation);
+                            selectedLocation = null;
+                        }
+
+                        // Create and add permanent marker
+                        Marker newMarker = new Marker(mapView);
+                        newMarker.setPosition(new GeoPoint(latitude, longitude));
+                        updateMarkerInfo(newMarker, emergency);
+
+                        mapView.getOverlays().add(newMarker);
+                        emergencyMarkers.add(newMarker);
+
+                        mapView.invalidate();
+
+                        Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+    private boolean checkCameraPermission() {
+        return ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        ActivityCompat.requestPermissions(requireActivity(),
+                new String[]{Manifest.permission.CAMERA},
+                PERMISSION_REQUEST_CODE);
+    }
+
+    private void launchCamera() {
+        try {
+            File photoFile = createImageFile();
+            photoUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    photoFile);
+            takePicture.launch(photoUri);
+        } catch (IOException ex) {
+            Toast.makeText(requireContext(),
+                    "Error creating image file",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -395,6 +480,7 @@ public class MapFragment extends Fragment {
             }
         }
 
+
         @Override
         public void onClose() {
             // Remove any pending auto-close callbacks
@@ -414,6 +500,19 @@ public class MapFragment extends Fragment {
             pulsingOverlay.stopAnimation();
         }
         mapView.onPause();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchCamera();
+            } else {
+                Toast.makeText(requireContext(),
+                        "Camera permission is required to take photos",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 
