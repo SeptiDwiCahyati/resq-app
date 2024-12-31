@@ -1,5 +1,6 @@
 package com.septi.rescuu.database;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -58,13 +59,14 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         return db.insert(TABLE_EMERGENCY, null, values);
     }
 
+    @SuppressLint("Range")
     public List<Emergency> getAllEmergencies() {
         List<Emergency> emergencies = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_EMERGENCY, null, null, null, null, null, COLUMN_TIMESTAMP + " DESC");
 
         while (cursor.moveToNext()) {
-            Emergency emergency = new Emergency(
+            @SuppressLint("Range") Emergency emergency = new Emergency(
                     cursor.getDouble(cursor.getColumnIndex(COLUMN_LATITUDE)),
                     cursor.getDouble(cursor.getColumnIndex(COLUMN_LONGITUDE)),
                     cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)),
