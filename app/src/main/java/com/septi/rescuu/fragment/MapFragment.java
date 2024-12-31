@@ -3,6 +3,7 @@ package com.septi.rescuu.fragment;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -172,25 +173,91 @@ public class MapFragment extends Fragment {
 
 
     private void getCurrentLocation() {
+        // First check if permissions are granted
         if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             requestLocationPermissions();
             return;
         }
 
+        // Check if GPS is enabled
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(requireContext(), "Mohon aktifkan GPS anda", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            return;
+        }
+
+        // Show loading indicator
+        Toast.makeText(requireContext(), "Mencari lokasi...", Toast.LENGTH_SHORT).show();
+
+        // Try to get location from GPS first
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        // If GPS location is null, try network provider
+        if (location == null) {
+            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
+
         if (location != null) {
             GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-            mapView.getController().animateTo(currentLocation);
 
-            // Update or add marker
+            // Animate map to current location with zoom
+            mapView.getController().animateTo(currentLocation);
+            mapView.getController().setZoom(18.0);
+
+            // Update or create current location marker
             if (currentLocationMarker == null) {
                 currentLocationMarker = new Marker(mapView);
                 mapView.getOverlays().add(currentLocationMarker);
             }
+
+            // Update marker position and appearance
             currentLocationMarker.setPosition(currentLocation);
             currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            currentLocationMarker.setTitle("Lokasi Anda");
+
+            // Set a distinctive icon for current location
+            Drawable icon = getResources().getDrawable(R.drawable.ic_my_location); // Make sure to add this icon
+            currentLocationMarker.setIcon(resizeMarkerIcon(icon));
+
             mapView.invalidate();
+
+            Toast.makeText(requireContext(), "Lokasi ditemukan!", Toast.LENGTH_SHORT).show();
+        } else {
+            // If no location is available, request location updates
+            try {
+                locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
+                        new android.location.LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                GeoPoint currentLocation = new GeoPoint(location.getLatitude(),
+                                        location.getLongitude());
+                                mapView.getController().animateTo(currentLocation);
+                                mapView.getController().setZoom(18.0);
+
+                                if (currentLocationMarker == null) {
+                                    currentLocationMarker = new Marker(mapView);
+                                    mapView.getOverlays().add(currentLocationMarker);
+                                }
+                                currentLocationMarker.setPosition(currentLocation);
+                                mapView.invalidate();
+                            }
+
+                            @Override
+                            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+                            @Override
+                            public void onProviderEnabled(String provider) {}
+
+                            @Override
+                            public void onProviderDisabled(String provider) {}
+                        }, null);
+            } catch (SecurityException e) {
+                Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
