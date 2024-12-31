@@ -1,4 +1,4 @@
-package com.septi.rescuu.util;
+package com.septi.rescuu.utils;
 
 import com.septi.rescuu.R;
 import com.septi.rescuu.model.QuickAction;

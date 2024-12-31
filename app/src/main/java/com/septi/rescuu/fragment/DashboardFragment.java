@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.septi.rescuu.util.DummyData;
+import com.septi.rescuu.utils.DummyData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
