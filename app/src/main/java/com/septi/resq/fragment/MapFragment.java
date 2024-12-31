@@ -129,20 +129,36 @@ public class MapFragment extends Fragment {
         mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
             @Override
             public boolean onSingleTapConfirmed( MotionEvent e, MapView mapView ) {
+                // Klik tunggal untuk menampilkan informasi kecelakaan (info marker)
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
                         (int) e.getX(), (int) e.getY());
 
-                // Remove previous selected location marker if it exists
+                for (Marker marker : emergencyMarkers) {
+                    if (marker.getBounds().contains((float) p.getLatitude(), (float) p.getLongitude())) {
+                        marker.showInfoWindow();
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onLongPress( MotionEvent e, MapView mapView ) {
+                // Tekan lama untuk menambahkan laporan baru
+                org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
+                        (int) e.getX(), (int) e.getY());
+
+                // Hapus marker sebelumnya jika ada
                 if (selectedLocation != null) {
                     mapView.getOverlays().remove(selectedLocation);
                 }
 
-                // Create new marker
+                // Tambahkan marker baru di lokasi yang dipilih
                 selectedLocation = new Marker(mapView);
                 selectedLocation.setPosition(new GeoPoint(p.getLatitude(), p.getLongitude()));
                 selectedLocation.setAnchor(0.5f, 1.0f);
 
-                // Add to map overlays
                 mapView.getOverlays().add(selectedLocation);
                 mapView.invalidate();
 
@@ -151,6 +167,7 @@ public class MapFragment extends Fragment {
             }
         });
     }
+
 
     private void loadExistingMarkers() {
         // Clear existing emergency markers from both list and map
@@ -421,6 +438,7 @@ public class MapFragment extends Fragment {
             }
         }
 
+
         @Override
         public void onClose() {
             // Optional: Cleanup code here if needed
@@ -444,6 +462,7 @@ public class MapFragment extends Fragment {
         }
         mapView.onPause();
     }
+
 
     @Override
     public void onResume() {

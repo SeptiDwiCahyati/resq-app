@@ -67,17 +67,7 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Profile Button -->
-    <ImageButton
-        android:id="@+id/profile_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Profile Button"
-        android:src="@drawable/ic_profile_placeholder"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
 
     <!-- My Location Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
