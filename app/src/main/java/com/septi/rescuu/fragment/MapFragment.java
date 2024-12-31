@@ -30,6 +30,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.septi.rescuu.R;
 import com.septi.rescuu.model.Emergency;
 import com.septi.rescuu.database.EmergencyDBHelper;
+import com.septi.rescuu.utils.PulsingLocationOverlay;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -48,11 +49,13 @@ public class MapFragment extends Fragment {
     private EmergencyDBHelper dbHelper;
     private Marker selectedLocation;
     private Marker currentLocationMarker;
-    private List<Marker> emergencyMarkers; // Add this field
+    private List<Marker> emergencyMarkers;
+    private GeoPoint lastKnownLocation;
+    private PulsingLocationOverlay pulsingOverlay;
     private LocationManager locationManager;
     // Constants
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int MARKER_SIZE_DP = 48;
+    private static final int MARKER_SIZE_DP = 40;
     private static final double DEFAULT_LATITUDE = -6.200000;
     private static final double DEFAULT_LONGITUDE = 106.816666;
     private static final double DEFAULT_ZOOM = 15.0;
@@ -83,9 +86,9 @@ public class MapFragment extends Fragment {
         // Enable hardware acceleration
         mapView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
-        // Set initial map position (default to Jakarta, Indonesia)
-        GeoPoint startPoint = new GeoPoint(-6.200000, 106.816666);
-        mapView.getController().setZoom(15.0);
+        // Set initial map position to default location (Jakarta)
+        GeoPoint startPoint = new GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+        mapView.getController().setZoom(DEFAULT_ZOOM);
         mapView.getController().setCenter(startPoint);
 
         // Initialize location services
@@ -94,8 +97,15 @@ public class MapFragment extends Fragment {
         // Setup UI controls
         setupUIControls(view);
 
-        // Request permissions
-        requestLocationPermissions();
+        // Request permissions and fetch current location
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation();
+        } else {
+            requestLocationPermissions();
+        }
 
         // Add map click listener
         setupMapClickListener();
@@ -105,6 +115,7 @@ public class MapFragment extends Fragment {
 
         return view;
     }
+
 
     private void setupUIControls(View view) {
         FloatingActionButton myLocationButton = view.findViewById(R.id.my_location_button);
@@ -162,7 +173,9 @@ public class MapFragment extends Fragment {
     }
 
     private void reportEmergency() {
-        if (selectedLocation != null) {
+        if (lastKnownLocation != null) {
+            showReportDialog(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+        } else if (selectedLocation != null) {
             GeoPoint location = selectedLocation.getPosition();
             showReportDialog(location.getLatitude(), location.getLongitude());
         } else {
@@ -170,6 +183,7 @@ public class MapFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
     private void getCurrentLocation() {
@@ -202,48 +216,14 @@ public class MapFragment extends Fragment {
         }
 
         if (location != null) {
-            GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-
-            // Animate map to current location with zoom
-            mapView.getController().animateTo(currentLocation);
-            mapView.getController().setZoom(18.0);
-
-            // Update or create current location marker
-            if (currentLocationMarker == null) {
-                currentLocationMarker = new Marker(mapView);
-                mapView.getOverlays().add(currentLocationMarker);
-            }
-
-            // Update marker position and appearance
-            currentLocationMarker.setPosition(currentLocation);
-            currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            currentLocationMarker.setTitle("Lokasi Anda");
-
-            // Set a distinctive icon for current location
-            Drawable icon = getResources().getDrawable(R.drawable.ic_my_location); // Make sure to add this icon
-            currentLocationMarker.setIcon(resizeMarkerIcon(icon));
-
-            mapView.invalidate();
-
-            Toast.makeText(requireContext(), "Lokasi ditemukan!", Toast.LENGTH_SHORT).show();
+            updateCurrentLocation(location);
         } else {
-            // If no location is available, request location updates
             try {
                 locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
                         new android.location.LocationListener() {
                             @Override
                             public void onLocationChanged(Location location) {
-                                GeoPoint currentLocation = new GeoPoint(location.getLatitude(),
-                                        location.getLongitude());
-                                mapView.getController().animateTo(currentLocation);
-                                mapView.getController().setZoom(18.0);
-
-                                if (currentLocationMarker == null) {
-                                    currentLocationMarker = new Marker(mapView);
-                                    mapView.getOverlays().add(currentLocationMarker);
-                                }
-                                currentLocationMarker.setPosition(currentLocation);
-                                mapView.invalidate();
+                                updateCurrentLocation(location);
                             }
 
                             @Override
@@ -260,6 +240,45 @@ public class MapFragment extends Fragment {
             }
         }
     }
+
+    private void updateCurrentLocation(Location location) {
+        GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+        lastKnownLocation = currentLocation;
+
+        mapView.getController().animateTo(currentLocation);
+        mapView.getController().setZoom(18.0);
+
+        if (currentLocationMarker == null) {
+            currentLocationMarker = new Marker(mapView);
+            mapView.getOverlays().add(currentLocationMarker);
+        }
+
+        // Set marker position and properties
+        currentLocationMarker.setPosition(currentLocation);
+        currentLocationMarker.setAnchor(0.5f, 0.5f);  // Changed to center anchor
+        currentLocationMarker.setTitle("Lokasi Anda");
+
+        Drawable icon = getResources().getDrawable(R.drawable.ic_location);
+// Gunakan ukuran lebih kecil, misalnya 30dp
+        currentLocationMarker.setIcon(resizeMarkerIcon(icon, 20));
+
+
+        // Update or create pulsing overlay
+        if (pulsingOverlay == null) {
+            pulsingOverlay = new PulsingLocationOverlay(requireContext(), mapView, currentLocation);
+            mapView.getOverlays().add(0, pulsingOverlay); // Add at index 0 to draw below marker
+        } else {
+            pulsingOverlay.updateLocation(currentLocation);
+        }
+        pulsingOverlay.startAnimation();
+
+        mapView.invalidate();
+
+        Toast.makeText(requireContext(), "Lokasi ditemukan!", Toast.LENGTH_SHORT).show();
+    }
+
+
+
 
 
 
@@ -329,9 +348,9 @@ public class MapFragment extends Fragment {
 
 
     // Helper method untuk resize marker icon
-    private Drawable resizeMarkerIcon(Drawable icon) {
+    private Drawable resizeMarkerIcon(Drawable icon, int sizeDp) {
         float density = getResources().getDisplayMetrics().density;
-        int pixelSize = (int) (MARKER_SIZE_DP * density);
+        int pixelSize = (int) (sizeDp * density);
 
         Bitmap bitmap = Bitmap.createBitmap(pixelSize, pixelSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -340,6 +359,7 @@ public class MapFragment extends Fragment {
 
         return new BitmapDrawable(getResources(), bitmap);
     }
+
 
     private void updateMarkerInfo(Marker marker, Emergency emergency) {
         marker.setTitle(emergency.getType());
@@ -374,7 +394,10 @@ public class MapFragment extends Fragment {
         }
 
         Drawable icon = getResources().getDrawable(iconDrawable);
-        Drawable resizedIcon = resizeMarkerIcon(icon);
+// Gunakan ukuran default, misalnya MARKER_SIZE_DP
+        Drawable resizedIcon = resizeMarkerIcon(icon, MARKER_SIZE_DP);
+        marker.setIcon(resizedIcon);
+
         marker.setIcon(resizedIcon);
 
         // Set info window
@@ -416,15 +439,21 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-        loadExistingMarkers();
+    public void onPause() {
+        super.onPause();
+        if (pulsingOverlay != null) {
+            pulsingOverlay.stopAnimation();
+        }
+        mapView.onPause();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
+    public void onResume() {
+        super.onResume();
+        if (pulsingOverlay != null) {
+            pulsingOverlay.startAnimation();
+        }
+        mapView.onResume();
+        loadExistingMarkers();
     }
 }
