@@ -13,6 +13,7 @@ import com.septi.resq.utils.AppUtils;
 public class MainActivity extends AppCompatActivity {
     private LottieAnimationView loadingAnimation;
 
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);

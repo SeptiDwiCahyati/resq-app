@@ -15,6 +15,7 @@ import com.septi.resq.fragment.TrackingFragment;
 
 public class HomeActivity extends AppCompatActivity {
 
+
     // Fragment Manager
     private final FragmentManager fragmentManager = getSupportFragmentManager();
 
