@@ -217,7 +217,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Recent Reports Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/recent_reports_card"
                 android:layout_width="match_parent"
@@ -249,20 +248,24 @@
                         android:id="@+id/tv_current_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="31 Desember 2024"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp"
                         android:layout_marginBottom="16dp" />
 
+
+
+                    <!-- RecyclerView dibatasi tingginya -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_recent_reports"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:paddingBottom="8dp"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                        android:layout_height="350dp"
+                    android:clipToPadding="false"
+                    android:paddingBottom="8dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

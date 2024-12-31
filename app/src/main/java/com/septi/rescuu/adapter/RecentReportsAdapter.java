@@ -18,8 +18,9 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
     private OnItemClickListener listener;
 
     public RecentReportsAdapter(List<Report> reports) {
-        this.reports = reports;
+        this.reports = reports; // Semua data diteruskan tanpa pembatasan
     }
+
 
     @NonNull
     @Override
@@ -27,7 +28,6 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_report, parent, false);
         return new ReportViewHolder(view, listener, reports);
-
     }
 
     @Override
@@ -70,8 +70,7 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
             });
         }
 
-
-    void bind(Report report) {
+        void bind(Report report) {
             titleView.setText(report.getTitle());
             locationView.setText(report.getLocation());
             timestampView.setText(report.getTimestamp());

@@ -42,16 +42,24 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+
         initializeViews(rootView);
-
+        setupRecyclerViews(rootView);
         setupClickListeners();
-        setupRecyclerViews(rootView);
 
-        // Menyiapkan RecyclerView
-        setupRecyclerViews(rootView);
+        // Menampilkan tanggal realtime di TextView
+        TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
+        updateCurrentDate(tvCurrentDate);
 
         return rootView;
     }
+
+    private void updateCurrentDate(TextView tvCurrentDate) {
+        // Menggunakan SimpleDateFormat untuk format tanggal
+        String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
+        tvCurrentDate.setText(currentDate);
+    }
+
     private void initializeViews(View view) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
@@ -107,10 +115,13 @@ public class HomeFragment extends Fragment {
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
 
-        // Menetapkan adapter untuk laporan terbaru
+        // Atur RecyclerView tanpa membatasi jumlah data
         RecyclerView rvRecentReports = rootView.findViewById(R.id.rv_recent_reports);
+        rvRecentReports.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
     }
+
+
 
 
     /**

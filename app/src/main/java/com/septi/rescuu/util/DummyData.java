@@ -32,6 +32,8 @@ public class DummyData {
         recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
         recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
         recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
+        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
+        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
         return recentReports;
     }
 

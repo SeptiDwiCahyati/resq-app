@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         loadingAnimation = findViewById(R.id.loading_animation);
+
         showLoading();
 
         new Handler().postDelayed(() -> {
