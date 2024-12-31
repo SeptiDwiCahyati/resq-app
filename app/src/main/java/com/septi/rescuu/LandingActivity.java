@@ -20,7 +20,7 @@ public class LandingActivity extends AppCompatActivity {
 
         // Skip landing page if not first launch
         if (!AppUtils.isFirstTimeLaunch(this)) {
-            startActivity(new Intent(LandingActivity.this, DashboardActivity.class));
+            startActivity(new Intent(LandingActivity.this, HomeActivity.class));
             finish();
             return;
         }
@@ -37,7 +37,7 @@ public class LandingActivity extends AppCompatActivity {
 
         getStartedButton.setOnClickListener(v -> {
             AppUtils.setFirstTimeLaunch(this, false);
-            startActivity(new Intent(LandingActivity.this, DashboardActivity.class));
+            startActivity(new Intent(LandingActivity.this, HomeActivity.class));
             finish();
         });
     }

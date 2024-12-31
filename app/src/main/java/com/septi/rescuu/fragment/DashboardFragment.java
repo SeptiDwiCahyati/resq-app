@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.rescuu.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.septi.rescuu.R;
 import com.septi.rescuu.adapter.ActiveTeamsAdapter;
 import com.septi.rescuu.adapter.QuickActionAdapter;
 import com.septi.rescuu.adapter.RecentReportsAdapter;
@@ -24,13 +25,12 @@ import com.google.android.material.button.MaterialButton;
 import com.septi.rescuu.util.DummyData;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-public class HomeFragment extends Fragment {
+public class DashboardFragment extends Fragment {
 
     private RecyclerView rvQuickActions;
     private RecyclerView rvActiveTeams;

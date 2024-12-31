@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.rescuu.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.septi.rescuu.R;
 import com.septi.rescuu.model.Emergency;
 import com.septi.rescuu.database.EmergencyDBHelper;
 

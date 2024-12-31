@@ -6,14 +6,19 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.septi.rescuu.fragment.DashboardFragment;
+import com.septi.rescuu.fragment.MapFragment;
+import com.septi.rescuu.fragment.ProfileFragment;
+import com.septi.rescuu.fragment.ReportFragment;
+import com.septi.rescuu.fragment.TrackingFragment;
 
-public class DashboardActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
     // Fragment Manager
     private final FragmentManager fragmentManager = getSupportFragmentManager();
 
     // Fragments
-    private final Fragment homeFragment = new HomeFragment();
+    private final Fragment homeFragment = new DashboardFragment();
     private final Fragment reportFragment = new ReportFragment();
     private final Fragment mapFragment = new MapFragment();
     private final Fragment trackingFragment = new TrackingFragment();

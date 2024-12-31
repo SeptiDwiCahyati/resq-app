@@ -32,7 +32,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".DashboardActivity"
+            android:name=".HomeActivity"
             android:exported="false" />
     </application>
 </manifest>
