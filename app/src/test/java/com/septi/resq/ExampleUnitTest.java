@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.resq;
 
 import org.junit.Test;
 

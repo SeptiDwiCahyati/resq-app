@@ -1,4 +1,4 @@
-package com.septi.rescuu.utils;
+package com.septi.resq.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

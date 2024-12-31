@@ -1,4 +1,4 @@
-package com.septi.rescuu.fragment;
+package com.septi.resq.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,13 +8,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.septi.rescuu.R;
-import com.septi.rescuu.adapter.ActiveTeamsAdapter;
-import com.septi.rescuu.adapter.QuickActionAdapter;
-import com.septi.rescuu.adapter.RecentReportsAdapter;
-import com.septi.rescuu.model.QuickAction;
-import com.septi.rescuu.model.RescueTeam;
-import com.septi.rescuu.model.Report;
+import com.septi.resq.R;
+import com.septi.resq.adapter.ActiveTeamsAdapter;
+import com.septi.resq.adapter.QuickActionAdapter;
+import com.septi.resq.adapter.RecentReportsAdapter;
+import com.septi.resq.model.QuickAction;
+import com.septi.resq.model.RescueTeam;
+import com.septi.resq.model.Report;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.septi.rescuu.utils.DummyData;
+import com.septi.resq.utils.DummyData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

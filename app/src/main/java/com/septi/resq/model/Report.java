@@ -1,4 +1,4 @@
-package com.septi.rescuu.model;
+package com.septi.resq.model;
 
 public class Report {
     private String title;

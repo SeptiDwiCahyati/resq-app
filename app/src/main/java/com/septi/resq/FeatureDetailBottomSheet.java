@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.resq;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

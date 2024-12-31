@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.resq;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.airbnb.lottie.LottieAnimationView;
-import com.septi.rescuu.utils.AppUtils;
+import com.septi.resq.utils.AppUtils;
 
 public class MainActivity extends AppCompatActivity {
     private LottieAnimationView loadingAnimation;

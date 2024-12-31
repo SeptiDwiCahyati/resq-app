@@ -1,4 +1,4 @@
-package com.septi.rescuu.fragment;
+package com.septi.resq.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -27,10 +27,10 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.septi.rescuu.R;
-import com.septi.rescuu.model.Emergency;
-import com.septi.rescuu.database.EmergencyDBHelper;
-import com.septi.rescuu.utils.PulsingLocationOverlay;
+import com.septi.resq.R;
+import com.septi.resq.model.Emergency;
+import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.utils.PulsingLocationOverlay;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;

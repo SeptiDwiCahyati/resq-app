@@ -1,9 +1,9 @@
-package com.septi.rescuu.utils;
+package com.septi.resq.utils;
 
-import com.septi.rescuu.R;
-import com.septi.rescuu.model.QuickAction;
-import com.septi.rescuu.model.Report;
-import com.septi.rescuu.model.RescueTeam;
+import com.septi.resq.R;
+import com.septi.resq.model.QuickAction;
+import com.septi.resq.model.Report;
+import com.septi.resq.model.RescueTeam;
 
 import java.util.ArrayList;
 import java.util.List;

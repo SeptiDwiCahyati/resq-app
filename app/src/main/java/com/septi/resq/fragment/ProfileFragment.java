@@ -1,4 +1,4 @@
-package com.septi.rescuu.fragment;
+package com.septi.resq.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
-import com.septi.rescuu.R;
+import com.septi.resq.R;
 
 public class ProfileFragment extends Fragment {
     @Override

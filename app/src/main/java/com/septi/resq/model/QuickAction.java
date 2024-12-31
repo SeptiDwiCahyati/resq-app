@@ -1,4 +1,4 @@
-package com.septi.rescuu.model;
+package com.septi.resq.model;
 
 public class QuickAction {
     private String title;

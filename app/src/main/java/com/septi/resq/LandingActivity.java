@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.resq;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
-import com.septi.rescuu.utils.AppUtils;
+import com.septi.resq.utils.AppUtils;
 
 public class LandingActivity extends AppCompatActivity {
     @Override

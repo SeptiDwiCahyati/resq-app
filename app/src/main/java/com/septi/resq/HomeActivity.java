@@ -1,4 +1,4 @@
-package com.septi.rescuu;
+package com.septi.resq;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -6,11 +6,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.septi.rescuu.fragment.DashboardFragment;
-import com.septi.rescuu.fragment.MapFragment;
-import com.septi.rescuu.fragment.ProfileFragment;
-import com.septi.rescuu.fragment.ReportFragment;
-import com.septi.rescuu.fragment.TrackingFragment;
+import com.septi.resq.fragment.DashboardFragment;
+import com.septi.resq.fragment.MapFragment;
+import com.septi.resq.fragment.ProfileFragment;
+import com.septi.resq.fragment.ReportFragment;
+import com.septi.resq.fragment.TrackingFragment;
 
 public class HomeActivity extends AppCompatActivity {
 

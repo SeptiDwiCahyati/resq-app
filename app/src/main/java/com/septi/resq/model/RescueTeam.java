@@ -1,4 +1,4 @@
-package com.septi.rescuu.model;
+package com.septi.resq.model;
 
 public class RescueTeam {
     private String name;

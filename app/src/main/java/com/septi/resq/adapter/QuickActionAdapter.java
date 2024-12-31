@@ -1,4 +1,4 @@
-package com.septi.rescuu.adapter;
+package com.septi.resq.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.septi.rescuu.R;
-import com.septi.rescuu.model.QuickAction;
+import com.septi.resq.R;
+import com.septi.resq.model.QuickAction;
 
 import java.util.List;
 

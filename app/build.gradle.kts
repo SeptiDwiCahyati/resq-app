@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.septi.rescuu"
+    namespace = "com.septi.resq"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.septi.rescuu"
+        applicationId = "com.septi.resq"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
