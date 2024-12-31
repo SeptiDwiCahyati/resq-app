@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.airbnb.lottie.LottieAnimationView;
 import com.septi.resq.utils.AppUtils;
 
@@ -13,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private LottieAnimationView loadingAnimation;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

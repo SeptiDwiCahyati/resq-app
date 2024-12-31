@@ -1,6 +1,7 @@
 package com.septi.resq;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -27,7 +28,7 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment activeFragment = homeFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
@@ -68,7 +69,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // Method to switch fragments
-    private void switchFragment(Fragment fragment) {
+    private void switchFragment( Fragment fragment ) {
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
         activeFragment = fragment;
     }

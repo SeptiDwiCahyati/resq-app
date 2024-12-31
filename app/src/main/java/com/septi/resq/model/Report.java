@@ -5,7 +5,7 @@ public class Report {
     private String location;
     private String timestamp;
 
-    public Report(String title, String location, String timestamp) {
+    public Report( String title, String location, String timestamp ) {
         this.title = title;
         this.location = location;
         this.timestamp = timestamp;

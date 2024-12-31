@@ -4,13 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.button.MaterialButton;
 import com.septi.resq.utils.AppUtils;
 
 public class LandingActivity extends AppCompatActivity {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
 
         // Make status bar transparent
@@ -43,7 +45,7 @@ public class LandingActivity extends AppCompatActivity {
         });
     }
 
-    private void showFeatureDetail(String feature) {
+    private void showFeatureDetail( String feature ) {
         // Show feature detail bottom sheet or dialog
         FeatureDetailBottomSheet bottomSheet = new FeatureDetailBottomSheet(feature);
         bottomSheet.show(getSupportFragmentManager(), "FeatureDetail");

@@ -39,8 +39,9 @@ public class DashboardFragment extends Fragment {
     private TextView btnToggleTeams;
     private boolean isShowingAllTeams = false;
     private ActiveTeamsAdapter activeTeamsAdapter;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
         initializeViews(rootView);
@@ -54,13 +55,13 @@ public class DashboardFragment extends Fragment {
         return rootView;
     }
 
-    private void updateCurrentDate(TextView tvCurrentDate) {
+    private void updateCurrentDate( TextView tvCurrentDate ) {
         // Menggunakan SimpleDateFormat untuk format tanggal
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
     }
 
-    private void initializeViews(View view) {
+    private void initializeViews( View view ) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
         rvRecentReports = view.findViewById(R.id.rv_recent_reports);
@@ -72,7 +73,7 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    private void setupRecyclerViews(View rootView) {
+    private void setupRecyclerViews( View rootView ) {
         // Menyiapkan RecyclerView untuk Tim Aktif
         setupActiveTeamsRecyclerView();
 
@@ -89,9 +90,7 @@ public class DashboardFragment extends Fragment {
      */
     private void setupActiveTeamsRecyclerView() {
         // Mengambil tim aktif yang statusnya "Tersedia"
-        List<RescueTeam> availableTeams = DummyData.getActiveTeams().stream()
-                .filter(team -> team.getStatus().equals("Tersedia"))
-                .collect(Collectors.toList());
+        List<RescueTeam> availableTeams = DummyData.getActiveTeams().stream().filter(team -> team.getStatus().equals("Tersedia")).collect(Collectors.toList());
 
         // Menyiapkan layout RecyclerView secara horizontal
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -106,7 +105,7 @@ public class DashboardFragment extends Fragment {
      * Menyiapkan RecyclerView untuk Laporan Terbaru.
      * Menampilkan laporan terbaru dalam format daftar vertikal.
      */
-    private void setupRecentReportsRecyclerView(View rootView) {
+    private void setupRecentReportsRecyclerView( View rootView ) {
         // Mengambil laporan terbaru dari data dummy
         List<Report> recentReports = DummyData.getRecentReports();
 
@@ -120,8 +119,6 @@ public class DashboardFragment extends Fragment {
         rvRecentReports.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
     }
-
-
 
 
     /**
@@ -138,7 +135,7 @@ public class DashboardFragment extends Fragment {
 
         // Menetapkan adapter untuk tindakan cepat
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
-        adapter.setOnItemClickListener((quickAction, position) -> {
+        adapter.setOnItemClickListener(( quickAction, position ) -> {
             // Menangani klik pada tombol "Lihat Semua" (posisi 7)
             if (position == 7) {
                 showAllActionsDialog();
@@ -162,16 +159,10 @@ public class DashboardFragment extends Fragment {
         btnToggleTeams.setText(isShowingAllTeams ? "Kecilkan" : "Tampilkan Semua");
 
         // Update layout manager
-        rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(),
-                isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,
-                false));
+        rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(), isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL, false));
 
         // Update adapter with new data and layout
-        List<RescueTeam> teams = isShowingAllTeams
-                ? DummyData.getActiveTeams()
-                : DummyData.getActiveTeams().stream()
-                .filter(team -> team.getStatus().equals("Tersedia"))
-                .collect(Collectors.toList());
+        List<RescueTeam> teams = isShowingAllTeams ? DummyData.getActiveTeams() : DummyData.getActiveTeams().stream().filter(team -> team.getStatus().equals("Tersedia")).collect(Collectors.toList());
 
         activeTeamsAdapter.updateData(teams, isShowingAllTeams);
 

@@ -5,7 +5,7 @@ public class RescueTeam {
     private String distance;
     private String status;
 
-    public RescueTeam(String name, String distance, String status) {
+    public RescueTeam( String name, String distance, String status ) {
         this.name = name;
         this.distance = distance;
         this.status = status;

@@ -61,7 +61,7 @@ public class MapFragment extends Fragment {
     private static final double DEFAULT_ZOOM = 15.0;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
         // Initialize database helper first
         dbHelper = new EmergencyDBHelper(requireContext());
         emergencyMarkers = new ArrayList<>();
@@ -117,7 +117,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void setupUIControls(View view) {
+    private void setupUIControls( View view ) {
         FloatingActionButton myLocationButton = view.findViewById(R.id.my_location_button);
         myLocationButton.setOnClickListener(v -> getCurrentLocation());
 
@@ -128,7 +128,7 @@ public class MapFragment extends Fragment {
     private void setupMapClickListener() {
         mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
             @Override
-            public boolean onSingleTapConfirmed(MotionEvent e, MapView mapView) {
+            public boolean onSingleTapConfirmed( MotionEvent e, MapView mapView ) {
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
                         (int) e.getX(), (int) e.getY());
 
@@ -185,7 +185,6 @@ public class MapFragment extends Fragment {
     }
 
 
-
     private void getCurrentLocation() {
         // First check if permissions are granted
         if (ActivityCompat.checkSelfPermission(requireContext(),
@@ -222,18 +221,21 @@ public class MapFragment extends Fragment {
                 locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
                         new android.location.LocationListener() {
                             @Override
-                            public void onLocationChanged(Location location) {
+                            public void onLocationChanged( Location location ) {
                                 updateCurrentLocation(location);
                             }
 
                             @Override
-                            public void onStatusChanged(String provider, int status, Bundle extras) {}
+                            public void onStatusChanged( String provider, int status, Bundle extras ) {
+                            }
 
                             @Override
-                            public void onProviderEnabled(String provider) {}
+                            public void onProviderEnabled( String provider ) {
+                            }
 
                             @Override
-                            public void onProviderDisabled(String provider) {}
+                            public void onProviderDisabled( String provider ) {
+                            }
                         }, null);
             } catch (SecurityException e) {
                 Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -241,7 +243,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void updateCurrentLocation(Location location) {
+    private void updateCurrentLocation( Location location ) {
         GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
         lastKnownLocation = currentLocation;
 
@@ -278,11 +280,7 @@ public class MapFragment extends Fragment {
     }
 
 
-
-
-
-
-    private void showReportDialog(final double latitude, final double longitude) {
+    private void showReportDialog( final double latitude, final double longitude ) {
         View dialogView = LayoutInflater.from(getContext())
                 .inflate(R.layout.dialog_report_emergency, null);
 
@@ -299,7 +297,7 @@ public class MapFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Laporkan Kejadian Darurat")
                 .setView(dialogView)
-                .setPositiveButton("Laporkan", (dialog, which) -> {
+                .setPositiveButton("Laporkan", ( dialog, which ) -> {
                     String type = typeSpinner.getSelectedItem().toString();
                     String description = descriptionEdit.getText().toString();
                     String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
@@ -335,7 +333,7 @@ public class MapFragment extends Fragment {
                                 Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Batal", (dialog, which) -> {
+                .setNegativeButton("Batal", ( dialog, which ) -> {
                     // Remove temporary marker on cancel
                     if (selectedLocation != null) {
                         mapView.getOverlays().remove(selectedLocation);
@@ -348,7 +346,7 @@ public class MapFragment extends Fragment {
 
 
     // Helper method untuk resize marker icon
-    private Drawable resizeMarkerIcon(Drawable icon, int sizeDp) {
+    private Drawable resizeMarkerIcon( Drawable icon, int sizeDp ) {
         float density = getResources().getDisplayMetrics().density;
         int pixelSize = (int) (sizeDp * density);
 
@@ -361,7 +359,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void updateMarkerInfo(Marker marker, Emergency emergency) {
+    private void updateMarkerInfo( Marker marker, Emergency emergency ) {
         marker.setTitle(emergency.getType());
         marker.setSnippet("Waktu: " + emergency.getTimestamp() + "\n" +
                 "Deskripsi: " + emergency.getDescription());
@@ -406,12 +404,12 @@ public class MapFragment extends Fragment {
 
     // Custom InfoWindow implementation
     private class CustomInfoWindow extends org.osmdroid.views.overlay.infowindow.InfoWindow {
-        public CustomInfoWindow(MapView mapView) {
+        public CustomInfoWindow( MapView mapView ) {
             super(R.layout.marker_info_window, mapView);
         }
 
         @Override
-        public void onOpen(Object item) {
+        public void onOpen( Object item ) {
             Marker marker = (Marker) item;
             View view = getView();
             if (view != null) {
