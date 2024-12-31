@@ -1,5 +1,6 @@
 package com.septi.resq.fragment;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.septi.resq.R;
 import com.septi.resq.adapter.ActiveTeamsAdapter;
 import com.septi.resq.adapter.QuickActionAdapter;
@@ -41,7 +43,7 @@ public class DashboardFragment extends Fragment {
     private TextView btnToggleTeams;
     private boolean isShowingAllTeams = false;
     private ActiveTeamsAdapter activeTeamsAdapter;
-    // Tambahkan variabel database helper
+    private ShapeableImageView ivProfile;
     private UserProfileDBHelper dbHelper;
     private TextView tvUsername;
     @Override
@@ -68,8 +70,7 @@ public class DashboardFragment extends Fragment {
     }
 
     private void updateUsername() {
-        // Ambil data pengguna dari database
-        UserProfile profile = dbHelper.getProfile(1); // Gunakan ID user sesuai dengan aplikasi Anda
+        UserProfile profile = dbHelper.getProfile(1);
 
         if (profile != null) {
             tvUsername.setText(profile.getName());
@@ -90,10 +91,24 @@ public class DashboardFragment extends Fragment {
         rvRecentReports = view.findViewById(R.id.rv_recent_reports);
         btnEmergency = view.findViewById(R.id.btn_emergency);
         btnToggleTeams = view.findViewById(R.id.btn_toggle_teams);
-        tvUsername = view.findViewById(R.id.tv_username); // Tambahkan inisialisasi tv_username
-
+        tvUsername = view.findViewById(R.id.tv_username);
+        ivProfile = view.findViewById(R.id.iv_profile);
+        dbHelper = new UserProfileDBHelper(requireContext());
+        updateProfilePhoto();
         if (btnToggleTeams != null) {
             setupToggleButton();
+        }
+    }
+
+    private void updateProfilePhoto() {
+        UserProfile profile = dbHelper.getProfile(1);
+        if (profile != null && profile.getPhotoUri() != null && !profile.getPhotoUri().isEmpty()) {
+            try {
+                Uri photoUri = Uri.parse(profile.getPhotoUri());
+                ivProfile.setImageURI(photoUri);
+            } catch (Exception e) {
+                ivProfile.setImageResource(R.drawable.ic_profile);
+            }
         }
     }
 
@@ -217,7 +232,13 @@ public class DashboardFragment extends Fragment {
         // Close button listener
         btnClose.setOnClickListener(v -> dialog.dismiss());
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update profile photo when returning to dashboard
+        updateProfilePhoto();
+        updateUsername();
+    }
 
     private void setupClickListeners() {
         btnEmergency.setOnClickListener(v -> {

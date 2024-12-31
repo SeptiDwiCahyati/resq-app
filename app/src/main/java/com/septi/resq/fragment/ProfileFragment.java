@@ -122,6 +122,11 @@ public class ProfileFragment extends Fragment {
 
             if (success) {
                 Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show();
+                // Refresh the dashboard fragment if it's visible
+                Fragment dashboardFragment = getParentFragmentManager().findFragmentByTag("dashboard");
+                if (dashboardFragment instanceof DashboardFragment) {
+                    ((DashboardFragment) dashboardFragment).onResume();
+                }
             } else {
                 Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show();
             }
