@@ -36,7 +36,9 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MapFragment extends Fragment {
@@ -44,6 +46,7 @@ public class MapFragment extends Fragment {
     private EmergencyDBHelper dbHelper;
     private Marker selectedLocation;
     private Marker currentLocationMarker;
+    private List<Marker> emergencyMarkers; // Add this field
     private LocationManager locationManager;
     // Constants
     private static final int PERMISSION_REQUEST_CODE = 1;
@@ -56,7 +59,7 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Initialize database helper first
         dbHelper = new EmergencyDBHelper(requireContext());
-
+        emergencyMarkers = new ArrayList<>();
         // Initialize OpenStreetMap configuration
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
@@ -116,13 +119,18 @@ public class MapFragment extends Fragment {
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
                         (int) e.getX(), (int) e.getY());
 
-                // Create or move marker
-                if (selectedLocation == null) {
-                    selectedLocation = new Marker(mapView);
-                    mapView.getOverlays().add(selectedLocation);
+                // Remove previous selected location marker if it exists
+                if (selectedLocation != null) {
+                    mapView.getOverlays().remove(selectedLocation);
                 }
+
+                // Create new marker
+                selectedLocation = new Marker(mapView);
                 selectedLocation.setPosition(new GeoPoint(p.getLatitude(), p.getLongitude()));
                 selectedLocation.setAnchor(0.5f, 1.0f);
+
+                // Add to map overlays
+                mapView.getOverlays().add(selectedLocation);
                 mapView.invalidate();
 
                 showReportDialog(p.getLatitude(), p.getLongitude());
@@ -132,14 +140,35 @@ public class MapFragment extends Fragment {
     }
 
     private void loadExistingMarkers() {
+        // Clear existing emergency markers from both list and map
+        for (Marker marker : emergencyMarkers) {
+            mapView.getOverlays().remove(marker);
+        }
+        emergencyMarkers.clear();
+
+        // Load markers from database
         for (Emergency emergency : dbHelper.getAllEmergencies()) {
             Marker marker = new Marker(mapView);
             marker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
             updateMarkerInfo(marker, emergency);
+
+            // Add to both map and our list
             mapView.getOverlays().add(marker);
+            emergencyMarkers.add(marker);
         }
         mapView.invalidate();
     }
+
+    private void reportEmergency() {
+        if (selectedLocation != null) {
+            GeoPoint location = selectedLocation.getPosition();
+            showReportDialog(location.getLatitude(), location.getLongitude());
+        } else {
+            Toast.makeText(requireContext(), "Silakan pilih lokasi kejadian terlebih dahulu",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(),
@@ -164,15 +193,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void reportEmergency() {
-        if (selectedLocation != null) {
-            GeoPoint location = selectedLocation.getPosition();
-            showReportDialog(location.getLatitude(), location.getLongitude());
-        } else {
-            Toast.makeText(requireContext(), "Silakan pilih lokasi kejadian terlebih dahulu",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
+
 
     private void showReportDialog(final double latitude, final double longitude) {
         View dialogView = LayoutInflater.from(getContext())
@@ -207,12 +228,34 @@ public class MapFragment extends Fragment {
 
                     long id = dbHelper.insertEmergency(emergency);
                     if (id > 0) {
-                        updateMarkerInfo(selectedLocation, emergency);
+                        // Remove temporary selected location marker
+                        if (selectedLocation != null) {
+                            mapView.getOverlays().remove(selectedLocation);
+                            selectedLocation = null;
+                        }
+
+                        // Create and add permanent marker
+                        Marker newMarker = new Marker(mapView);
+                        newMarker.setPosition(new GeoPoint(latitude, longitude));
+                        updateMarkerInfo(newMarker, emergency);
+
+                        mapView.getOverlays().add(newMarker);
+                        emergencyMarkers.add(newMarker);
+
+                        mapView.invalidate();
+
                         Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan",
                                 Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Batal", null)
+                .setNegativeButton("Batal", (dialog, which) -> {
+                    // Remove temporary marker on cancel
+                    if (selectedLocation != null) {
+                        mapView.getOverlays().remove(selectedLocation);
+                        selectedLocation = null;
+                        mapView.invalidate();
+                    }
+                })
                 .show();
     }
 
