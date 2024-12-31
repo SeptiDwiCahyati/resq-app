@@ -29,11 +29,6 @@ public class DummyData {
         recentReports.add(new Report("Kecelakaan Motor", "Jl. Sudirman", "10 menit yang lalu"));
         recentReports.add(new Report("Kebakaran", "Jl. Thamrin", "30 menit yang lalu"));
         recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
         return recentReports;
     }
 
@@ -43,9 +38,9 @@ public class DummyData {
         quickActions.add(new QuickAction(truncateText("Panggil Ambulans"), R.drawable.ic_ambulance));
         quickActions.add(new QuickAction(truncateText("Hubungi Polisi"), R.drawable.ic_police));
         quickActions.add(new QuickAction(truncateText("Pemadam Kebakaran"), R.drawable.ic_fire));
-        quickActions.add(new QuickAction(truncateText("Lapor Bencana"), R.drawable.ic_fire));
-        quickActions.add(new QuickAction(truncateText("Pertolongan Pertama"), R.drawable.ic_fire));
-        quickActions.add(new QuickAction(truncateText("Evakuasi Segera"), R.drawable.ic_fire));
+        quickActions.add(new QuickAction(truncateText("Lapor Bencana"), R.drawable.ic_disaster));
+        quickActions.add(new QuickAction(truncateText("Pertolongan Pertama"), R.drawable.ic_first_aid));
+        quickActions.add(new QuickAction(truncateText("Evakuasi Segera"), R.drawable.ic_evacuate));
         quickActions.add(new QuickAction(truncateText("Lihat Semua"), R.drawable.ic_chevron_right));
         return quickActions;
     }
