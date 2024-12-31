@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -129,14 +130,26 @@ public class MapFragment extends Fragment {
         mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
             @Override
             public boolean onSingleTapConfirmed( MotionEvent e, MapView mapView ) {
-                // Klik tunggal untuk menampilkan informasi kecelakaan (info marker)
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
                         (int) e.getX(), (int) e.getY());
 
+                boolean clickedOnMarker = false;
+
+                // Check if clicked on any marker
                 for (Marker marker : emergencyMarkers) {
                     if (marker.getBounds().contains((float) p.getLatitude(), (float) p.getLongitude())) {
                         marker.showInfoWindow();
-                        return true;
+                        clickedOnMarker = true;
+                        break;
+                    }
+                }
+
+                // If clicked outside any marker, close all info windows
+                if (!clickedOnMarker) {
+                    for (Marker marker : emergencyMarkers) {
+                        if (marker.isInfoWindowShown()) {
+                            marker.closeInfoWindow();
+                        }
                     }
                 }
 
@@ -421,8 +434,12 @@ public class MapFragment extends Fragment {
 
     // Custom InfoWindow implementation
     private class CustomInfoWindow extends org.osmdroid.views.overlay.infowindow.InfoWindow {
+        private Handler autoCloseHandler;
+        private static final long AUTO_CLOSE_DELAY = 5000; // 5 seconds
+
         public CustomInfoWindow( MapView mapView ) {
             super(R.layout.marker_info_window, mapView);
+            autoCloseHandler = new Handler();
         }
 
         @Override
@@ -435,13 +452,17 @@ public class MapFragment extends Fragment {
 
                 titleText.setText(marker.getTitle());
                 snippetText.setText(marker.getSnippet());
+
+                // Schedule auto-close after 5 seconds
+                autoCloseHandler.removeCallbacksAndMessages(null);
+                autoCloseHandler.postDelayed(this::close, AUTO_CLOSE_DELAY);
             }
         }
 
-
         @Override
         public void onClose() {
-            // Optional: Cleanup code here if needed
+            // Remove any pending auto-close callbacks
+            autoCloseHandler.removeCallbacksAndMessages(null);
         }
     }
 
