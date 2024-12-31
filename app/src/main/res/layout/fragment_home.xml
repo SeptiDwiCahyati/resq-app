@@ -53,38 +53,39 @@
                     android:id="@+id/tv_welcome"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
                     android:alpha="0.95"
-                    android:background="@color/colorPrimary"
-                    android:fontFamily="@font/poppins_regular"
+                    android:background="@drawable/rounded_background"
+                    android:fontFamily="@font/poppins_semibold"
                     android:letterSpacing="0.02"
-                    android:shadowColor="#40000000"
-                    android:shadowDx="2"
-                    android:shadowDy="2"
-                    android:shadowRadius="4"
+                    android:padding="16dp"
                     android:text="Selamat Datang,"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
                     app:layout_constraintEnd_toStartOf="@id/profile_card"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
 
                 <TextView
                     android:id="@+id/tv_username"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:layout_marginEnd="16dp"
+
                     android:fontFamily="@font/poppins_semibold"
                     android:letterSpacing="0.01"
                     android:shadowColor="#40000000"
                     android:shadowDx="2"
                     android:shadowDy="2"
                     android:shadowRadius="4"
-                    android:text="John Doe"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     app:layout_constraintEnd_toStartOf="@id/profile_card"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_welcome" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
