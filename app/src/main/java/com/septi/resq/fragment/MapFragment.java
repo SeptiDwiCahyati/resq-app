@@ -22,7 +22,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.septi.resq.utils.LocationUtils;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -99,10 +99,7 @@ public class MapFragment extends Fragment {
         setupUIControls(view);
 
         // Request permissions and fetch current location
-        if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(requireContext(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             getCurrentLocation();
         } else {
             requestLocationPermissions();
@@ -130,8 +127,7 @@ public class MapFragment extends Fragment {
         mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
             @Override
             public boolean onSingleTapConfirmed( MotionEvent e, MapView mapView ) {
-                org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
-                        (int) e.getX(), (int) e.getY());
+                org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
 
                 boolean clickedOnMarker = false;
 
@@ -159,8 +155,7 @@ public class MapFragment extends Fragment {
             @Override
             public boolean onLongPress( MotionEvent e, MapView mapView ) {
                 // Tekan lama untuk menambahkan laporan baru
-                org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels(
-                        (int) e.getX(), (int) e.getY());
+                org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
 
                 // Hapus marker sebelumnya jika ada
                 if (selectedLocation != null) {
@@ -209,69 +204,28 @@ public class MapFragment extends Fragment {
             GeoPoint location = selectedLocation.getPosition();
             showReportDialog(location.getLatitude(), location.getLongitude());
         } else {
-            Toast.makeText(requireContext(), "Silakan pilih lokasi kejadian terlebih dahulu",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Silakan pilih lokasi kejadian terlebih dahulu", Toast.LENGTH_SHORT).show();
         }
     }
 
 
     private void getCurrentLocation() {
-        // First check if permissions are granted
-        if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(requireContext(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        // Check if location permissions are granted
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            // Use LocationUtils to get the last known location
+            Location location = LocationUtils.getLastKnownLocation(requireContext());
 
-            requestLocationPermissions();
-            return;
-        }
-
-        // Check if GPS is enabled
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(requireContext(), "Mohon aktifkan GPS anda", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            return;
-        }
-
-        // Show loading indicator
-        Toast.makeText(requireContext(), "Mencari lokasi...", Toast.LENGTH_SHORT).show();
-
-        // Try to get location from GPS first
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        // If GPS location is null, try network provider
-        if (location == null) {
-            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }
-
-        if (location != null) {
-            updateCurrentLocation(location);
-        } else {
-            try {
-                locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
-                        new android.location.LocationListener() {
-                            @Override
-                            public void onLocationChanged( Location location ) {
-                                updateCurrentLocation(location);
-                            }
-
-                            @Override
-                            public void onStatusChanged( String provider, int status, Bundle extras ) {
-                            }
-
-                            @Override
-                            public void onProviderEnabled( String provider ) {
-                            }
-
-                            @Override
-                            public void onProviderDisabled( String provider ) {
-                            }
-                        }, null);
-            } catch (SecurityException e) {
-                Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (location != null) {
+                updateCurrentLocation(location);
+            } else {
+                Toast.makeText(requireContext(), "Unable to get location.", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            // Request permissions if not granted
+            LocationUtils.requestLocationPermissions(requireContext());
         }
     }
+
 
     private void updateCurrentLocation( Location location ) {
         GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
@@ -311,67 +265,51 @@ public class MapFragment extends Fragment {
 
 
     private void showReportDialog( final double latitude, final double longitude ) {
-        View dialogView = LayoutInflater.from(getContext())
-                .inflate(R.layout.dialog_report_emergency, null);
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
 
         Spinner typeSpinner = dialogView.findViewById(R.id.spinner_emergency_type);
         EditText descriptionEdit = dialogView.findViewById(R.id.edit_description);
 
         // Setup emergency type spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item,
-                new String[]{"Kecelakaan", "Kebakaran", "Bencana Alam", "Kriminal", "Medis", "Lainnya"});
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"Kecelakaan", "Kebakaran", "Bencana Alam", "Kriminal", "Medis", "Lainnya"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeSpinner.setAdapter(adapter);
 
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Laporkan Kejadian Darurat")
-                .setView(dialogView)
-                .setPositiveButton("Laporkan", ( dialog, which ) -> {
-                    String type = typeSpinner.getSelectedItem().toString();
-                    String description = descriptionEdit.getText().toString();
-                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                            Locale.getDefault()).format(new Date());
+        new AlertDialog.Builder(requireContext()).setTitle("Laporkan Kejadian Darurat").setView(dialogView).setPositiveButton("Laporkan", ( dialog, which ) -> {
+            String type = typeSpinner.getSelectedItem().toString();
+            String description = descriptionEdit.getText().toString();
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
-                    Emergency emergency = new Emergency(
-                            latitude,
-                            longitude,
-                            type,
-                            description,
-                            timestamp
-                    );
+            Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp);
 
-                    long id = dbHelper.insertEmergency(emergency);
-                    if (id > 0) {
-                        // Remove temporary selected location marker
-                        if (selectedLocation != null) {
-                            mapView.getOverlays().remove(selectedLocation);
-                            selectedLocation = null;
-                        }
+            long id = dbHelper.insertEmergency(emergency);
+            if (id > 0) {
+                // Remove temporary selected location marker
+                if (selectedLocation != null) {
+                    mapView.getOverlays().remove(selectedLocation);
+                    selectedLocation = null;
+                }
 
-                        // Create and add permanent marker
-                        Marker newMarker = new Marker(mapView);
-                        newMarker.setPosition(new GeoPoint(latitude, longitude));
-                        updateMarkerInfo(newMarker, emergency);
+                // Create and add permanent marker
+                Marker newMarker = new Marker(mapView);
+                newMarker.setPosition(new GeoPoint(latitude, longitude));
+                updateMarkerInfo(newMarker, emergency);
 
-                        mapView.getOverlays().add(newMarker);
-                        emergencyMarkers.add(newMarker);
+                mapView.getOverlays().add(newMarker);
+                emergencyMarkers.add(newMarker);
 
-                        mapView.invalidate();
+                mapView.invalidate();
 
-                        Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("Batal", ( dialog, which ) -> {
-                    // Remove temporary marker on cancel
-                    if (selectedLocation != null) {
-                        mapView.getOverlays().remove(selectedLocation);
-                        selectedLocation = null;
-                        mapView.invalidate();
-                    }
-                })
-                .show();
+                Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
+            }
+        }).setNegativeButton("Batal", ( dialog, which ) -> {
+            // Remove temporary marker on cancel
+            if (selectedLocation != null) {
+                mapView.getOverlays().remove(selectedLocation);
+                selectedLocation = null;
+                mapView.invalidate();
+            }
+        }).show();
     }
 
 
@@ -391,8 +329,7 @@ public class MapFragment extends Fragment {
 
     private void updateMarkerInfo( Marker marker, Emergency emergency ) {
         marker.setTitle(emergency.getType());
-        marker.setSnippet("Waktu: " + emergency.getTimestamp() + "\n" +
-                "Deskripsi: " + emergency.getDescription());
+        marker.setSnippet("Waktu: " + emergency.getTimestamp() + "\n" + "Deskripsi: " + emergency.getDescription());
 
         // Set fixed anchor points
         marker.setAnchor(0.5f, 1.0f);
@@ -422,7 +359,6 @@ public class MapFragment extends Fragment {
         }
 
         Drawable icon = getResources().getDrawable(iconDrawable);
-// Gunakan ukuran default, misalnya MARKER_SIZE_DP
         Drawable resizedIcon = resizeMarkerIcon(icon, MARKER_SIZE_DP);
         marker.setIcon(resizedIcon);
 
@@ -467,13 +403,9 @@ public class MapFragment extends Fragment {
     }
 
     private void requestLocationPermissions() {
-        ActivityCompat.requestPermissions(requireActivity(),
-                new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                },
-                PERMISSION_REQUEST_CODE);
+        LocationUtils.requestLocationPermissions(requireContext());
     }
+
 
     @Override
     public void onPause() {
