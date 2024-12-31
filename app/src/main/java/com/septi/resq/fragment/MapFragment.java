@@ -456,23 +456,38 @@ public class MapFragment extends Fragment {
     // Custom InfoWindow implementation
     private class CustomInfoWindow extends org.osmdroid.views.overlay.infowindow.InfoWindow {
         private Handler autoCloseHandler;
-        private static final long AUTO_CLOSE_DELAY = 5000; // 5 seconds
+        private static final long AUTO_CLOSE_DELAY = 10000; // 5 seconds
 
-        public CustomInfoWindow( MapView mapView ) {
+        public CustomInfoWindow(MapView mapView) {
             super(R.layout.marker_info_window, mapView);
             autoCloseHandler = new Handler();
         }
 
         @Override
-        public void onOpen( Object item ) {
+        public void onOpen(Object item) {
             Marker marker = (Marker) item;
             View view = getView();
             if (view != null) {
                 TextView titleText = view.findViewById(R.id.title);
                 TextView snippetText = view.findViewById(R.id.snippet);
+                ImageView imageView = view.findViewById(R.id.emergency_image);
 
                 titleText.setText(marker.getTitle());
                 snippetText.setText(marker.getSnippet());
+
+                // Find the emergency data for this marker
+                Emergency emergency = findEmergencyForMarker(marker);
+                if (emergency != null && emergency.getPhotoPath() != null) {
+                    try {
+                        Uri photoUri = Uri.parse(emergency.getPhotoPath());
+                        imageView.setImageURI(photoUri);
+                        imageView.setVisibility(View.VISIBLE);
+                    } catch (Exception e) {
+                        imageView.setVisibility(View.GONE);
+                    }
+                } else {
+                    imageView.setVisibility(View.GONE);
+                }
 
                 // Schedule auto-close after 5 seconds
                 autoCloseHandler.removeCallbacksAndMessages(null);
@@ -480,14 +495,25 @@ public class MapFragment extends Fragment {
             }
         }
 
-
         @Override
         public void onClose() {
-            // Remove any pending auto-close callbacks
             autoCloseHandler.removeCallbacksAndMessages(null);
         }
     }
 
+    // Add this helper method in your MapFragment class
+    private Emergency findEmergencyForMarker(Marker marker) {
+        GeoPoint position = marker.getPosition();
+        // Query the database for the emergency at this location
+        List<Emergency> emergencies = dbHelper.getAllEmergencies();
+        for (Emergency emergency : emergencies) {
+            if (Math.abs(emergency.getLatitude() - position.getLatitude()) < 0.0001 &&
+                    Math.abs(emergency.getLongitude() - position.getLongitude()) < 0.0001) {
+                return emergency;
+            }
+        }
+        return null;
+    }
     private void requestLocationPermissions() {
         LocationUtils.requestLocationPermissions(requireContext());
     }
