@@ -12,6 +12,7 @@ import com.septi.resq.R;
 import com.septi.resq.adapter.ActiveTeamsAdapter;
 import com.septi.resq.adapter.QuickActionAdapter;
 import com.septi.resq.adapter.RecentReportsAdapter;
+import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.QuickAction;
 import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.Report;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.septi.resq.model.UserProfile;
 import com.septi.resq.utils.DummyData;
 
 import java.text.SimpleDateFormat;
@@ -39,12 +41,22 @@ public class DashboardFragment extends Fragment {
     private TextView btnToggleTeams;
     private boolean isShowingAllTeams = false;
     private ActiveTeamsAdapter activeTeamsAdapter;
-
+    // Tambahkan variabel database helper
+    private UserProfileDBHelper dbHelper;
+    private TextView tvUsername;
     @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // Inisialisasi database helper
+        dbHelper = new UserProfileDBHelper(requireContext());
+
+        // Inisialisasi Views
         initializeViews(rootView);
+
+        // Perbarui username
+        updateUsername();
+
         setupRecyclerViews(rootView);
         setupClickListeners();
 
@@ -55,18 +67,30 @@ public class DashboardFragment extends Fragment {
         return rootView;
     }
 
+    private void updateUsername() {
+        // Ambil data pengguna dari database
+        UserProfile profile = dbHelper.getProfile(1); // Gunakan ID user sesuai dengan aplikasi Anda
+
+        if (profile != null) {
+            tvUsername.setText(profile.getName());
+        } else {
+            tvUsername.setText("User");
+        }
+    }
+
     private void updateCurrentDate( TextView tvCurrentDate ) {
         // Menggunakan SimpleDateFormat untuk format tanggal
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
     }
 
-    private void initializeViews( View view ) {
+    private void initializeViews(View view) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
         rvRecentReports = view.findViewById(R.id.rv_recent_reports);
         btnEmergency = view.findViewById(R.id.btn_emergency);
         btnToggleTeams = view.findViewById(R.id.btn_toggle_teams);
+        tvUsername = view.findViewById(R.id.tv_username); // Tambahkan inisialisasi tv_username
 
         if (btnToggleTeams != null) {
             setupToggleButton();
