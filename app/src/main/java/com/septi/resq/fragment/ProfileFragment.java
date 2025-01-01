@@ -79,7 +79,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupListeners() {
-        fabEditPhoto.setOnClickListener(v -> openImagePicker());
+        fabEditPhoto.setOnClickListener(v -> checkAndRequestPermissions());
+
         btnSave.setOnClickListener(v -> saveProfile());
     }
 
@@ -103,6 +104,35 @@ public class ProfileFragment extends Fragment {
             currentProfile.setId(DEFAULT_USER_ID);
         }
     }
+
+    private final ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(),
+            result -> {
+                Boolean readGranted = result.getOrDefault(android.Manifest.permission.READ_EXTERNAL_STORAGE, false);
+                Boolean mediaGranted = result.getOrDefault(android.Manifest.permission.READ_MEDIA_IMAGES, false);
+
+                if (readGranted || mediaGranted) {
+                    openImagePicker();
+                } else {
+                    Toast.makeText(requireContext(), "Permission denied. Cannot access photos.", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    private void checkAndRequestPermissions() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+ (API 33+)
+            requestPermissionLauncher.launch(new String[]{
+                    android.Manifest.permission.READ_MEDIA_IMAGES
+            });
+        } else {
+            // For Android 12 and below
+            requestPermissionLauncher.launch(new String[]{
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+            });
+        }
+    }
+
 
     private void saveProfile() {
         String name = etName.getText().toString().trim();
