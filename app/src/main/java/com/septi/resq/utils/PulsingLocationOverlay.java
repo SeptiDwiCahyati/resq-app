@@ -13,10 +13,8 @@ import org.osmdroid.views.MapView;
 public class PulsingLocationOverlay extends org.osmdroid.views.overlay.Overlay {
     private final GeoPoint location;
     private final MapView mapView;
-    private float radius = 0;
     private final Paint paint;
     private final int maxRadius;
-    private final int duration = 1500; // Animation duration in milliseconds
     private long startTime;
     private boolean isAnimating = true;
 
@@ -43,10 +41,12 @@ public class PulsingLocationOverlay extends org.osmdroid.views.overlay.Overlay {
         mapView.getProjection().toPixels(location, point);
 
         long elapsed = SystemClock.uptimeMillis() - startTime;
+        // Animation duration in milliseconds
+        int duration = 1500;
         float progress = (elapsed % duration) / (float) duration;
 
         // Calculate current radius using sine function for smooth animation
-        radius = maxRadius * (float) Math.abs(Math.sin(progress * Math.PI));
+        float radius = maxRadius * (float) Math.abs(Math.sin(progress * Math.PI));
 
         // Update paint alpha based on radius
         paint.setAlpha((int) (80 * (1 - radius / maxRadius)));

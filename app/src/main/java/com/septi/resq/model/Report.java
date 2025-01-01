@@ -1,9 +1,9 @@
 package com.septi.resq.model;
 
 public class Report {
-    private String title;
-    private String location;
-    private String timestamp;
+    private final String title;
+    private final String location;
+    private final String timestamp;
 
     public Report( String title, String location, String timestamp ) {
         this.title = title;

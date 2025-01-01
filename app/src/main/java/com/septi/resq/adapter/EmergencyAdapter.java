@@ -13,26 +13,25 @@ import com.bumptech.glide.Glide;
 import com.septi.resq.R;
 import com.septi.resq.model.Emergency;
 
-import java.io.File;
 import java.util.List;
 
 public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.EmergencyViewHolder> {
     private List<Emergency> emergencies;
 
-    public EmergencyAdapter(List<Emergency> emergencies) {
+    public EmergencyAdapter( List<Emergency> emergencies ) {
         this.emergencies = emergencies;
     }
 
     @NonNull
     @Override
-    public EmergencyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public EmergencyViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_emergency, parent, false);
         return new EmergencyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
+    public void onBindViewHolder( @NonNull EmergencyViewHolder holder, int position ) {
         Emergency emergency = emergencies.get(position);
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
@@ -59,7 +58,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         return emergencies.size();
     }
 
-    public void updateData(List<Emergency> newEmergencies) {
+    public void updateData( List<Emergency> newEmergencies ) {
         this.emergencies = newEmergencies;
         notifyDataSetChanged();
     }
@@ -71,7 +70,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         TextView locationTextView;
         ImageView imageView;
 
-        EmergencyViewHolder(View itemView) {
+        EmergencyViewHolder( View itemView ) {
             super(itemView);
             typeTextView = itemView.findViewById(R.id.emergencyTypeTextView);
             descriptionTextView = itemView.findViewById(R.id.emergencyDescriptionTextView);

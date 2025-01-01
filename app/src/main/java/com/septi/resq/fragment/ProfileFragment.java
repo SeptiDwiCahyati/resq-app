@@ -24,7 +24,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.septi.resq.R;
 import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.UserProfile;
-import com.septi.resq.model.UserProfileViewModel;
+import com.septi.resq.viewmodel.UserProfileViewModel;
 
 public class ProfileFragment extends Fragment {
     private UserProfileViewModel viewModel;

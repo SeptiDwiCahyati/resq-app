@@ -1,8 +1,8 @@
 package com.septi.resq.model;
 
 public class QuickAction {
-    private String title;
-    private int iconResource;
+    private final String title;
+    private final int iconResource;
 
     public QuickAction( String title, int iconResource ) {
         this.title = title;

@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.septi.resq.model.UserProfile;
-import com.septi.resq.model.UserProfileViewModel;
+import com.septi.resq.viewmodel.UserProfileViewModel;
 import com.septi.resq.utils.DummyData;
 
 import java.text.SimpleDateFormat;
@@ -40,7 +40,6 @@ public class DashboardFragment extends Fragment {
 
     private RecyclerView rvQuickActions;
     private RecyclerView rvActiveTeams;
-    private RecyclerView rvRecentReports;
     private MaterialButton btnEmergency;
     private TextView btnToggleTeams;
     private boolean isShowingAllTeams = false;
@@ -103,7 +102,6 @@ public class DashboardFragment extends Fragment {
     private void initializeViews(View view) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
-        rvRecentReports = view.findViewById(R.id.rv_recent_reports);
         btnEmergency = view.findViewById(R.id.btn_emergency);
         btnToggleTeams = view.findViewById(R.id.btn_toggle_teams);
         tvUsername = view.findViewById(R.id.tv_username);

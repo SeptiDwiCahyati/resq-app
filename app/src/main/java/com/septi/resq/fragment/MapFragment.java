@@ -2,15 +2,12 @@ package com.septi.resq.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.septi.resq.utils.LocationUtils;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -31,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,6 +37,7 @@ import com.septi.resq.R;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.utils.PulsingLocationOverlay;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -61,22 +61,24 @@ public class MapFragment extends Fragment {
     private List<Marker> emergencyMarkers;
     private GeoPoint lastKnownLocation;
     private PulsingLocationOverlay pulsingOverlay;
-    private LocationManager locationManager;
-
 
     // Add these class variables
     private Uri photoUri;
     private ImageView imagePreview;
     private ActivityResultLauncher<Uri> takePicture;
-    private static final String[] REQUIRED_PERMISSIONS = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.CAMERA
-    };
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final int MARKER_SIZE_DP = 40;
+    private static final double DEFAULT_LATITUDE = -6.200000;
+    private static final double DEFAULT_LONGITUDE = 106.816666;
+    private static final double DEFAULT_ZOOM = 15.0;
+
+    private EmergencyViewModel viewModel;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        viewModel.init(dbHelper);
 
         // Initialize the camera launcher
         takePicture = registerForActivityResult(
@@ -88,7 +90,35 @@ public class MapFragment extends Fragment {
                     }
                 }
         );
+
+        // Observe new emergencies
+        viewModel.getNewEmergency().observe(this, this::addEmergencyMarker);
+        viewModel.getEmergencies().observe(this, this::updateAllMarkers);
     }
+
+
+    private void addEmergencyMarker(Emergency emergency) {
+        Marker newMarker = new Marker(mapView);
+        newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
+        updateMarkerInfo(newMarker, emergency);
+        mapView.getOverlays().add(newMarker);
+        emergencyMarkers.add(newMarker);
+        mapView.invalidate();
+    }
+
+    private void updateAllMarkers(List<Emergency> emergencies) {
+        // Clear existing markers
+        for (Marker marker : emergencyMarkers) {
+            mapView.getOverlays().remove(marker);
+        }
+        emergencyMarkers.clear();
+
+        // Add updated markers
+        for (Emergency emergency : emergencies) {
+            addEmergencyMarker(emergency);
+        }
+    }
+
 
     // Add this method to create temporary image file
     private File createImageFile() throws IOException {
@@ -100,11 +130,7 @@ public class MapFragment extends Fragment {
 
 
     // Constants
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int MARKER_SIZE_DP = 40;
-    private static final double DEFAULT_LATITUDE = -6.200000;
-    private static final double DEFAULT_LONGITUDE = 106.816666;
-    private static final double DEFAULT_ZOOM = 15.0;
+
 
     @Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
@@ -138,7 +164,6 @@ public class MapFragment extends Fragment {
         mapView.getController().setCenter(startPoint);
 
         // Initialize location services
-        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
 
         // Setup UI controls
         setupUIControls(view);
@@ -310,7 +335,7 @@ public class MapFragment extends Fragment {
 
 
     // Update your showReportDialog method
-    private void showReportDialog(final double latitude, final double longitude) {
+    private void showReportDialog( final double latitude, final double longitude ) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
 
         Spinner typeSpinner = dialogView.findViewById(R.id.spinner_emergency_type);
@@ -338,7 +363,7 @@ public class MapFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Laporkan Kejadian Darurat")
                 .setView(dialogView)
-                .setPositiveButton("Laporkan", (dialog, which) -> {
+                .setPositiveButton("Laporkan", ( dialog, which ) -> {
                     String type = typeSpinner.getSelectedItem().toString();
                     String description = descriptionEdit.getText().toString();
                     String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -346,7 +371,7 @@ public class MapFragment extends Fragment {
                     String photoPath = photoUri != null ? photoUri.toString() : null;
 
                     Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp, photoPath);
-                    // Update your database helper to include the photo path
+                    viewModel.addEmergency(emergency);
                     long id = dbHelper.insertEmergency(emergency);
 
                     if (id > 0) {
@@ -372,6 +397,7 @@ public class MapFragment extends Fragment {
                 .setNegativeButton("Batal", null)
                 .show();
     }
+
     private boolean checkCameraPermission() {
         return ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
@@ -439,7 +465,7 @@ public class MapFragment extends Fragment {
                 iconDrawable = R.drawable.ic_emergency;
                 break;
             default:
-                iconDrawable = R.drawable.ic_fire;
+                iconDrawable = R.drawable.error_image;
                 break;
         }
 
@@ -458,13 +484,13 @@ public class MapFragment extends Fragment {
         private Handler autoCloseHandler;
         private static final long AUTO_CLOSE_DELAY = 10000; // 5 seconds
 
-        public CustomInfoWindow(MapView mapView) {
+        public CustomInfoWindow( MapView mapView ) {
             super(R.layout.marker_info_window, mapView);
             autoCloseHandler = new Handler();
         }
 
         @Override
-        public void onOpen(Object item) {
+        public void onOpen( Object item ) {
             Marker marker = (Marker) item;
             View view = getView();
             if (view != null) {
@@ -502,7 +528,7 @@ public class MapFragment extends Fragment {
     }
 
     // Add this helper method in your MapFragment class
-    private Emergency findEmergencyForMarker(Marker marker) {
+    private Emergency findEmergencyForMarker( Marker marker ) {
         GeoPoint position = marker.getPosition();
         // Query the database for the emergency at this location
         List<Emergency> emergencies = dbHelper.getAllEmergencies();
@@ -514,6 +540,7 @@ public class MapFragment extends Fragment {
         }
         return null;
     }
+
     private void requestLocationPermissions() {
         LocationUtils.requestLocationPermissions(requireContext());
     }
@@ -529,7 +556,7 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult( int requestCode, String[] permissions, int[] grantResults ) {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 launchCamera();

@@ -15,7 +15,7 @@ import com.septi.resq.model.QuickAction;
 import java.util.List;
 
 public class QuickActionAdapter extends RecyclerView.Adapter<QuickActionAdapter.QuickActionViewHolder> {
-    private List<QuickAction> quickActions;
+    private final List<QuickAction> quickActions;
     private OnItemClickListener listener;
 
     public QuickActionAdapter(List<QuickAction> quickActions) {

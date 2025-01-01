@@ -7,15 +7,15 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
-import com.septi.resq.model.Emergency;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 
-import java.util.List;
 
 public class ReportFragment extends Fragment {
     private EmergencyAdapter adapter;
@@ -25,19 +25,18 @@ public class ReportFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
-        // Initialize RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize database helper
         dbHelper = new EmergencyDBHelper(requireContext());
+        EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        viewModel.init(dbHelper);
 
-        // Get emergencies from database
-        List<Emergency> emergencies = dbHelper.getAllEmergencies();
-
-        // Initialize and set adapter
-        adapter = new EmergencyAdapter(emergencies);
+        adapter = new EmergencyAdapter(dbHelper.getAllEmergencies());
         recyclerView.setAdapter(adapter);
+
+        // Observe emergency updates
+        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> adapter.updateData(emergencies));
 
         return view;
     }

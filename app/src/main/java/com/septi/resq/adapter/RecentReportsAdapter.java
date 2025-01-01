@@ -14,7 +14,7 @@ import com.septi.resq.model.Report;
 import java.util.List;
 
 public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdapter.ReportViewHolder> {
-    private List<Report> reports;
+    private final List<Report> reports;
     private OnItemClickListener listener;
 
     public RecentReportsAdapter(List<Report> reports) {

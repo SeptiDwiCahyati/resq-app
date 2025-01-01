@@ -70,7 +70,7 @@ public class UserProfileDBHelper extends SQLiteOpenHelper {
                 COLUMN_ID + "=?", new String[]{String.valueOf(id)},
                 null, null, null);
 
-        if (cursor != null && cursor.moveToFirst()) {
+        if (cursor.moveToFirst()) {
             profile = new UserProfile(
                     cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
@@ -99,11 +99,4 @@ public class UserProfileDBHelper extends SQLiteOpenHelper {
         return rowsAffected > 0;
     }
 
-    public boolean deleteProfile(long id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rowsAffected = db.delete(TABLE_USER,
-                COLUMN_ID + "=?", new String[]{String.valueOf(id)});
-        db.close();
-        return rowsAffected > 0;
-    }
 }

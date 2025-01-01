@@ -2,11 +2,11 @@ package com.septi.resq.model;
 
 public class Emergency {
     private long id;
-    private double latitude;
-    private double longitude;
-    private String type;
-    private String description;
-    private String timestamp;
+    private final double latitude;
+    private final double longitude;
+    private final String type;
+    private final String description;
+    private final String timestamp;
     private String photoPath;
 
     public Emergency(double latitude, double longitude, String type, String description, String timestamp, String photoPath) {
@@ -53,9 +53,6 @@ public class Emergency {
         return photoPath;
     }
 
-    public void setPhotoPath(String photoPath) {
-        this.photoPath = photoPath;
-    }
 
     public void setId(long id) {
         this.id = id;

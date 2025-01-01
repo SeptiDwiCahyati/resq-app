@@ -1,9 +1,9 @@
 package com.septi.resq.model;
 
 public class RescueTeam {
-    private String name;
-    private String distance;
-    private String status;
+    private final String name;
+    private final String distance;
+    private final String status;
 
     public RescueTeam( String name, String distance, String status ) {
         this.name = name;
