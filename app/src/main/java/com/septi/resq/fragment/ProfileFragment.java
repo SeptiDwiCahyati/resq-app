@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -63,11 +64,21 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        androidx.appcompat.widget.Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+
+        // Set Toolbar sebagai ActionBar
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Profile");
+        }
+
         initViews();
         setupListeners();
         loadProfileData();
         return rootView;
     }
+
 
     private void initViews() {
         imgProfile = rootView.findViewById(R.id.img_profile);

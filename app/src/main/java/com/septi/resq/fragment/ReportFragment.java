@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,6 +26,15 @@ public class ReportFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
+        // Setup AppBar
+        androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
+        }
+
+        // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -40,6 +50,7 @@ public class ReportFragment extends Fragment {
 
         return view;
     }
+
 
     @Override
     public void onResume() {

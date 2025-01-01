@@ -25,6 +25,8 @@
         <item name="cornerSize">50%</item>
     </style>
 
+
+
     <!-- Custom text styles -->
     <style name="TextAppearance.RescueMap.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
         <item name="android:textSize">36sp</item>

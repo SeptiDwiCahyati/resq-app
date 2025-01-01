@@ -8,6 +8,9 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import org.json.JSONObject;
@@ -53,6 +56,16 @@ public class TrackingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         initializeMap(view);
+
+        // Initialize the Toolbar from the included layout
+        Toolbar toolbar = view.findViewById(R.id.toolbar);  // Add this line
+        // Set the Toolbar as ActionBar
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
+
+        if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Tracking");
+        }
         return view;
     }
 
