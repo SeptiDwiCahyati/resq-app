@@ -41,6 +41,8 @@ dependencies {
     implementation("org.osmdroid:osmdroid-wms:6.1.16")
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.16")
     implementation("com.github.MKergall:osmbonuspack:6.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation("org.json:json:20210307")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
