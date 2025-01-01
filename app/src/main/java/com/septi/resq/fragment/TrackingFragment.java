@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.septi.resq.R;
+import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.model.Emergency;
 
 public class TrackingFragment extends Fragment {
     private MapView map;
@@ -32,17 +34,19 @@ public class TrackingFragment extends Fragment {
     private Marker ambulanceMarker;
     private Polyline routeLine;
     private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
-    private static final float SPEED = 80.0f; // 80 km/h
+    private static final float SPEED = 80.0f;
     private Handler animationHandler = new Handler();
     private List<GeoPoint> currentRoute;
     private int currentRouteIndex = 0;
     private boolean isMoving = false;
+    private EmergencyDBHelper dbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context ctx = requireActivity().getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        dbHelper = new EmergencyDBHelper(ctx);
     }
 
     @Override
@@ -64,14 +68,29 @@ public class TrackingFragment extends Fragment {
         ambulanceMarker.setTitle("Ambulance");
         map.getOverlays().add(ambulanceMarker);
 
-        setupIncidentMarkers();
+        loadEmergencyMarkersFromDatabase();
     }
 
-    private void setupIncidentMarkers() {
-        addIncidentMarker(new GeoPoint(0.085235, 111.497224), "Traffic Accident");
-        addIncidentMarker(new GeoPoint(0.086874, 111.498516), "Medical Emergency");
-    }
+    private void loadEmergencyMarkersFromDatabase() {
+        List<Emergency> emergencies = dbHelper.getAllEmergencies();
+        for (Emergency emergency : emergencies) {
+            GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
+            Marker marker = new Marker(map);
+            marker.setPosition(position);
+            marker.setTitle(emergency.getType());
+            marker.setSnippet(emergency.getDescription());
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
+            marker.setOnMarkerClickListener((marker1, mapView) -> {
+                stopAmbulanceMovement();
+                calculateRoute(ambulanceMarker.getPosition(), marker1.getPosition());
+                return true;
+            });
+
+            map.getOverlays().add(marker);
+        }
+        map.invalidate();
+    }
     private void addIncidentMarker(GeoPoint position, String title) {
         Marker marker = new Marker(map);
         marker.setPosition(position);
