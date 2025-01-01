@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,8 +24,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.septi.resq.R;
 import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.UserProfile;
+import com.septi.resq.model.UserProfileViewModel;
 
 public class ProfileFragment extends Fragment {
+    private UserProfileViewModel viewModel;
     private View rootView;
     private ShapeableImageView imgProfile;
     private TextInputEditText etName, etEmail, etPhone;
@@ -52,6 +55,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         dbHelper = new UserProfileDBHelper(requireContext());
+        viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
     }
 
     @Nullable
@@ -121,18 +125,13 @@ public class ProfileFragment extends Fragment {
             }
 
             if (success) {
+                viewModel.updateUserProfile(currentProfile); // Update ViewModel
                 Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show();
-                // Refresh the dashboard fragment if it's visible
-                Fragment dashboardFragment = getParentFragmentManager().findFragmentByTag("dashboard");
-                if (dashboardFragment instanceof DashboardFragment) {
-                    ((DashboardFragment) dashboardFragment).onResume();
-                }
             } else {
                 Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
     private boolean validateInput(String name, String email, String phone) {
         if (name.isEmpty()) {
             etName.setError("Name is required");

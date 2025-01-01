@@ -20,12 +20,14 @@ import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.Report;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.septi.resq.model.UserProfile;
+import com.septi.resq.model.UserProfileViewModel;
 import com.septi.resq.utils.DummyData;
 
 import java.text.SimpleDateFormat;
@@ -46,38 +48,51 @@ public class DashboardFragment extends Fragment {
     private ShapeableImageView ivProfile;
     private UserProfileDBHelper dbHelper;
     private TextView tvUsername;
+    private UserProfileViewModel viewModel;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Inisialisasi database helper
-        dbHelper = new UserProfileDBHelper(requireContext());
-
-        // Inisialisasi Views
+        // Initialize views
         initializeViews(rootView);
 
-        // Perbarui username
-        updateUsername();
+        // Observe user profile changes
+        viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
+            if (profile != null) {
+                tvUsername.setText(profile.getName());
+                if (profile.getPhotoUri() != null && !profile.getPhotoUri().isEmpty()) {
+                    try {
+                        Uri photoUri = Uri.parse(profile.getPhotoUri());
+                        ivProfile.setImageURI(photoUri);
+                    } catch (Exception e) {
+                        ivProfile.setImageResource(R.drawable.ic_profile);
+                    }
+                }
+            }
+        });
+
+        // Load initial profile data
+        UserProfile initialProfile = dbHelper.getProfile(1);
+        if (initialProfile != null) {
+            viewModel.updateUserProfile(initialProfile);
+        }
 
         setupRecyclerViews(rootView);
         setupClickListeners();
 
-        // Menampilkan tanggal realtime di TextView
         TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
         updateCurrentDate(tvCurrentDate);
 
         return rootView;
     }
 
-    private void updateUsername() {
-        UserProfile profile = dbHelper.getProfile(1);
 
-        if (profile != null) {
-            tvUsername.setText(profile.getName());
-        } else {
-            tvUsername.setText("User");
-        }
-    }
 
     private void updateCurrentDate( TextView tvCurrentDate ) {
         // Menggunakan SimpleDateFormat untuk format tanggal
@@ -94,23 +109,12 @@ public class DashboardFragment extends Fragment {
         tvUsername = view.findViewById(R.id.tv_username);
         ivProfile = view.findViewById(R.id.iv_profile);
         dbHelper = new UserProfileDBHelper(requireContext());
-        updateProfilePhoto();
         if (btnToggleTeams != null) {
             setupToggleButton();
         }
     }
 
-    private void updateProfilePhoto() {
-        UserProfile profile = dbHelper.getProfile(1);
-        if (profile != null && profile.getPhotoUri() != null && !profile.getPhotoUri().isEmpty()) {
-            try {
-                Uri photoUri = Uri.parse(profile.getPhotoUri());
-                ivProfile.setImageURI(photoUri);
-            } catch (Exception e) {
-                ivProfile.setImageResource(R.drawable.ic_profile);
-            }
-        }
-    }
+
 
     private void setupRecyclerViews( View rootView ) {
         // Menyiapkan RecyclerView untuk Tim Aktif
@@ -231,13 +235,6 @@ public class DashboardFragment extends Fragment {
 
         // Close button listener
         btnClose.setOnClickListener(v -> dialog.dismiss());
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Update profile photo when returning to dashboard
-        updateProfilePhoto();
-        updateUsername();
     }
 
     private void setupClickListeners() {
