@@ -13,4 +13,5 @@
     <color name="text_secondary">#616161</color>
     <color name="gradient_start">#80000000</color>
     <color name="gradient_end">#00000000</color>
+    <color name="route_color">#4285F4</color>
 </resources>

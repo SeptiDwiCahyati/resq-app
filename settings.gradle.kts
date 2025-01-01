@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        jcenter()
     }
 }
 dependencyResolutionManagement {
@@ -10,7 +11,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-    }
+        maven { url = uri("https://jitpack.io") }    }
 }
 
 rootProject.name = "ResQ"
