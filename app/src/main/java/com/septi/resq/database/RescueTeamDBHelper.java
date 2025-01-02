@@ -45,9 +45,18 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
 
     private void insertSampleData(SQLiteDatabase db) {
         String[][] sampleData = {
+                {"Basarnas Pontianak", "0.0319", "109.3250", "0561-55555555"}, // Pontianak coordinates
+                {"PMI Pontianak", "0.0332", "109.3345", "0561-44444444"},
+                {"Relawan Pontianak", "0.0325", "109.3308", "0561-33333333"},
                 {"Basarnas Sintang", "0.0716", "111.4950", "0565-55555555"}, // Sintang coordinates
                 {"PMI Sintang", "0.0730", "111.4975", "0565-44444444"},
-                {"Relawan Sintang", "0.0709", "111.4948", "0565-33333333"}
+                {"Relawan Sintang", "0.0709", "111.4948", "0565-33333333"},
+                {"Basarnas Sanggau", "0.1246", "110.5642", "0564-55555555"}, // Sanggau coordinates
+                {"PMI Sanggau", "0.1275", "110.5678", "0564-44444444"},
+                {"Relawan Sanggau", "0.1258", "110.5653", "0564-33333333"},
+                {"Basarnas Ketapang", "-1.8536", "109.9779", "0534-55555555"}, // Ketapang coordinates
+                {"PMI Ketapang", "-1.8502", "109.9824", "0534-44444444"},
+                {"Relawan Ketapang", "-1.8528", "109.9796", "0534-33333333"}
         };
 
         for (String[] data : sampleData) {

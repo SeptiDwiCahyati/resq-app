@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.septi.resq.R;
@@ -62,6 +63,7 @@ public class DashboardFragment extends Fragment {
     private RescueTeamDBHelper rescueTeamDBHelper;
     private EmergencyViewModel emergencyViewModel;
     private RecentReportsAdapter recentReportsAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +74,7 @@ public class DashboardFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize views
@@ -81,10 +83,16 @@ public class DashboardFragment extends Fragment {
         setupObservers();
         setupClickListeners();
 
-        // Observe user profile changes
+        // Observe user profile changes (existing code)
         viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
             if (profile != null) {
-                tvUsername.setText(profile.getName());
+                String username = profile.getName();
+                // Batasi teks menjadi maksimal 7 karakter
+                if (username != null && username.length() > 7) {
+                    username = username.substring(0, 7); // Potong hingga 7 karakter
+                }
+                tvUsername.setText(username);
+
                 if (profile.getPhotoUri() != null && !profile.getPhotoUri().isEmpty()) {
                     try {
                         Uri photoUri = Uri.parse(profile.getPhotoUri());
@@ -95,6 +103,7 @@ public class DashboardFragment extends Fragment {
                 }
             }
         });
+
 
         // Load initial profile data
         UserProfile initialProfile = dbHelper.getProfile(1);
@@ -140,13 +149,13 @@ public class DashboardFragment extends Fragment {
     }
 
 
-    private void updateCurrentDate( TextView tvCurrentDate ) {
+    private void updateCurrentDate(TextView tvCurrentDate) {
         // Menggunakan SimpleDateFormat untuk format tanggal
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
     }
 
-    private void initializeViews( View view ) {
+    private void initializeViews(View view) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
         btnEmergency = view.findViewById(R.id.btn_emergency);
@@ -160,7 +169,7 @@ public class DashboardFragment extends Fragment {
     }
 
 
-    private void setupRecyclerViews( View rootView ) {
+    private void setupRecyclerViews(View rootView) {
         // Menyiapkan RecyclerView untuk Tim Aktif
         setupActiveTeamsRecyclerView();
 
@@ -338,7 +347,7 @@ public class DashboardFragment extends Fragment {
 
         // Menetapkan adapter untuk tindakan cepat
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
-        adapter.setOnItemClickListener(( quickAction, position ) -> {
+        adapter.setOnItemClickListener((quickAction, position) -> {
             // Menangani klik pada tombol "Lihat Semua" (posisi 7)
             if (position == 7) {
                 showAllActionsDialog();
@@ -415,5 +424,19 @@ public class DashboardFragment extends Fragment {
             startActivity(callIntent);
         });
 
+        // Add click listener for profile image
+        ivProfile.setOnClickListener(v -> {
+            Fragment profileFragment = new ProfileFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .hide(DashboardFragment.this)
+                    .show(profileFragment)
+                    .commit();
+
+            // Update bottom navigation selection
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+            bottomNav.setSelectedItemId(R.id.nav_profile);
+        });
     }
+
 }

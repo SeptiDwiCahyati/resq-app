@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Define the background color with reduced opacity (80 is 50% opacity) -->
-    <solid android:color="#80808080" /> <!-- 50% opacity black, change the color to your desired shade -->
-
-    <!-- Define the border radius -->
-    <corners android:radius="8dp" /> <!-- Adjust the radius as needed -->
-
-    <!-- Optional: add a border -->
-    <!--<stroke android:color="@color/white" android:width="2dp"/>-->
+    <solid android:color="#80808080" /> <!-- Warna latar belakang -->
+    <corners android:radius="12dp" /> <!-- Sesuaikan radius -->
 </shape>

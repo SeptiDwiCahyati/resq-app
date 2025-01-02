@@ -64,7 +64,7 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
         TextView titleView;
         TextView locationView;
         TextView timestampView;
-        List<Report> reports;  // Add a reference to the reports list
+
 
         ReportViewHolder(View itemView, final OnItemClickListener listener, List<Report> reports) {
             super(itemView);
