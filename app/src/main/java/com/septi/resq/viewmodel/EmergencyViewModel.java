@@ -34,11 +34,14 @@ public class EmergencyViewModel extends ViewModel {
     }
 
     public void addEmergency(Emergency emergency) {
-        if (dbHelper != null) {
-            long id = dbHelper.insertEmergency(emergency);
-            if (id > 0) {
-                newEmergency.setValue(emergency);
-                loadEmergencies(); // Refresh the list
+        // Simpan ke database
+        long id = dbHelper.insertEmergency(emergency);
+        if (id > 0) {
+            // Update LiveData dengan data baru
+            List<Emergency> currentList = emergencies.getValue();
+            if (currentList != null) {
+                currentList.add(emergency);
+                emergencies.setValue(currentList);
             }
         }
     }

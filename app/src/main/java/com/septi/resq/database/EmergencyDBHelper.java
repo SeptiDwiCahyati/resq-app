@@ -52,7 +52,28 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     }
 
     public long insertEmergency(Emergency emergency) {
-        SQLiteDatabase db = getWritableDatabase();
+        // Cek apakah data dengan timestamp yang sama sudah ada
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_EMERGENCY,
+                null,
+                COLUMN_TIMESTAMP + " = ? AND " +
+                        COLUMN_LATITUDE + " = ? AND " +
+                        COLUMN_LONGITUDE + " = ?",
+                new String[]{
+                        emergency.getTimestamp(),
+                        String.valueOf(emergency.getLatitude()),
+                        String.valueOf(emergency.getLongitude())
+                },
+                null, null, null);
+
+        if (cursor.getCount() > 0) {
+            cursor.close();
+            return -1; // Data sudah ada
+        }
+        cursor.close();
+
+        // Jika belum ada, lakukan insert
+        db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_LATITUDE, emergency.getLatitude());
         values.put(COLUMN_LONGITUDE, emergency.getLongitude());
@@ -60,6 +81,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DESCRIPTION, emergency.getDescription());
         values.put(COLUMN_TIMESTAMP, emergency.getTimestamp());
         values.put(COLUMN_PHOTO_PATH, emergency.getPhotoPath());
+
         return db.insert(TABLE_EMERGENCY, null, values);
     }
 

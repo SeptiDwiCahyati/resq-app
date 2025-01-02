@@ -360,7 +360,7 @@ public class MapFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Laporkan Kejadian Darurat")
                 .setView(dialogView)
-                .setPositiveButton("Laporkan", ( dialog, which ) -> {
+                .setPositiveButton("Laporkan", (dialog, which) -> {
                     String type = typeSpinner.getSelectedItem().toString();
                     String description = descriptionEdit.getText().toString();
                     String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -368,31 +368,35 @@ public class MapFragment extends Fragment {
                     String photoPath = photoUri != null ? photoUri.toString() : null;
 
                     Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp, photoPath);
+
+                    // Simpan hanya melalui ViewModel
                     viewModel.addEmergency(emergency);
-                    long id = dbHelper.insertEmergency(emergency);
 
-                    if (id > 0) {
-                        // Remove temporary selected location marker
-                        if (selectedLocation != null) {
-                            mapView.getOverlays().remove(selectedLocation);
-                            selectedLocation = null;
-                        }
+                    // Update UI marker
+                    updateMapMarker(emergency);
 
-                        // Create and add permanent marker
-                        Marker newMarker = new Marker(mapView);
-                        newMarker.setPosition(new GeoPoint(latitude, longitude));
-                        updateMarkerInfo(newMarker, emergency);
-
-                        mapView.getOverlays().add(newMarker);
-                        emergencyMarkers.add(newMarker);
-
-                        mapView.invalidate();
-
-                        Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Batal", null)
                 .show();
+    }
+
+    private void updateMapMarker(Emergency emergency) {
+        // Remove temporary selected location marker
+        if (selectedLocation != null) {
+            mapView.getOverlays().remove(selectedLocation);
+            selectedLocation = null;
+        }
+
+        // Create and add permanent marker
+        Marker newMarker = new Marker(mapView);
+        newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
+        updateMarkerInfo(newMarker, emergency);
+
+        mapView.getOverlays().add(newMarker);
+        emergencyMarkers.add(newMarker);
+
+        mapView.invalidate();
     }
 
     private boolean checkCameraPermission() {
