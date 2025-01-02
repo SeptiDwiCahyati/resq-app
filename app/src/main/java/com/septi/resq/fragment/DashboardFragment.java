@@ -1,5 +1,6 @@
 package com.septi.resq.fragment;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -50,12 +51,13 @@ public class DashboardFragment extends Fragment {
     private UserProfileViewModel viewModel;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
     }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize views
@@ -92,14 +94,13 @@ public class DashboardFragment extends Fragment {
     }
 
 
-
     private void updateCurrentDate( TextView tvCurrentDate ) {
         // Menggunakan SimpleDateFormat untuk format tanggal
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
     }
 
-    private void initializeViews(View view) {
+    private void initializeViews( View view ) {
         rvQuickActions = view.findViewById(R.id.rv_quick_actions);
         rvActiveTeams = view.findViewById(R.id.rv_active_teams);
         btnEmergency = view.findViewById(R.id.btn_emergency);
@@ -111,7 +112,6 @@ public class DashboardFragment extends Fragment {
             setupToggleButton();
         }
     }
-
 
 
     private void setupRecyclerViews( View rootView ) {
@@ -166,6 +166,7 @@ public class DashboardFragment extends Fragment {
      * Menyiapkan RecyclerView untuk Tindakan Cepat.
      * Menampilkan tindakan cepat dalam layout grid (4 kolom).
      */
+
     private void setupQuickActionsRecyclerView() {
         // Mengambil daftar tindakan cepat dari data dummy
         List<QuickAction> quickActions = DummyData.getQuickActions();
@@ -195,19 +196,10 @@ public class DashboardFragment extends Fragment {
 
     private void toggleTeamsView() {
         isShowingAllTeams = !isShowingAllTeams;
-
-        // Update button text
         btnToggleTeams.setText(isShowingAllTeams ? "Kecilkan" : "Tampilkan Semua");
-
-        // Update layout manager
         rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(), isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL, false));
-
-        // Update adapter with new data and layout
         List<RescueTeam> teams = isShowingAllTeams ? DummyData.getActiveTeams() : DummyData.getActiveTeams().stream().filter(team -> team.getStatus().equals("Tersedia")).collect(Collectors.toList());
-
         activeTeamsAdapter.updateData(teams, isShowingAllTeams);
-
-        // Smooth transition for layout change
         rvActiveTeams.scheduleLayoutAnimation();
     }
 
@@ -237,8 +229,10 @@ public class DashboardFragment extends Fragment {
 
     private void setupClickListeners() {
         btnEmergency.setOnClickListener(v -> {
-            // Handle emergency button click
-            // Implement emergency call logic here
+            Intent callIntent = new Intent(Intent.ACTION_DIAL);
+            callIntent.setData(Uri.parse("tel:112"));
+            startActivity(callIntent);
         });
+
     }
 }
