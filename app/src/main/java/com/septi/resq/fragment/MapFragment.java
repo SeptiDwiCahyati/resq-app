@@ -268,20 +268,24 @@ public class MapFragment extends Fragment {
 
 
     private void getCurrentLocation() {
-        // Check if location permissions are granted, request if not granted
-        if (LocationUtils.hasLocationPermission(requireContext())) {
-            Location location = LocationUtils.getLastKnownLocation(requireContext());
-
-            if (location != null) {
+        LocationUtils.getCurrentLocation(requireContext(), new LocationUtils.LocationCallback() {
+            @Override
+            public void onLocationRetrieved(Location location) {
                 updateCurrentLocation(location);
-            } else {
-                Toast.makeText(requireContext(), "Unable to get location.", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            // Show permission request dialog only once
-            LocationUtils.checkLocationPermission(requireActivity());
-        }
+
+            @Override
+            public void onLocationError(String error) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPermissionError() {
+                LocationUtils.checkLocationPermission(requireActivity());
+            }
+        });
     }
+
 
 
 

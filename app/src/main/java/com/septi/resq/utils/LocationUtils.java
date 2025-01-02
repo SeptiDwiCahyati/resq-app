@@ -38,6 +38,27 @@ public class LocationUtils {
         }
     }
 
+    // Get the current location with a callback
+    public static void getCurrentLocation(Context context, LocationCallback callback) {
+        if (hasLocationPermission(context)) {
+            Location location = getLastKnownLocation(context);
+            if (location != null) {
+                callback.onLocationRetrieved(location);
+            } else {
+                callback.onLocationError("Unable to get location.");
+            }
+        } else {
+            callback.onPermissionError();
+        }
+    }
+
+    // Callback interface
+    public interface LocationCallback {
+        void onLocationRetrieved(Location location);
+        void onLocationError(String error);
+        void onPermissionError();
+    }
+
 
     // Check if the user denied permissions permanently
     public static boolean isPermissionDeniedPermanently(Activity activity) {
