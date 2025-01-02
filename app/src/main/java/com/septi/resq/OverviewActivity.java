@@ -92,4 +92,16 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
             }
         }
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check if location permission is granted, and if so, update the distances
+        if (LocationUtils.hasLocationPermission(this)) {
+            onLocationPermissionGranted();
+        } else {
+            // Optionally handle cases where permission is not granted yet
+        }
+    }
+
+
 }
