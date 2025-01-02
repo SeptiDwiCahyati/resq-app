@@ -70,10 +70,10 @@ public class LocationUtils {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 }
             } catch (SecurityException e) {
-                Toast.makeText(context, "Location permission is required to get the current location", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Izin Lokasi Diperlukan untuk mendapatkan Lokasi saat Ini", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Silahkan Izinkan Lokasi", Toast.LENGTH_SHORT).show();
         }
 
         return location;
