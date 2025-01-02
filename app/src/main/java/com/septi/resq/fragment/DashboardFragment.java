@@ -1,6 +1,7 @@
 package com.septi.resq.fragment;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,7 +60,7 @@ public class DashboardFragment extends Fragment {
         super.onCreate(savedInstanceState);
         rescueTeamDBHelper = new RescueTeamDBHelper(requireContext());
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
-        LocationUtils.checkLocationPermission(requireActivity());
+//        LocationUtils.checkLocationPermission(requireActivity());
 
     }
 
@@ -98,6 +99,34 @@ public class DashboardFragment extends Fragment {
         updateCurrentDate(tvCurrentDate);
 
         return rootView;
+    }
+
+    public void updateTeamDistances() {
+        Location currentLocation = LocationUtils.getLastKnownLocation(requireContext());
+        if (currentLocation != null && activeTeamsAdapter != null) {
+            List<RescueTeam> teams = isShowingAllTeams ?
+                    rescueTeamDBHelper.getAllTeams() :
+                    rescueTeamDBHelper.getAvailableTeams();
+
+            for (RescueTeam team : teams) {
+                Location teamLocation = new Location("");
+                teamLocation.setLatitude(team.getLatitude());
+                teamLocation.setLongitude(team.getLongitude());
+                team.setDistance(currentLocation.distanceTo(teamLocation) / 1000.0);
+            }
+
+            activeTeamsAdapter.updateData(teams, isShowingAllTeams);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LocationUtils.PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                updateTeamDistances();
+            }
+        }
     }
 
 

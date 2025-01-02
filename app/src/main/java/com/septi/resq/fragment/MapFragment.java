@@ -100,6 +100,42 @@ public class MapFragment extends Fragment {
         viewModel.getEmergencies().observe(this, this::updateAllMarkers);
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        dbHelper = new EmergencyDBHelper(requireContext());
+        emergencyMarkers = new ArrayList<>();
+        Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = view.findViewById(R.id.map_view);
+
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setMultiTouchControls(true);
+        mapView.setTilesScaledToDpi(true);
+        mapView.setHorizontalMapRepetitionEnabled(false);
+        mapView.setVerticalMapRepetitionEnabled(false);
+        mapView.setMinZoomLevel(4.0);
+        mapView.setMaxZoomLevel(19.0);
+        mapView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        GeoPoint startPoint = new GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+        mapView.getController().setZoom(DEFAULT_ZOOM);
+        mapView.getController().setCenter(startPoint);
+
+        setupUIControls(view);
+
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            getCurrentLocation();
+        } else {
+            LocationUtils.requestLocationPermissions(requireActivity());
+        }
+
+        setupMapClickListener();
+        loadExistingMarkers();
+
+        return view;
+    }
+
 
     private void addEmergencyMarker( Emergency emergency ) {
         Marker newMarker = new Marker(mapView);
@@ -136,41 +172,7 @@ public class MapFragment extends Fragment {
     // Constants
 
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        dbHelper = new EmergencyDBHelper(requireContext());
-        emergencyMarkers = new ArrayList<>();
-        Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
-        View view = inflater.inflate(R.layout.fragment_map, container, false);
-        mapView = view.findViewById(R.id.map_view);
-
-        mapView.setTileSource(TileSourceFactory.MAPNIK);
-        mapView.setMultiTouchControls(true);
-        mapView.setTilesScaledToDpi(true);
-        mapView.setHorizontalMapRepetitionEnabled(false);
-        mapView.setVerticalMapRepetitionEnabled(false);
-        mapView.setMinZoomLevel(4.0);
-        mapView.setMaxZoomLevel(19.0);
-        mapView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        GeoPoint startPoint = new GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
-        mapView.getController().setZoom(DEFAULT_ZOOM);
-        mapView.getController().setCenter(startPoint);
-
-        setupUIControls(view);
-
-        if (LocationUtils.hasLocationPermission(requireContext())) {
-            getCurrentLocation();
-        } else {
-            LocationUtils.requestLocationPermissions(requireActivity());
-        }
-
-        setupMapClickListener();
-        loadExistingMarkers();
-
-        return view;
-    }
 
 
     private void setupUIControls( View view ) {

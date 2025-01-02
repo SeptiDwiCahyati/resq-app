@@ -1,5 +1,6 @@
 package com.septi.resq;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,8 +13,9 @@ import com.septi.resq.fragment.MapFragment;
 import com.septi.resq.fragment.ProfileFragment;
 import com.septi.resq.fragment.ReportFragment;
 import com.septi.resq.fragment.TrackingFragment;
+import com.septi.resq.utils.LocationUtils;
 
-public class OverviewActivity extends AppCompatActivity {
+public class OverviewActivity extends AppCompatActivity implements LocationUtils.LocationPermissionCallback {
 
 
     // Fragment Manager
@@ -28,12 +30,12 @@ public class OverviewActivity extends AppCompatActivity {
 
     private Fragment activeFragment = homeFragment;
 
+
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
-
-        // Initialize Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Add all fragments to the FragmentManager
@@ -73,5 +75,22 @@ public class OverviewActivity extends AppCompatActivity {
     private void switchFragment( Fragment fragment ) {
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
         activeFragment = fragment;
+    }
+    @Override
+    public void onLocationPermissionGranted() {
+        DashboardFragment dashboardFragment = (DashboardFragment) fragmentManager.findFragmentByTag("1");
+        if (dashboardFragment != null) {
+            dashboardFragment.updateTeamDistances();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LocationUtils.PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onLocationPermissionGranted();
+            }
+        }
     }
 }

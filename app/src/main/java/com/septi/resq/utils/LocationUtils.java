@@ -18,7 +18,7 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
 public class LocationUtils {
-    private static final int PERMISSION_REQUEST_CODE = 1;
+    public static final int PERMISSION_REQUEST_CODE = 1;
 
     // Check if location permissions are granted
     public static boolean hasLocationPermission(Context context) {
@@ -28,14 +28,20 @@ public class LocationUtils {
     // Check and request location permissions
     public static void checkLocationPermission(Activity activity) {
         if (hasLocationPermission(activity)) {
-            // Permission already granted, proceed with getting location
+            // Permission already granted
+            if (activity instanceof LocationPermissionCallback) {
+                ((LocationPermissionCallback) activity).onLocationPermissionGranted();
+            }
         } else if (isPermissionDeniedPermanently(activity)) {
-            // Permission denied permanently, show settings dialog
-            showSettingsDialog(activity, "Izin Lokasi Diperlukan", "Izinkan aplikasi untuk mengakses lokasi Anda di pengaturan.");
+            showSettingsDialog(activity, "Izin Lokasi Diperlukan",
+                    "Izinkan aplikasi untuk mengakses lokasi Anda di pengaturan.");
         } else {
-            // Request permission
             requestLocationPermissions(activity);
         }
+    }
+
+    public interface LocationPermissionCallback {
+        void onLocationPermissionGranted();
     }
 
 
