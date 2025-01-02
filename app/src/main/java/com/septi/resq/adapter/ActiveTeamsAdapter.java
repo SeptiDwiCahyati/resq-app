@@ -37,13 +37,11 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
         return new RescueTeamViewHolder(view, listener, rescueTeams);
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull RescueTeamViewHolder holder, int position) {
         RescueTeam team = rescueTeams.get(position);
         holder.bind(team);
 
-        // Jika dalam mode vertical, atur lebar card agar match_parent
         if (isVerticalLayout) {
             ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
             params.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -68,11 +66,11 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
         TextView nameView;
         TextView distanceView;
         TextView statusView;
-        List<RescueTeam> rescueTeams;  // Hold reference to the list
+        List<RescueTeam> rescueTeams;
 
         RescueTeamViewHolder(View itemView, final OnItemClickListener listener, List<RescueTeam> rescueTeams) {
             super(itemView);
-            this.rescueTeams = rescueTeams;  // Initialize the list
+            this.rescueTeams = rescueTeams;
             nameView = itemView.findViewById(R.id.tv_team_name);
             distanceView = itemView.findViewById(R.id.tv_distance);
             statusView = itemView.findViewById(R.id.tv_status);
@@ -87,14 +85,18 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
 
         void bind(RescueTeam team) {
             nameView.setText(team.getName());
-            distanceView.setText(team.getDistance());
+
+            // Format distance
+            Double distance = team.getDistance();
+            String distanceText = distance != null ?
+                    String.format("%.1f km", distance) : "Calculating...";
+            distanceView.setText(distanceText);
+
             statusView.setText(team.getStatus());
 
-            // Atur background dan text color status sesuai kondisi
-            int statusColor = team.getStatus().equals("Tersedia") ?
+            int statusColor = team.isAvailable() ?
                     R.color.status_available : R.color.status_busy;
             statusView.setTextColor(itemView.getContext().getColor(statusColor));
         }
     }
-    }
-
+}

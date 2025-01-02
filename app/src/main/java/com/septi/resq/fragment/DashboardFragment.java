@@ -1,6 +1,7 @@
 package com.septi.resq.fragment;
 
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import com.septi.resq.R;
 import com.septi.resq.adapter.ActiveTeamsAdapter;
 import com.septi.resq.adapter.QuickActionAdapter;
 import com.septi.resq.adapter.RecentReportsAdapter;
+import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.QuickAction;
 import com.septi.resq.model.RescueTeam;
@@ -28,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.septi.resq.model.UserProfile;
+import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.viewmodel.UserProfileViewModel;
 import com.septi.resq.utils.DummyData;
 
@@ -35,11 +38,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class DashboardFragment extends Fragment {
 
     private RecyclerView rvQuickActions;
+    private Location currentLocation;
     private RecyclerView rvActiveTeams;
     private MaterialButton btnEmergency;
     private TextView btnToggleTeams;
@@ -49,11 +52,18 @@ public class DashboardFragment extends Fragment {
     private UserProfileDBHelper dbHelper;
     private TextView tvUsername;
     private UserProfileViewModel viewModel;
+    private RescueTeamDBHelper rescueTeamDBHelper;
 
     @Override
-    public void onCreate( Bundle savedInstanceState ) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        rescueTeamDBHelper = new RescueTeamDBHelper(requireContext());
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
+
+        // Check and request location permissions
+        if (!LocationUtils.hasLocationPermission(requireContext())) {
+            LocationUtils.requestLocationPermissions(requireContext());
+        }
     }
 
     @Override
@@ -130,17 +140,30 @@ public class DashboardFragment extends Fragment {
      * Menampilkan tim yang tersedia dalam layout horizontal.
      */
     private void setupActiveTeamsRecyclerView() {
-        // Mengambil tim aktif yang statusnya "Tersedia"
-        List<RescueTeam> availableTeams = DummyData.getActiveTeams().stream().filter(team -> team.getStatus().equals("Tersedia")).collect(Collectors.toList());
+        // Get current location
+        currentLocation = LocationUtils.getLastKnownLocation(requireContext());
+        List<RescueTeam> availableTeams = rescueTeamDBHelper.getAvailableTeams();
 
-        // Menyiapkan layout RecyclerView secara horizontal
-        LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        // Calculate distances
+        if (currentLocation != null) {
+            for (RescueTeam team : availableTeams) {
+                Location teamLocation = new Location("");
+                teamLocation.setLatitude(team.getLatitude());
+                teamLocation.setLongitude(team.getLongitude());
+
+                float distanceInMeters = currentLocation.distanceTo(teamLocation);
+                team.setDistance(distanceInMeters / 1000.0); // Convert to kilometers
+            }
+        }
+
+        LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.HORIZONTAL, false);
         rvActiveTeams.setLayoutManager(horizontalLayout);
 
-        // Menetapkan adapter untuk tim aktif
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
         rvActiveTeams.setAdapter(activeTeamsAdapter);
     }
+
 
     /**
      * Menyiapkan RecyclerView untuk Laporan Terbaru.
@@ -197,11 +220,31 @@ public class DashboardFragment extends Fragment {
     private void toggleTeamsView() {
         isShowingAllTeams = !isShowingAllTeams;
         btnToggleTeams.setText(isShowingAllTeams ? "Kecilkan" : "Tampilkan Semua");
-        rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(), isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL, false));
-        List<RescueTeam> teams = isShowingAllTeams ? DummyData.getActiveTeams() : DummyData.getActiveTeams().stream().filter(team -> team.getStatus().equals("Tersedia")).collect(Collectors.toList());
+
+        rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(),
+                isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,
+                false));
+
+        List<RescueTeam> teams = isShowingAllTeams ?
+                rescueTeamDBHelper.getAllTeams() :
+                rescueTeamDBHelper.getAvailableTeams();
+
+        // Calculate distances for all teams
+        if (currentLocation != null) {
+            for (RescueTeam team : teams) {
+                Location teamLocation = new Location("");
+                teamLocation.setLatitude(team.getLatitude());
+                teamLocation.setLongitude(team.getLongitude());
+
+                float distanceInMeters = currentLocation.distanceTo(teamLocation);
+                team.setDistance(distanceInMeters / 1000.0);
+            }
+        }
+
         activeTeamsAdapter.updateData(teams, isShowingAllTeams);
         rvActiveTeams.scheduleLayoutAnimation();
     }
+
 
     private void showAllActionsDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
