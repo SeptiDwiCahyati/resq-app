@@ -35,6 +35,7 @@ import com.google.android.material.button.MaterialButton;
 import com.septi.resq.model.UserProfile;
 import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.utils.LocationUtils;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 import com.septi.resq.viewmodel.UserProfileViewModel;
 import com.septi.resq.utils.DummyData;
 
@@ -59,12 +60,15 @@ public class DashboardFragment extends Fragment {
     private TextView tvUsername;
     private UserProfileViewModel viewModel;
     private RescueTeamDBHelper rescueTeamDBHelper;
-
+    private EmergencyViewModel emergencyViewModel;
+    private RecentReportsAdapter recentReportsAdapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         rescueTeamDBHelper = new RescueTeamDBHelper(requireContext());
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
+        emergencyViewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        emergencyViewModel.init(new EmergencyDBHelper(requireContext()));
     }
 
     @Override
@@ -73,6 +77,9 @@ public class DashboardFragment extends Fragment {
 
         // Initialize views
         initializeViews(rootView);
+        setupRecyclerViews(rootView);
+        setupObservers();
+        setupClickListeners();
 
         // Observe user profile changes
         viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
@@ -201,54 +208,95 @@ public class DashboardFragment extends Fragment {
     // Fragment setup code
     private void setupRecentReportsRecyclerView(View rootView) {
         TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
-        String currentDate = new SimpleDateFormat("dd MMMM yyyy",
-                Locale.getDefault()).format(new Date());
+        String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
 
         RecyclerView rvRecentReports = rootView.findViewById(R.id.rv_recent_reports);
         rvRecentReports.setLayoutManager(new LinearLayoutManager(getContext()));
-        RecentReportsAdapter adapter = new RecentReportsAdapter(new ArrayList<>());
-        rvRecentReports.setAdapter(adapter);
-
-        EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
-        List<Emergency> emergencies = dbHelper.getAllEmergencies();
-        List<Report> reports = new ArrayList<>();
-
-        for (Emergency emergency : emergencies) {
-            String timestamp = getRelativeTimeSpan(emergency.getTimestamp());
-
-            // Using final for the report object to access it in the callback
-            final Report newReport = new Report(
-                    emergency.getType(),
-                    "Loading address...",
-                    timestamp,
-                    emergency.getLatitude(),
-                    emergency.getLongitude()
-            );
-            reports.add(newReport);
-
-            GeocodingHelper.getAddressFromLocation(
-                    requireContext(),
-                    emergency.getLatitude(),
-                    emergency.getLongitude(),
-                    new GeocodingHelper.GeocodingCallback() {
-                        @Override
-                        public void onAddressReceived(String address) {
-                            newReport.setLocation(address);
-                            adapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            newReport.setLocation("Location unavailable");
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-            );
-        }
-
-        adapter.updateReports(reports);
+        recentReportsAdapter = new RecentReportsAdapter(new ArrayList<>());
+        rvRecentReports.setAdapter(recentReportsAdapter);
     }
+
+    private void setupObservers() {
+        // Observe emergency changes
+        emergencyViewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
+            List<Report> reports = new ArrayList<>();
+            for (Emergency emergency : emergencies) {
+                String timestamp = getRelativeTimeSpan(emergency.getTimestamp());
+                Report newReport = new Report(
+                        emergency.getType(),
+                        "Loading address...",
+                        timestamp,
+                        emergency.getLatitude(),
+                        emergency.getLongitude()
+                );
+                reports.add(newReport);
+
+                // Get address for each emergency
+                fetchAddressForReport(newReport);
+            }
+            recentReportsAdapter.updateReports(reports);
+        });
+
+        // Observe new emergencies
+        emergencyViewModel.getNewEmergency().observe(getViewLifecycleOwner(), emergency -> {
+            if (emergency != null) {
+                String timestamp = getRelativeTimeSpan(emergency.getTimestamp());
+                Report newReport = new Report(
+                        emergency.getType(),
+                        "Loading address...",
+                        timestamp,
+                        emergency.getLatitude(),
+                        emergency.getLongitude()
+                );
+
+                // Add new report at the beginning of the list
+                List<Report> currentReports = new ArrayList<>(recentReportsAdapter.getReports());
+                currentReports.add(0, newReport);
+                recentReportsAdapter.updateReports(currentReports);
+
+                // Fetch address for new report
+                fetchAddressForReport(newReport);
+            }
+        });
+
+        // Observe user profile changes (existing code)
+        viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
+            if (profile != null) {
+                tvUsername.setText(profile.getName());
+                if (profile.getPhotoUri() != null && !profile.getPhotoUri().isEmpty()) {
+                    try {
+                        Uri photoUri = Uri.parse(profile.getPhotoUri());
+                        ivProfile.setImageURI(photoUri);
+                    } catch (Exception e) {
+                        ivProfile.setImageResource(R.drawable.ic_profile);
+                    }
+                }
+            }
+        });
+    }
+
+    private void fetchAddressForReport(Report report) {
+        GeocodingHelper.getAddressFromLocation(
+                requireContext(),
+                report.getLatitude(),
+                report.getLongitude(),
+                new GeocodingHelper.GeocodingCallback() {
+                    @Override
+                    public void onAddressReceived(String address) {
+                        report.setLocation(address);
+                        recentReportsAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        report.setLocation("Location unavailable");
+                        recentReportsAdapter.notifyDataSetChanged();
+                    }
+                }
+        );
+    }
+
 
     private String getRelativeTimeSpan(String timestamp) {
         try {

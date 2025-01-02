@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.septi.resq.R;
 import com.septi.resq.model.Report;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdapter.ReportViewHolder> {
@@ -27,6 +28,10 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
         notifyDataSetChanged();
     }
 
+    // Method untuk mendapatkan list reports
+    public List<Report> getReports() {
+        return new ArrayList<>(reports); // Return copy of list untuk menghindari modifikasi langsung
+    }
 
     @NonNull
     @Override
