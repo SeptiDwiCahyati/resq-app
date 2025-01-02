@@ -7,20 +7,24 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
-
 public class ReportFragment extends Fragment {
     private EmergencyAdapter adapter;
     private EmergencyDBHelper dbHelper;
+    private SearchView searchView;
+
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,7 +41,26 @@ public class ReportFragment extends Fragment {
         // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
 
+        // Setup SearchView
+        searchView = view.findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filter(query); // Panggil metode filter di adapter
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filter(newText); // Panggil metode filter di adapter
+                return true;
+            }
+        });
+
+
+        // Setup Database and ViewModel
         dbHelper = new EmergencyDBHelper(requireContext());
         EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.init(dbHelper);
@@ -46,16 +69,16 @@ public class ReportFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         // Observe emergency updates
-        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> adapter.updateData(emergencies));
+        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies ->
+                adapter.updateData(emergencies)
+        );
 
         return view;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh the list when fragment becomes visible
         if (adapter != null) {
             adapter.updateData(dbHelper.getAllEmergencies());
         }
