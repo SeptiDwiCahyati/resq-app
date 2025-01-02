@@ -59,11 +59,8 @@ public class DashboardFragment extends Fragment {
         super.onCreate(savedInstanceState);
         rescueTeamDBHelper = new RescueTeamDBHelper(requireContext());
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
+        LocationUtils.checkLocationPermission(requireActivity());
 
-        // Check and request location permissions
-        if (!LocationUtils.hasLocationPermission(requireContext())) {
-            LocationUtils.requestLocationPermissions(requireContext());
-        }
     }
 
     @Override

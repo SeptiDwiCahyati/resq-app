@@ -1,8 +1,11 @@
 package com.septi.resq.fragment;
 
+import static com.septi.resq.utils.LocationUtils.requestLocationPermissions;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -134,20 +137,14 @@ public class MapFragment extends Fragment {
 
 
     @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
-        // Initialize database helper first
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         dbHelper = new EmergencyDBHelper(requireContext());
         emergencyMarkers = new ArrayList<>();
-        // Initialize OpenStreetMap configuration
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
-        // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-
-        // Initialize map AFTER inflating the view
         mapView = view.findViewById(R.id.map_view);
 
-        // Configure map base settings
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setMultiTouchControls(true);
         mapView.setTilesScaledToDpi(true);
@@ -155,31 +152,21 @@ public class MapFragment extends Fragment {
         mapView.setVerticalMapRepetitionEnabled(false);
         mapView.setMinZoomLevel(4.0);
         mapView.setMaxZoomLevel(19.0);
-
-        // Enable hardware acceleration
         mapView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
-        // Set initial map position to default location (Jakarta)
         GeoPoint startPoint = new GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
         mapView.getController().setZoom(DEFAULT_ZOOM);
         mapView.getController().setCenter(startPoint);
 
-        // Initialize location services
-
-        // Setup UI controls
         setupUIControls(view);
 
-        // Request permissions and fetch current location
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (LocationUtils.hasLocationPermission(requireContext())) {
             getCurrentLocation();
         } else {
-            requestLocationPermissions();
+            LocationUtils.requestLocationPermissions(requireActivity());
         }
 
-        // Add map click listener
         setupMapClickListener();
-
-        // Load existing markers
         loadExistingMarkers();
 
         return view;
@@ -281,6 +268,7 @@ public class MapFragment extends Fragment {
 
 
     private void getCurrentLocation() {
+        // Check if location permissions are granted, request if not granted
         if (LocationUtils.hasLocationPermission(requireContext())) {
             Location location = LocationUtils.getLastKnownLocation(requireContext());
 
@@ -290,10 +278,12 @@ public class MapFragment extends Fragment {
                 Toast.makeText(requireContext(), "Unable to get location.", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // Request permissions if not granted
-            LocationUtils.requestLocationPermissions(requireContext());
+            // Show permission request dialog only once
+            LocationUtils.checkLocationPermission(requireActivity());
         }
     }
+
+
 
 
     private void updateCurrentLocation( Location location ) {
@@ -526,10 +516,6 @@ public class MapFragment extends Fragment {
             }
         }
         return null;
-    }
-
-    private void requestLocationPermissions() {
-        LocationUtils.requestLocationPermissions(requireContext());
     }
 
 
