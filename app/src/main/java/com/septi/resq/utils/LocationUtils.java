@@ -38,27 +38,6 @@ public class LocationUtils {
         }
     }
 
-    // Get the current location with a callback
-    public static void getCurrentLocation(Context context, LocationCallback callback) {
-        if (hasLocationPermission(context)) {
-            Location location = getLastKnownLocation(context);
-            if (location != null) {
-                callback.onLocationRetrieved(location);
-            } else {
-                callback.onLocationError("Unable to get location.");
-            }
-        } else {
-            callback.onPermissionError();
-        }
-    }
-
-    // Callback interface
-    public interface LocationCallback {
-        void onLocationRetrieved(Location location);
-        void onLocationError(String error);
-        void onPermissionError();
-    }
-
 
     // Check if the user denied permissions permanently
     public static boolean isPermissionDeniedPermanently(Activity activity) {
@@ -93,13 +72,6 @@ public class LocationUtils {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                 PERMISSION_REQUEST_CODE);
     }
-
-
-
-
-
-
-
 
     // Show dialog to direct the user to app settings
     public static void showSettingsDialog(Activity activity, String title, String message) {
