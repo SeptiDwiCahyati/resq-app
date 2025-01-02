@@ -55,6 +55,7 @@ public class DashboardFragment extends Fragment {
     private MaterialButton btnEmergency;
     private TextView btnToggleTeams;
     private boolean isShowingAllTeams = false;
+    private boolean isCalculatingDistances = false;
     private ActiveTeamsAdapter activeTeamsAdapter;
     private ShapeableImageView ivProfile;
     private UserProfileDBHelper dbHelper;
@@ -72,6 +73,7 @@ public class DashboardFragment extends Fragment {
         emergencyViewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         emergencyViewModel.init(new EmergencyDBHelper(requireContext()));
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -121,7 +123,14 @@ public class DashboardFragment extends Fragment {
     }
 
     public void updateTeamDistances() {
+        // Prevent multiple simultaneous calculations
+        if (isCalculatingDistances) {
+            return;
+        }
+
+        isCalculatingDistances = true;
         Location currentLocation = LocationUtils.getLastKnownLocation(requireContext());
+
         if (currentLocation != null && activeTeamsAdapter != null) {
             List<RescueTeam> teams = isShowingAllTeams ?
                     rescueTeamDBHelper.getAllTeams() :
@@ -136,6 +145,7 @@ public class DashboardFragment extends Fragment {
 
             activeTeamsAdapter.updateData(teams, isShowingAllTeams);
         }
+        isCalculatingDistances = false;
     }
 
     @Override
@@ -185,28 +195,18 @@ public class DashboardFragment extends Fragment {
      * Menampilkan tim yang tersedia dalam layout horizontal.
      */
     private void setupActiveTeamsRecyclerView() {
-        // Get current location
-        currentLocation = LocationUtils.getLastKnownLocation(requireContext());
-        List<RescueTeam> availableTeams = rescueTeamDBHelper.getAvailableTeams();
-
-        // Calculate distances
-        if (currentLocation != null) {
-            for (RescueTeam team : availableTeams) {
-                Location teamLocation = new Location("");
-                teamLocation.setLatitude(team.getLatitude());
-                teamLocation.setLongitude(team.getLongitude());
-
-                float distanceInMeters = currentLocation.distanceTo(teamLocation);
-                team.setDistance(distanceInMeters / 1000.0); // Convert to kilometers
-            }
-        }
-
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
         rvActiveTeams.setLayoutManager(horizontalLayout);
 
+        List<RescueTeam> availableTeams = rescueTeamDBHelper.getAvailableTeams();
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
         rvActiveTeams.setAdapter(activeTeamsAdapter);
+
+        // Only calculate initial distances if we have permission
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            updateTeamDistances();
+        }
     }
 
 
@@ -372,23 +372,17 @@ public class DashboardFragment extends Fragment {
                 isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,
                 false));
 
-        List<RescueTeam> teams = isShowingAllTeams ?
-                rescueTeamDBHelper.getAllTeams() :
-                rescueTeamDBHelper.getAvailableTeams();
-
-        // Calculate distances for all teams
-        if (currentLocation != null) {
-            for (RescueTeam team : teams) {
-                Location teamLocation = new Location("");
-                teamLocation.setLatitude(team.getLatitude());
-                teamLocation.setLongitude(team.getLongitude());
-
-                float distanceInMeters = currentLocation.distanceTo(teamLocation);
-                team.setDistance(distanceInMeters / 1000.0);
-            }
+        // Only calculate distances if we have location permission
+        if (LocationUtils.hasLocationPermission(requireContext())) {
+            updateTeamDistances();
+        } else {
+            // If no permission, just update the list without distances
+            List<RescueTeam> teams = isShowingAllTeams ?
+                    rescueTeamDBHelper.getAllTeams() :
+                    rescueTeamDBHelper.getAvailableTeams();
+            activeTeamsAdapter.updateData(teams, isShowingAllTeams);
         }
 
-        activeTeamsAdapter.updateData(teams, isShowingAllTeams);
         rvActiveTeams.scheduleLayoutAnimation();
     }
 

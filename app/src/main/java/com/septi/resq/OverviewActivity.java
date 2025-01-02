@@ -77,11 +77,14 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
     }
     @Override
     public void onLocationPermissionGranted() {
-        DashboardFragment dashboardFragment = (DashboardFragment) fragmentManager.findFragmentByTag("1");
-        if (dashboardFragment != null) {
+        // Only update if we're on the dashboard fragment
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (currentFragment instanceof DashboardFragment) {
+            DashboardFragment dashboardFragment = (DashboardFragment) currentFragment;
             dashboardFragment.updateTeamDistances();
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -95,11 +98,8 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
     @Override
     protected void onResume() {
         super.onResume();
-        // Check if location permission is granted, and if so, update the distances
         if (LocationUtils.hasLocationPermission(this)) {
             onLocationPermissionGranted();
-        } else {
-            // Optionally handle cases where permission is not granted yet
         }
     }
 
