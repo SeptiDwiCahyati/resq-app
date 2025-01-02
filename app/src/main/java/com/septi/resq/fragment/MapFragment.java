@@ -98,7 +98,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void addEmergencyMarker(Emergency emergency) {
+    private void addEmergencyMarker( Emergency emergency ) {
         Marker newMarker = new Marker(mapView);
         newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
         updateMarkerInfo(newMarker, emergency);
@@ -107,7 +107,7 @@ public class MapFragment extends Fragment {
         mapView.invalidate();
     }
 
-    private void updateAllMarkers(List<Emergency> emergencies) {
+    private void updateAllMarkers( List<Emergency> emergencies ) {
         // Clear existing markers
         for (Marker marker : emergencyMarkers) {
             mapView.getOverlays().remove(marker);
@@ -281,9 +281,7 @@ public class MapFragment extends Fragment {
 
 
     private void getCurrentLocation() {
-        // Check if location permissions are granted
         if (LocationUtils.hasLocationPermission(requireContext())) {
-            // Use LocationUtils to get the last known location
             Location location = LocationUtils.getLastKnownLocation(requireContext());
 
             if (location != null) {
@@ -310,21 +308,18 @@ public class MapFragment extends Fragment {
             mapView.getOverlays().add(currentLocationMarker);
         }
 
-        // Set marker position and properties
         currentLocationMarker.setPosition(currentLocation);
-        currentLocationMarker.setAnchor(0.5f, 0.5f);  // Changed to center anchor
+        currentLocationMarker.setAnchor(0.5f, 0.5f);
         currentLocationMarker.setTitle("Lokasi Anda");
 
         Drawable icon = getResources().getDrawable(R.drawable.ic_location);
-// Mendapatkan context
-        Context context = getContext(); // Gunakan 'getContext()' jika berada di dalam Fragment
 
-// Resize ikon
+        Context context = getContext();
+
+
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(context, icon, 20);
 
-// Mengatur ikon yang sudah diresize ke marker
         currentLocationMarker.setIcon(resizedIcon);
-
 
 
         // Update or create pulsing overlay
@@ -430,9 +425,6 @@ public class MapFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
 
 
     private void updateMarkerInfo( Marker marker, Emergency emergency ) {

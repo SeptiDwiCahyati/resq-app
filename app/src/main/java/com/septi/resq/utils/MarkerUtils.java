@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 public class MarkerUtils {
 
     // Helper method untuk resize marker icon
-    public static Drawable resizeMarkerIcon(Context context, Drawable icon, int sizeDp) {
+    public static Drawable resizeMarkerIcon( Context context, Drawable icon, int sizeDp ) {
         float density = context.getResources().getDisplayMetrics().density;
         int pixelSize = (int) (sizeDp * density);
 

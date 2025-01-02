@@ -56,14 +56,14 @@ public class TrackingFragment extends Fragment {
     private boolean isMoving = false;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         Context ctx = requireActivity().getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         initializeMap(view);
         EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
@@ -79,7 +79,7 @@ public class TrackingFragment extends Fragment {
         return view;
     }
 
-    private void initializeMap(View view) {
+    private void initializeMap( View view ) {
         map = view.findViewById(R.id.map);
         map.setMultiTouchControls(true);
         map.getController().setZoom(15.0);
@@ -99,8 +99,7 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
-    private void addEmergencyMarker(Emergency emergency) {
+    private void addEmergencyMarker( Emergency emergency ) {
         GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
         Marker marker = new Marker(map);
         marker.setPosition(position);
@@ -136,7 +135,7 @@ public class TrackingFragment extends Fragment {
 
         marker.setIcon(resizedIcon);
 
-        marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
+        marker.setOnMarkerClickListener(( clickedMarker, mapView ) -> {
             stopAmbulanceMovement();
             calculateRoute(ambulanceMarker.getPosition(), clickedMarker.getPosition());
             return true;
@@ -148,7 +147,7 @@ public class TrackingFragment extends Fragment {
     }
 
 
-    private void updateAllMarkers(List<Emergency> emergencies) {
+    private void updateAllMarkers( List<Emergency> emergencies ) {
         // Clear existing markers
         for (Marker marker : emergencyMarkers) {
             map.getOverlays().remove(marker);
@@ -161,7 +160,7 @@ public class TrackingFragment extends Fragment {
         }
     }
 
-    private void calculateRoute(GeoPoint start, GeoPoint end) {
+    private void calculateRoute( GeoPoint start, GeoPoint end ) {
         String url = OSRM_API_URL +
                 start.getLongitude() + "," + start.getLatitude() + ";" +
                 end.getLongitude() + "," + end.getLatitude() +
@@ -199,7 +198,7 @@ public class TrackingFragment extends Fragment {
         }).start();
     }
 
-    private void drawRoute(List<GeoPoint> points) {
+    private void drawRoute( List<GeoPoint> points ) {
         if (routeLine != null) {
             map.getOverlays().remove(routeLine);
         }
@@ -238,7 +237,7 @@ public class TrackingFragment extends Fragment {
         double distance = calculateDistance(current, next);
 
         // Calculate time needed for this segment (distance/speed in hours * 3600000 to get milliseconds)
-        long timeForSegment = (long)((distance / SPEED) * 3600000);
+        long timeForSegment = (long) ((distance / SPEED) * 3600000);
 
         // Move marker
         ambulanceMarker.setPosition(current);
@@ -251,18 +250,18 @@ public class TrackingFragment extends Fragment {
         }, Math.max(timeForSegment, 16)); // Minimum 16ms for smooth animation
     }
 
-    private double calculateDistance(GeoPoint p1, GeoPoint p2) {
+    private double calculateDistance( GeoPoint p1, GeoPoint p2 ) {
         double R = 6371; // Earth's radius in kilometers
         double dLat = Math.toRadians(p2.getLatitude() - p1.getLatitude());
         double dLon = Math.toRadians(p2.getLongitude() - p1.getLongitude());
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                 Math.cos(Math.toRadians(p1.getLatitude())) * Math.cos(Math.toRadians(p2.getLatitude())) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
 
-    private List<GeoPoint> decodePolyline(String encoded) {
+    private List<GeoPoint> decodePolyline( String encoded ) {
         List<GeoPoint> points = new ArrayList<>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
