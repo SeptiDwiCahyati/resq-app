@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
             if (AppUtils.isFirstTimeLaunch(this)) {
                 startActivity(new Intent(MainActivity.this, LandingActivity.class));
             } else {
-                startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                startActivity(new Intent(MainActivity.this, OverviewActivity.class));
             }
             finish();
         }, AppUtils.LOADING_DELAY);

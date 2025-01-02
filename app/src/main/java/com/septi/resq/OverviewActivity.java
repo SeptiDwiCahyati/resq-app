@@ -13,7 +13,7 @@ import com.septi.resq.fragment.ProfileFragment;
 import com.septi.resq.fragment.ReportFragment;
 import com.septi.resq.fragment.TrackingFragment;
 
-public class HomeActivity extends AppCompatActivity {
+public class OverviewActivity extends AppCompatActivity {
 
 
     // Fragment Manager
@@ -31,7 +31,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_overview);
 
         // Initialize Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
