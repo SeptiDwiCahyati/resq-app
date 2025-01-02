@@ -21,7 +21,6 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
     // Fragment Manager
     private final FragmentManager fragmentManager = getSupportFragmentManager();
 
-    // Fragments
     private final Fragment homeFragment = new DashboardFragment();
     private final Fragment reportFragment = new ReportFragment();
     private final Fragment mapFragment = new MapFragment();
@@ -37,7 +36,7 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-
+        LocationUtils.checkLocationPermission(this);
         // Add all fragments to the FragmentManager
         fragmentManager.beginTransaction().add(R.id.fragment_container, profileFragment, "5").hide(profileFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, trackingFragment, "4").hide(trackingFragment).commit();
