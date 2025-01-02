@@ -19,11 +19,13 @@ import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
+import java.util.ArrayList;
+
 public class ReportFragment extends Fragment {
     private EmergencyAdapter adapter;
     private EmergencyDBHelper dbHelper;
     private SearchView searchView;
-
+    private EmergencyViewModel viewModel;
 
 
     @Override
@@ -42,6 +44,8 @@ public class ReportFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
+
+        viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
         // Setup SearchView
         searchView = view.findViewById(R.id.searchView);
@@ -68,19 +72,17 @@ public class ReportFragment extends Fragment {
         adapter = new EmergencyAdapter(dbHelper.getAllEmergencies());
         recyclerView.setAdapter(adapter);
 
-        // Observe emergency updates
-        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies ->
-                adapter.updateData(emergencies)
-        );
+        // Initialize adapter with empty list
+        adapter = new EmergencyAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
+        // Observe changes in emergencies
+        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
+            if (emergencies != null) {
+                adapter.updateData(emergencies);
+            }
+        });
 
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (adapter != null) {
-            adapter.updateData(dbHelper.getAllEmergencies());
-        }
     }
 }

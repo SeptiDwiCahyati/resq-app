@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class EmergencyViewModel extends ViewModel {
@@ -26,23 +28,26 @@ public class EmergencyViewModel extends ViewModel {
         return newEmergency;
     }
 
+
     public void loadEmergencies() {
         if (dbHelper != null) {
             List<Emergency> emergencyList = dbHelper.getAllEmergencies();
             emergencies.setValue(emergencyList);
         }
     }
-
     public void addEmergency(Emergency emergency) {
-        // Simpan ke database
-        long id = dbHelper.insertEmergency(emergency);
-        if (id > 0) {
-            // Update LiveData dengan data baru
-            List<Emergency> currentList = emergencies.getValue();
-            if (currentList != null) {
-                currentList.add(emergency);
+        if (dbHelper != null) {
+            long id = dbHelper.insertEmergency(emergency);
+            if (id > 0) {
+                emergency.setId(id);
+                List<Emergency> currentList = emergencies.getValue();
+                if (currentList == null) {
+                    currentList = new ArrayList<>();
+                }
+                currentList.add(0, emergency); // Add to beginning of list
                 emergencies.setValue(currentList);
             }
         }
     }
 }
+

@@ -21,8 +21,8 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     private List<Emergency> allEmergencies; // Untuk menyimpan data asli
 
     public EmergencyAdapter(List<Emergency> emergencies) {
-        this.emergencies = emergencies;
-        this.allEmergencies = new ArrayList<>(emergencies); // Salin data asli
+        this.emergencies = new ArrayList<>(emergencies);
+        this.allEmergencies = new ArrayList<>(emergencies);
     }
 
     @NonNull
@@ -60,8 +60,8 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     }
 
     public void updateData(List<Emergency> newEmergencies) {
-        this.emergencies = newEmergencies;
-        this.allEmergencies = new ArrayList<>(newEmergencies); // Update salinan data asli
+        this.emergencies = new ArrayList<>(newEmergencies);
+        this.allEmergencies = new ArrayList<>(newEmergencies);
         notifyDataSetChanged();
     }
 
