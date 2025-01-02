@@ -17,8 +17,10 @@ import com.septi.resq.R;
 import com.septi.resq.adapter.ActiveTeamsAdapter;
 import com.septi.resq.adapter.QuickActionAdapter;
 import com.septi.resq.adapter.RecentReportsAdapter;
+import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.database.UserProfileDBHelper;
+import com.septi.resq.model.Emergency;
 import com.septi.resq.model.QuickAction;
 import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.Report;
@@ -31,11 +33,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.septi.resq.model.UserProfile;
+import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.viewmodel.UserProfileViewModel;
 import com.septi.resq.utils.DummyData;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -193,19 +198,80 @@ public class DashboardFragment extends Fragment {
      * Menyiapkan RecyclerView untuk Laporan Terbaru.
      * Menampilkan laporan terbaru dalam format daftar vertikal.
      */
-    private void setupRecentReportsRecyclerView( View rootView ) {
-        // Mengambil laporan terbaru dari data dummy
-        List<Report> recentReports = DummyData.getRecentReports();
-
-        // Ambil referensi TextView untuk tanggal
+    // Fragment setup code
+    private void setupRecentReportsRecyclerView(View rootView) {
         TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
-        String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
+        String currentDate = new SimpleDateFormat("dd MMMM yyyy",
+                Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
 
-        // Atur RecyclerView tanpa membatasi jumlah data
         RecyclerView rvRecentReports = rootView.findViewById(R.id.rv_recent_reports);
         rvRecentReports.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvRecentReports.setAdapter(new RecentReportsAdapter(recentReports));
+        RecentReportsAdapter adapter = new RecentReportsAdapter(new ArrayList<>());
+        rvRecentReports.setAdapter(adapter);
+
+        EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
+        List<Emergency> emergencies = dbHelper.getAllEmergencies();
+        List<Report> reports = new ArrayList<>();
+
+        for (Emergency emergency : emergencies) {
+            String timestamp = getRelativeTimeSpan(emergency.getTimestamp());
+
+            // Using final for the report object to access it in the callback
+            final Report newReport = new Report(
+                    emergency.getType(),
+                    "Loading address...",
+                    timestamp,
+                    emergency.getLatitude(),
+                    emergency.getLongitude()
+            );
+            reports.add(newReport);
+
+            GeocodingHelper.getAddressFromLocation(
+                    requireContext(),
+                    emergency.getLatitude(),
+                    emergency.getLongitude(),
+                    new GeocodingHelper.GeocodingCallback() {
+                        @Override
+                        public void onAddressReceived(String address) {
+                            newReport.setLocation(address);
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            newReport.setLocation("Location unavailable");
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+            );
+        }
+
+        adapter.updateReports(reports);
+    }
+
+    private String getRelativeTimeSpan(String timestamp) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                    Locale.getDefault());
+            Date pastDate = sdf.parse(timestamp);
+            Date now = new Date();
+
+            long diffInMillis = now.getTime() - pastDate.getTime();
+            long diffMinutes = diffInMillis / (60 * 1000);
+            long diffHours = diffMinutes / 60;
+            long diffDays = diffHours / 24;
+
+            if (diffMinutes < 60) {
+                return diffMinutes + " menit yang lalu";
+            } else if (diffHours < 24) {
+                return diffHours + " jam yang lalu";
+            } else {
+                return diffDays + " hari yang lalu";
+            }
+        } catch (ParseException e) {
+            return timestamp;
+        }
     }
 
 

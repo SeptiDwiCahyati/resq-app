@@ -12,13 +12,7 @@ public class DummyData {
 
 
 
-    public static List<Report> getRecentReports() {
-        List<Report> recentReports = new ArrayList<>();
-        recentReports.add(new Report("Kecelakaan Motor", "Jl. Sudirman", "10 menit yang lalu"));
-        recentReports.add(new Report("Kebakaran", "Jl. Thamrin", "30 menit yang lalu"));
-        recentReports.add(new Report("Banjir", "Jl. Gatot Subroto", "1 jam yang lalu"));
-        return recentReports;
-    }
+
 
     public static List<QuickAction> getQuickActions() {
         List<QuickAction> quickActions = new ArrayList<>();

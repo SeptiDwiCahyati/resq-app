@@ -14,11 +14,17 @@ import com.septi.resq.model.Report;
 import java.util.List;
 
 public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdapter.ReportViewHolder> {
-    private final List<Report> reports;
+    private List<Report> reports;
     private OnItemClickListener listener;
 
     public RecentReportsAdapter(List<Report> reports) {
-        this.reports = reports; // Semua data diteruskan tanpa pembatasan
+
+        this.reports = reports;
+    }
+
+    public void updateReports(List<Report> newReports) {
+        this.reports = newReports;
+        notifyDataSetChanged();
     }
 
 
@@ -57,7 +63,6 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
 
         ReportViewHolder(View itemView, final OnItemClickListener listener, List<Report> reports) {
             super(itemView);
-            this.reports = reports;  // Initialize the reports list
             titleView = itemView.findViewById(R.id.tv_report_title);
             locationView = itemView.findViewById(R.id.tv_location);
             timestampView = itemView.findViewById(R.id.tv_timestamp);
