@@ -2,6 +2,7 @@ package com.septi.resq.fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -36,6 +37,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.septi.resq.R;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.utils.MarkerUtils;
 import com.septi.resq.utils.PulsingLocationOverlay;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
@@ -62,7 +64,6 @@ public class MapFragment extends Fragment {
     private GeoPoint lastKnownLocation;
     private PulsingLocationOverlay pulsingOverlay;
 
-    // Add these class variables
     private Uri photoUri;
     private ImageView imagePreview;
     private ActivityResultLauncher<Uri> takePicture;
@@ -315,8 +316,15 @@ public class MapFragment extends Fragment {
         currentLocationMarker.setTitle("Lokasi Anda");
 
         Drawable icon = getResources().getDrawable(R.drawable.ic_location);
-// Gunakan ukuran lebih kecil, misalnya 30dp
-        currentLocationMarker.setIcon(resizeMarkerIcon(icon, 20));
+// Mendapatkan context
+        Context context = getContext(); // Gunakan 'getContext()' jika berada di dalam Fragment
+
+// Resize ikon
+        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(context, icon, 20);
+
+// Mengatur ikon yang sudah diresize ke marker
+        currentLocationMarker.setIcon(resizedIcon);
+
 
 
         // Update or create pulsing overlay
@@ -424,18 +432,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    // Helper method untuk resize marker icon
-    private Drawable resizeMarkerIcon( Drawable icon, int sizeDp ) {
-        float density = getResources().getDisplayMetrics().density;
-        int pixelSize = (int) (sizeDp * density);
 
-        Bitmap bitmap = Bitmap.createBitmap(pixelSize, pixelSize, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        icon.draw(canvas);
-
-        return new BitmapDrawable(getResources(), bitmap);
-    }
 
 
     private void updateMarkerInfo( Marker marker, Emergency emergency ) {
@@ -470,9 +467,7 @@ public class MapFragment extends Fragment {
         }
 
         Drawable icon = getResources().getDrawable(iconDrawable);
-        Drawable resizedIcon = resizeMarkerIcon(icon, MARKER_SIZE_DP);
-        marker.setIcon(resizedIcon);
-
+        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), icon, MARKER_SIZE_DP);
         marker.setIcon(resizedIcon);
 
         // Set info window

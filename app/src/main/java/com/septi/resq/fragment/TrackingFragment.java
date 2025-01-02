@@ -1,7 +1,13 @@
 package com.septi.resq.fragment;
 
+import static com.septi.resq.utils.MarkerUtils.resizeMarkerIcon;
+
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -16,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.septi.resq.R;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.utils.MarkerUtils;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import org.json.JSONObject;
@@ -35,6 +42,7 @@ import java.util.Objects;
 
 public class TrackingFragment extends Fragment {
     private MapView map;
+    private static final int MARKER_SIZE_DP = 40;
 
     private Marker ambulanceMarker;
     private final List<Marker> emergencyMarkers = new ArrayList<>();
@@ -81,8 +89,16 @@ public class TrackingFragment extends Fragment {
         ambulanceMarker.setPosition(new GeoPoint(0.0530266, 111.4755201));
         ambulanceMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         ambulanceMarker.setTitle("Ambulance");
+
+        // Set new icon for ambulance
+        Drawable newAmbulanceIcon = getResources().getDrawable(R.drawable.ic_ambulance);
+        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), newAmbulanceIcon, MARKER_SIZE_DP); // Use newAmbulanceIcon here
+        ambulanceMarker.setIcon(resizedIcon);
+
         map.getOverlays().add(ambulanceMarker);
     }
+
+
 
     private void addEmergencyMarker(Emergency emergency) {
         GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
@@ -91,6 +107,34 @@ public class TrackingFragment extends Fragment {
         marker.setTitle(emergency.getType());
         marker.setSnippet(emergency.getDescription());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+        // Set and resize icon
+        int iconDrawable;
+        switch (emergency.getType()) {
+            case "Kecelakaan":
+                iconDrawable = R.drawable.ic_accident;
+                break;
+            case "Kebakaran":
+                iconDrawable = R.drawable.ic_fire;
+                break;
+            case "Bencana Alam":
+                iconDrawable = R.drawable.ic_disaster;
+                break;
+            case "Kriminal":
+                iconDrawable = R.drawable.ic_police;
+                break;
+            case "Medis":
+                iconDrawable = R.drawable.ic_emergency;
+                break;
+            default:
+                iconDrawable = R.drawable.error_image;
+                break;
+        }
+
+        Drawable icon = getResources().getDrawable(iconDrawable);
+        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), icon, MARKER_SIZE_DP);
+
+        marker.setIcon(resizedIcon);
 
         marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
             stopAmbulanceMovement();
@@ -102,6 +146,7 @@ public class TrackingFragment extends Fragment {
         emergencyMarkers.add(marker);
         map.invalidate();
     }
+
 
     private void updateAllMarkers(List<Emergency> emergencies) {
         // Clear existing markers
