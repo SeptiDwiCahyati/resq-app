@@ -12,6 +12,11 @@ import android.view.ViewGroup;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.septi.resq.R;
+import com.septi.resq.model.Emergency;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
@@ -26,45 +31,42 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.septi.resq.R;
-import com.septi.resq.database.EmergencyDBHelper;
-import com.septi.resq.model.Emergency;
+import java.util.Objects;
 
 public class TrackingFragment extends Fragment {
     private MapView map;
-    private static final GeoPoint AMBULANCE_LOCATION = new GeoPoint(0.0530266, 111.4755201);
+
     private Marker ambulanceMarker;
+    private final List<Marker> emergencyMarkers = new ArrayList<>();
+
     private Polyline routeLine;
     private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
     private static final float SPEED = 80.0f;
-    private Handler animationHandler = new Handler();
+    private final Handler animationHandler = new Handler();
     private List<GeoPoint> currentRoute;
     private int currentRouteIndex = 0;
     private boolean isMoving = false;
-    private EmergencyDBHelper dbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context ctx = requireActivity().getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
-        dbHelper = new EmergencyDBHelper(ctx);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
         initializeMap(view);
-
-        // Initialize the Toolbar from the included layout
+        EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        viewModel.getEmergencies().observe(getViewLifecycleOwner(), this::updateAllMarkers);
+        viewModel.getNewEmergency().observe(getViewLifecycleOwner(), this::addEmergencyMarker);
         Toolbar toolbar = view.findViewById(R.id.toolbar);  // Add this line
-        // Set the Toolbar as ActionBar
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
 
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Tracking");
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false); // No back button
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Tracking");
         }
         return view;
     }
@@ -73,50 +75,45 @@ public class TrackingFragment extends Fragment {
         map = view.findViewById(R.id.map);
         map.setMultiTouchControls(true);
         map.getController().setZoom(15.0);
-        map.getController().setCenter(AMBULANCE_LOCATION);
+        map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
         ambulanceMarker = new Marker(map);
-        ambulanceMarker.setPosition(AMBULANCE_LOCATION);
+        ambulanceMarker.setPosition(new GeoPoint(0.0530266, 111.4755201));
         ambulanceMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         ambulanceMarker.setTitle("Ambulance");
         map.getOverlays().add(ambulanceMarker);
-
-        loadEmergencyMarkersFromDatabase();
     }
 
-    private void loadEmergencyMarkersFromDatabase() {
-        List<Emergency> emergencies = dbHelper.getAllEmergencies();
-        for (Emergency emergency : emergencies) {
-            GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
-            Marker marker = new Marker(map);
-            marker.setPosition(position);
-            marker.setTitle(emergency.getType());
-            marker.setSnippet(emergency.getDescription());
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
-            marker.setOnMarkerClickListener((marker1, mapView) -> {
-                stopAmbulanceMovement();
-                calculateRoute(ambulanceMarker.getPosition(), marker1.getPosition());
-                return true;
-            });
-
-            map.getOverlays().add(marker);
-        }
-        map.invalidate();
-    }
-    private void addIncidentMarker(GeoPoint position, String title) {
+    private void addEmergencyMarker(Emergency emergency) {
+        GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
         Marker marker = new Marker(map);
         marker.setPosition(position);
-        marker.setTitle(title);
+        marker.setTitle(emergency.getType());
+        marker.setSnippet(emergency.getDescription());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
-        marker.setOnMarkerClickListener((marker1, mapView) -> {
+        marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
             stopAmbulanceMovement();
-            calculateRoute(ambulanceMarker.getPosition(), marker1.getPosition());
+            calculateRoute(ambulanceMarker.getPosition(), clickedMarker.getPosition());
             return true;
         });
 
         map.getOverlays().add(marker);
+        emergencyMarkers.add(marker);
+        map.invalidate();
+    }
+
+    private void updateAllMarkers(List<Emergency> emergencies) {
+        // Clear existing markers
+        for (Marker marker : emergencyMarkers) {
+            map.getOverlays().remove(marker);
+        }
+        emergencyMarkers.clear();
+
+        // Add updated markers
+        for (Emergency emergency : emergencies) {
+            addEmergencyMarker(emergency);
+        }
     }
 
     private void calculateRoute(GeoPoint start, GeoPoint end) {
