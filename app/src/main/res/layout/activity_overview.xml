@@ -24,6 +24,7 @@
         app:itemIconTint="@color/icon_color_selector"
         app:itemTextColor="@color/icon_color_selector"
         app:menu="@menu/bottom_nav_menu"
+        app:itemRippleColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

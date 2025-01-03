@@ -2,6 +2,8 @@ package com.septi.resq;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -17,7 +19,6 @@ import com.septi.resq.utils.LocationUtils;
 
 public class OverviewActivity extends AppCompatActivity implements LocationUtils.LocationPermissionCallback {
 
-
     // Fragment Manager
     private final FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -29,14 +30,20 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
 
     private Fragment activeFragment = homeFragment;
 
-
-
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
+
+        // Mengatur warna status bar
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark)); // Ganti sesuai dengan warna yang diinginkan
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         LocationUtils.checkLocationPermission(this);
+
         // Add all fragments to the FragmentManager
         fragmentManager.beginTransaction().add(R.id.fragment_container, profileFragment, "5").hide(profileFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, trackingFragment, "4").hide(trackingFragment).commit();
@@ -67,14 +74,14 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
 
             return false;
         });
-
     }
 
     // Method to switch fragments
-    private void switchFragment( Fragment fragment ) {
+    private void switchFragment(Fragment fragment) {
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
         activeFragment = fragment;
     }
+
     @Override
     public void onLocationPermissionGranted() {
         // Only update if we're on the dashboard fragment
@@ -85,7 +92,6 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -95,6 +101,7 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
             }
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -102,6 +109,4 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
             onLocationPermissionGranted();
         }
     }
-
-
 }

@@ -12,7 +12,7 @@
         <item name="colorOnSecondary">@color/white</item>
 
         <!-- Status bar color -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
 
         <!-- Text appearances -->
         <item name="textAppearanceHeadline1">@style/TextAppearance.RescueMap.Headline1</item>
