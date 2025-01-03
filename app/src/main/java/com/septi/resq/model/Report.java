@@ -1,6 +1,5 @@
 package com.septi.resq.model;
 
-// Report.java
 public class Report {
     private long id;
     private String title;

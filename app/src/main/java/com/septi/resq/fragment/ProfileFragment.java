@@ -37,7 +37,7 @@ public class ProfileFragment extends Fragment {
     private Uri selectedImageUri;
     private UserProfileDBHelper dbHelper;
     private UserProfile currentProfile;
-    private static final long DEFAULT_USER_ID = 1; // Assuming single user for simplicity
+    private static final long DEFAULT_USER_ID = 1;
 
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -66,10 +66,9 @@ public class ProfileFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_profile, container, false);
         androidx.appcompat.widget.Toolbar toolbar = rootView.findViewById(R.id.toolbar);
 
-        // Set Toolbar sebagai ActionBar
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Profile");
         }
 

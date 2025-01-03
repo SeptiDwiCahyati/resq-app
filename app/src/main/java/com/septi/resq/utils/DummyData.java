@@ -10,10 +10,6 @@ import java.util.List;
 
 public class DummyData {
 
-
-
-
-
     public static List<QuickAction> getQuickActions() {
         List<QuickAction> quickActions = new ArrayList<>();
         quickActions.add(new QuickAction(truncateText("Lapor Kecelakaan"), R.drawable.ic_accident));

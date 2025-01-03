@@ -50,7 +50,6 @@ import java.util.Locale;
 public class DashboardFragment extends Fragment {
 
     private RecyclerView rvQuickActions;
-    private Location currentLocation;
     private RecyclerView rvActiveTeams;
     private MaterialButton btnEmergency;
     private TextView btnToggleTeams;
@@ -78,20 +77,16 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-
-        // Initialize views
         initializeViews(rootView);
         setupRecyclerViews(rootView);
         setupObservers();
         setupClickListeners();
 
-        // Observe user profile changes (existing code)
         viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
             if (profile != null) {
                 String username = profile.getName();
-                // Batasi teks menjadi maksimal 7 karakter
                 if (username != null && username.length() > 7) {
-                    username = username.substring(0, 7); // Potong hingga 7 karakter
+                    username = username.substring(0, 7);
                 }
                 tvUsername.setText(username);
 
@@ -107,7 +102,6 @@ public class DashboardFragment extends Fragment {
         });
 
 
-        // Load initial profile data
         UserProfile initialProfile = dbHelper.getProfile(1);
         if (initialProfile != null) {
             viewModel.updateUserProfile(initialProfile);
@@ -123,7 +117,6 @@ public class DashboardFragment extends Fragment {
     }
 
     public void updateTeamDistances() {
-        // Prevent multiple simultaneous calculations
         if (isCalculatingDistances) {
             return;
         }
@@ -160,7 +153,6 @@ public class DashboardFragment extends Fragment {
 
 
     private void updateCurrentDate(TextView tvCurrentDate) {
-        // Menggunakan SimpleDateFormat untuk format tanggal
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(currentDate);
     }
@@ -180,13 +172,8 @@ public class DashboardFragment extends Fragment {
 
 
     private void setupRecyclerViews(View rootView) {
-        // Menyiapkan RecyclerView untuk Tim Aktif
         setupActiveTeamsRecyclerView();
-
-        // Menyiapkan RecyclerView untuk Laporan Terbaru
         setupRecentReportsRecyclerView(rootView);
-
-        // Menyiapkan RecyclerView untuk Tindakan Cepat
         setupQuickActionsRecyclerView();
     }
 
@@ -203,7 +190,6 @@ public class DashboardFragment extends Fragment {
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
         rvActiveTeams.setAdapter(activeTeamsAdapter);
 
-        // Only calculate initial distances if we have permission
         if (LocationUtils.hasLocationPermission(requireContext())) {
             updateTeamDistances();
         }
@@ -214,7 +200,7 @@ public class DashboardFragment extends Fragment {
      * Menyiapkan RecyclerView untuk Laporan Terbaru.
      * Menampilkan laporan terbaru dalam format daftar vertikal.
      */
-    // Fragment setup code
+
     private void setupRecentReportsRecyclerView(View rootView) {
         TextView tvCurrentDate = rootView.findViewById(R.id.tv_current_date);
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
@@ -227,7 +213,6 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupObservers() {
-        // Observe emergency changes
         emergencyViewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             List<Report> reports = new ArrayList<>();
             for (Emergency emergency : emergencies) {
@@ -241,7 +226,6 @@ public class DashboardFragment extends Fragment {
                 );
                 reports.add(newReport);
 
-                // Get address for each emergency
                 fetchAddressForReport(newReport);
             }
             recentReportsAdapter.updateReports(reports);
@@ -259,17 +243,14 @@ public class DashboardFragment extends Fragment {
                         emergency.getLongitude()
                 );
 
-                // Add new report at the beginning of the list
                 List<Report> currentReports = new ArrayList<>(recentReportsAdapter.getReports());
                 currentReports.add(0, newReport);
                 recentReportsAdapter.updateReports(currentReports);
 
-                // Fetch address for new report
                 fetchAddressForReport(newReport);
             }
         });
 
-        // Observe user profile changes (existing code)
         viewModel.getUserProfile().observe(getViewLifecycleOwner(), profile -> {
             if (profile != null) {
                 tvUsername.setText(profile.getName());
@@ -372,11 +353,9 @@ public class DashboardFragment extends Fragment {
                 isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,
                 false));
 
-        // Only calculate distances if we have location permission
         if (LocationUtils.hasLocationPermission(requireContext())) {
             updateTeamDistances();
         } else {
-            // If no permission, just update the list without distances
             List<RescueTeam> teams = isShowingAllTeams ?
                     rescueTeamDBHelper.getAllTeams() :
                     rescueTeamDBHelper.getAvailableTeams();
@@ -394,20 +373,16 @@ public class DashboardFragment extends Fragment {
         RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
         Button btnClose = dialogView.findViewById(R.id.dialog_button_close);
 
-        // Setup RecyclerView with all actions
         dialogRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         dialogRecyclerView.setAdapter(new QuickActionAdapter(DummyData.getAllActions()));
 
-        // Create Dialog
         androidx.appcompat.app.AlertDialog dialog = builder.setView(dialogView).create();
         dialog.show();
 
-        // Set border radius for dialog
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
 
-        // Close button listener
         btnClose.setOnClickListener(v -> dialog.dismiss());
     }
 
@@ -418,7 +393,6 @@ public class DashboardFragment extends Fragment {
             startActivity(callIntent);
         });
 
-        // Add click listener for profile image
         ivProfile.setOnClickListener(v -> {
             Fragment profileFragment = new ProfileFragment();
             requireActivity().getSupportFragmentManager()
@@ -427,7 +401,6 @@ public class DashboardFragment extends Fragment {
                     .show(profileFragment)
                     .commit();
 
-            // Update bottom navigation selection
             BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
             bottomNav.setSelectedItemId(R.id.nav_profile);
         });

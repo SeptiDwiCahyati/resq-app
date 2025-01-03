@@ -147,32 +147,23 @@ public class MapFragment extends Fragment {
     }
 
     private void updateAllMarkers( List<Emergency> emergencies ) {
-        // Clear existing markers
         for (Marker marker : emergencyMarkers) {
             mapView.getOverlays().remove(marker);
         }
         emergencyMarkers.clear();
 
-        // Add updated markers
         for (Emergency emergency : emergencies) {
             addEmergencyMarker(emergency);
         }
     }
 
 
-    // Add this method to create temporary image file
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
         return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
-
-
-    // Constants
-
-
-
 
 
     private void setupUIControls( View view ) {
@@ -191,7 +182,6 @@ public class MapFragment extends Fragment {
 
                 boolean clickedOnMarker = false;
 
-                // Check if clicked on any marker
                 for (Marker marker : emergencyMarkers) {
                     if (marker.getBounds().contains((float) p.getLatitude(), (float) p.getLongitude())) {
                         marker.showInfoWindow();
@@ -200,7 +190,6 @@ public class MapFragment extends Fragment {
                     }
                 }
 
-                // If clicked outside any marker, close all info windows
                 if (!clickedOnMarker) {
                     for (Marker marker : emergencyMarkers) {
                         if (marker.isInfoWindowShown()) {
@@ -214,15 +203,11 @@ public class MapFragment extends Fragment {
 
             @Override
             public boolean onLongPress( MotionEvent e, MapView mapView ) {
-                // Tekan lama untuk menambahkan laporan baru
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-
-                // Hapus marker sebelumnya jika ada
                 if (selectedLocation != null) {
                     mapView.getOverlays().remove(selectedLocation);
                 }
 
-                // Tambahkan marker baru di lokasi yang dipilih
                 selectedLocation = new Marker(mapView);
                 selectedLocation.setPosition(new GeoPoint(p.getLatitude(), p.getLongitude()));
                 selectedLocation.setAnchor(0.5f, 1.0f);
@@ -238,19 +223,16 @@ public class MapFragment extends Fragment {
 
 
     private void loadExistingMarkers() {
-        // Clear existing emergency markers from both list and map
         for (Marker marker : emergencyMarkers) {
             mapView.getOverlays().remove(marker);
         }
         emergencyMarkers.clear();
 
-        // Load markers from database
         for (Emergency emergency : dbHelper.getAllEmergencies()) {
             Marker marker = new Marker(mapView);
             marker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
             updateMarkerInfo(marker, emergency);
 
-            // Add to both map and our list
             mapView.getOverlays().add(marker);
             emergencyMarkers.add(marker);
         }
@@ -270,7 +252,6 @@ public class MapFragment extends Fragment {
 
 
     private void getCurrentLocation() {
-        // Check if location permissions are granted, request if not granted
         if (LocationUtils.hasLocationPermission(requireContext())) {
             Location location = LocationUtils.getLastKnownLocation(requireContext());
 
@@ -280,7 +261,6 @@ public class MapFragment extends Fragment {
                 Toast.makeText(requireContext(), "Unable to get location.", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // Show permission request dialog only once
             LocationUtils.checkLocationPermission(requireActivity());
         }
     }
@@ -307,19 +287,15 @@ public class MapFragment extends Fragment {
         currentLocationMarker.setTitle("Lokasi Anda");
 
         Drawable icon = getResources().getDrawable(R.drawable.ic_location);
-
         Context context = getContext();
 
-
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(context, icon, 20);
-
         currentLocationMarker.setIcon(resizedIcon);
 
 
-        // Update or create pulsing overlay
         if (pulsingOverlay == null) {
             pulsingOverlay = new PulsingLocationOverlay(requireContext(), mapView, currentLocation);
-            mapView.getOverlays().add(0, pulsingOverlay); // Add at index 0 to draw below marker
+            mapView.getOverlays().add(0, pulsingOverlay);
         } else {
             pulsingOverlay.updateLocation(currentLocation);
         }
@@ -331,7 +307,6 @@ public class MapFragment extends Fragment {
     }
 
 
-    // Update your showReportDialog method
     private void showReportDialog( final double latitude, final double longitude ) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
 
@@ -340,7 +315,6 @@ public class MapFragment extends Fragment {
         MaterialButton takePhotoButton = dialogView.findViewById(R.id.btn_take_photo);
         imagePreview = dialogView.findViewById(R.id.img_preview);
 
-        // Setup emergency type spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item,
                 new String[]{"Kecelakaan", "Kebakaran", "Bencana Alam", "Kriminal", "Medis", "Lainnya"});
@@ -356,7 +330,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-        // Create and show dialog
         new AlertDialog.Builder(requireContext())
                 .setTitle("Laporkan Kejadian Darurat")
                 .setView(dialogView)
@@ -369,10 +342,8 @@ public class MapFragment extends Fragment {
 
                     Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp, photoPath);
 
-                    // Simpan hanya melalui ViewModel
                     viewModel.addEmergency(emergency);
 
-                    // Update UI marker
                     updateMapMarker(emergency);
 
                     Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
@@ -382,13 +353,11 @@ public class MapFragment extends Fragment {
     }
 
     private void updateMapMarker(Emergency emergency) {
-        // Remove temporary selected location marker
         if (selectedLocation != null) {
             mapView.getOverlays().remove(selectedLocation);
             selectedLocation = null;
         }
 
-        // Create and add permanent marker
         Marker newMarker = new Marker(mapView);
         newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
         updateMarkerInfo(newMarker, emergency);
@@ -460,14 +429,12 @@ public class MapFragment extends Fragment {
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), icon, MARKER_SIZE_DP);
         marker.setIcon(resizedIcon);
 
-        // Set info window
         marker.setInfoWindow(new CustomInfoWindow(mapView));
     }
 
-    // Custom InfoWindow implementation
     private class CustomInfoWindow extends org.osmdroid.views.overlay.infowindow.InfoWindow {
         private Handler autoCloseHandler;
-        private static final long AUTO_CLOSE_DELAY = 10000; // 5 seconds
+        private static final long AUTO_CLOSE_DELAY = 10000;
 
         public CustomInfoWindow( MapView mapView ) {
             super(R.layout.marker_info_window, mapView);
@@ -486,7 +453,6 @@ public class MapFragment extends Fragment {
                 titleText.setText(marker.getTitle());
                 snippetText.setText(marker.getSnippet());
 
-                // Find the emergency data for this marker
                 Emergency emergency = findEmergencyForMarker(marker);
                 if (emergency != null && emergency.getPhotoPath() != null) {
                     try {
@@ -500,7 +466,6 @@ public class MapFragment extends Fragment {
                     imageView.setVisibility(View.GONE);
                 }
 
-                // Schedule auto-close after 5 seconds
                 autoCloseHandler.removeCallbacksAndMessages(null);
                 autoCloseHandler.postDelayed(this::close, AUTO_CLOSE_DELAY);
             }
@@ -512,10 +477,8 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // Add this helper method in your MapFragment class
     private Emergency findEmergencyForMarker( Marker marker ) {
         GeoPoint position = marker.getPosition();
-        // Query the database for the emergency at this location
         List<Emergency> emergencies = dbHelper.getAllEmergencies();
         for (Emergency emergency : emergencies) {
             if (Math.abs(emergency.getLatitude() - position.getLatitude()) < 0.0001 &&

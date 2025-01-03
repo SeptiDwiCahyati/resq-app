@@ -12,7 +12,7 @@ import java.util.List;
 
 public class EmergencyDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emergency.db";
-    private static final int DATABASE_VERSION = 2; // Increment version number
+    private static final int DATABASE_VERSION = 2;
 
     public static final String TABLE_EMERGENCY = "emergencies";
     public static final String COLUMN_ID = "_id";
@@ -21,7 +21,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_TIMESTAMP = "timestamp";
-    public static final String COLUMN_PHOTO_PATH = "photo_path"; // New column
+    public static final String COLUMN_PHOTO_PATH = "photo_path";
 
     private static final String CREATE_TABLE_EMERGENCY =
             "CREATE TABLE " + TABLE_EMERGENCY + " (" +
@@ -45,7 +45,6 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
-            // Add photo_path column to existing table
             db.execSQL("ALTER TABLE " + TABLE_EMERGENCY +
                     " ADD COLUMN " + COLUMN_PHOTO_PATH + " TEXT;");
         }
@@ -68,11 +67,10 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
 
         if (cursor.getCount() > 0) {
             cursor.close();
-            return -1; // Data sudah ada
+            return -1;
         }
         cursor.close();
 
-        // Jika belum ada, lakukan insert
         db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_LATITUDE, emergency.getLatitude());

@@ -36,29 +36,27 @@ public class ReportFragment extends Fragment {
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false); // No back button
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
         }
 
-        // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
 
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
-        // Setup SearchView
         searchView = view.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapter.filter(query); // Panggil metode filter di adapter
+                adapter.filter(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.filter(newText); // Panggil metode filter di adapter
+                adapter.filter(newText);
                 return true;
             }
         });
@@ -76,7 +74,6 @@ public class ReportFragment extends Fragment {
         adapter = new EmergencyAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        // Observe changes in emergencies
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
                 adapter.updateData(emergencies);

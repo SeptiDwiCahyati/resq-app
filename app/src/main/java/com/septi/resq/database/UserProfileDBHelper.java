@@ -12,17 +12,14 @@ public class UserProfileDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "UserProfile.db";
     private static final int DATABASE_VERSION = 1;
 
-    // Table name
     public static final String TABLE_USER = "user_profile";
 
-    // Column names
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_PHOTO_URI = "photo_uri";
 
-    // Create table query
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_NAME + " TEXT,"

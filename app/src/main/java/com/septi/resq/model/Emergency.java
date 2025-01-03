@@ -18,12 +18,10 @@ public class Emergency {
         this.photoPath = photoPath;
     }
 
-    // Add constructor without photo path for backward compatibility
     public Emergency(double latitude, double longitude, String type, String description, String timestamp) {
         this(latitude, longitude, type, description, timestamp, null);
     }
 
-    // Existing getters
     public long getId() {
         return id;
     }
@@ -48,7 +46,6 @@ public class Emergency {
         return timestamp;
     }
 
-    // Add getter and setter for photoPath
     public String getPhotoPath() {
         return photoPath;
     }

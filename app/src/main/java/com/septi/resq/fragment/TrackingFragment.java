@@ -1,12 +1,7 @@
 package com.septi.resq.fragment;
 
-import static com.septi.resq.utils.MarkerUtils.resizeMarkerIcon;
-
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -93,7 +88,7 @@ public class TrackingFragment extends Fragment {
 
         // Set new icon for ambulance
         Drawable newAmbulanceIcon = getResources().getDrawable(R.drawable.ic_ambulance);
-        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), newAmbulanceIcon, MARKER_SIZE_DP); // Use newAmbulanceIcon here
+        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), newAmbulanceIcon, MARKER_SIZE_DP);
         ambulanceMarker.setIcon(resizedIcon);
 
         map.getOverlays().add(ambulanceMarker);
@@ -234,25 +229,21 @@ public class TrackingFragment extends Fragment {
         GeoPoint current = currentRoute.get(currentRouteIndex);
         GeoPoint next = currentRoute.get(currentRouteIndex + 1);
 
-        // Calculate distance in kilometers
         double distance = calculateDistance(current, next);
 
-        // Calculate time needed for this segment (distance/speed in hours * 3600000 to get milliseconds)
         long timeForSegment = (long) ((distance / SPEED) * 3600000);
 
-        // Move marker
         ambulanceMarker.setPosition(current);
         map.invalidate();
 
-        // Schedule next movement
         animationHandler.postDelayed(() -> {
             currentRouteIndex++;
             moveAmbulance();
-        }, Math.max(timeForSegment, 16)); // Minimum 16ms for smooth animation
+        }, Math.max(timeForSegment, 16));
     }
 
     private double calculateDistance( GeoPoint p1, GeoPoint p2 ) {
-        double R = 6371; // Earth's radius in kilometers
+        double R = 6371;
         double dLat = Math.toRadians(p2.getLatitude() - p1.getLatitude());
         double dLon = Math.toRadians(p2.getLongitude() - p1.getLongitude());
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
