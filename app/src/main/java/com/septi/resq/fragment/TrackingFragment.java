@@ -86,9 +86,10 @@ public class TrackingFragment extends Fragment {
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
         ambulanceMarker = new Marker(map);
-        ambulanceMarker.setPosition(new GeoPoint(0.0530266, 111.4755201));
+        ambulanceMarker.setPosition(new GeoPoint(-0.032557, 109.334169));
         ambulanceMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         ambulanceMarker.setTitle("Ambulance");
+
 
         // Set new icon for ambulance
         Drawable newAmbulanceIcon = getResources().getDrawable(R.drawable.ic_ambulance);
