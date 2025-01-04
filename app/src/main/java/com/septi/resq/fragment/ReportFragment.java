@@ -26,56 +26,56 @@ public class ReportFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate layout fragment_report.xml
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
-        // Setup AppBar
+        // Setup AppBar dengan toolbar dan judul "Emergency Reports"
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
-
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
         }
 
-        // Setup RecyclerView
+        // Setup RecyclerView dengan LinearLayoutManager dan ukuran tetap
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
 
-        // Initialize ViewModel
+        // Inisialisasi ViewModel untuk mengelola data UI
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
-        // Setup SearchView
+        // Setup SearchView untuk memfilter data berdasarkan input pengguna
         SearchView searchView = view.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapter.filter(query);
+                adapter.filter(query); // Filter data saat query dikirimkan
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.filter(newText);
+                adapter.filter(newText); // Filter data saat mengetik
                 return true;
             }
         });
 
-        // Setup database helper and initialize ViewModel
+        // Setup helper database dan inisialisasi ViewModel
         EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
         viewModel.init(dbHelper);
 
-        // Initialize adapter with empty list and viewModel
+        // Inisialisasi adapter dengan daftar kosong dan ViewModel untuk mengikat data
         adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel);
         recyclerView.setAdapter(adapter);
 
-        // Observe changes in the ViewModel
+        // Observasi perubahan data di ViewModel dan update RecyclerView
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
-                adapter.updateData(emergencies);
+                adapter.updateData(emergencies); // Update data adapter jika data berubah
             }
         });
 
-        return view;
+        return view; // Kembalikan view fragment
     }
 }
