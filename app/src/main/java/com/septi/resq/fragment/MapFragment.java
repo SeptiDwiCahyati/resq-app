@@ -1,15 +1,11 @@
 package com.septi.resq.fragment;
 
-import static com.septi.resq.utils.LocationUtils.requestLocationPermissions;
-
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
@@ -57,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
@@ -75,7 +72,7 @@ public class MapFragment extends Fragment {
     private static final double DEFAULT_LATITUDE = -6.200000;
     private static final double DEFAULT_LONGITUDE = 106.816666;
     private static final double DEFAULT_ZOOM = 15.0;
-
+    private long highlightedEmergencyId = -1;
     private EmergencyViewModel viewModel;
 
     @Override
@@ -94,6 +91,19 @@ public class MapFragment extends Fragment {
                     }
                 }
         );
+
+        if (getArguments() != null) {
+            highlightedEmergencyId = getArguments().getLong("emergencyId", -1);
+        }
+
+        // Check if we have navigation extras from MainActivity
+        Activity activity = getActivity();
+        if (activity != null) {
+            Intent intent = activity.getIntent();
+            if (intent != null && intent.getBooleanExtra("navigateToMap", false)) {
+                highlightedEmergencyId = intent.getLongExtra("emergencyId", -1);
+            }
+        }
 
         // Observe new emergencies
         viewModel.getNewEmergency().observe(this, this::addEmergencyMarker);
@@ -141,9 +151,34 @@ public class MapFragment extends Fragment {
 
         setupMapClickListener();
         loadExistingMarkers();
+        // Add this after loading existing markers
+        if (highlightedEmergencyId != -1) {
+            new Handler().postDelayed(() -> showHighlightedEmergency(highlightedEmergencyId), 500); // Small delay to ensure markers are loaded
+        }
 
         return view;
     }
+    private void showHighlightedEmergency(long emergencyId) {
+        Emergency emergency = dbHelper.getEmergencyById((int) emergencyId);
+        if (emergency != null) {
+            GeoPoint point = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
+
+            // Center map on the emergency location
+            mapView.getController().animateTo(point);
+            mapView.getController().setZoom(18.0);
+
+            // Find and show the marker's info window
+            for (Marker marker : emergencyMarkers) {
+                if (findEmergencyForMarker(marker) != null &&
+                        Objects.requireNonNull(findEmergencyForMarker(marker)).getId() == emergencyId) {
+                    marker.showInfoWindow();
+                    break;
+                }
+            }
+        }
+    }
+
+
 
 
     private void addEmergencyMarker(Emergency emergency) {
@@ -467,7 +502,7 @@ public class MapFragment extends Fragment {
     }
 
     private class CustomInfoWindow extends org.osmdroid.views.overlay.infowindow.InfoWindow {
-        private Handler autoCloseHandler;
+        private final Handler autoCloseHandler;
         private static final long AUTO_CLOSE_DELAY = 10000;
 
         public CustomInfoWindow(MapView mapView) {

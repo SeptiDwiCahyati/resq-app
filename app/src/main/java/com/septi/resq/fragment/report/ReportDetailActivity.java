@@ -1,5 +1,6 @@
 package com.septi.resq.fragment.report;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.septi.resq.OverviewActivity;
 import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
@@ -21,7 +23,6 @@ import com.septi.resq.model.Emergency;
 public class ReportDetailActivity extends AppCompatActivity {
     private TextView typeTextView, descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
-    private Button btnEdit, btnDelete;
     private EmergencyDBHelper dbHelper;
     private Emergency currentEmergency;
     private static final int LOCATION_REQUEST_CODE = 1001;
@@ -29,15 +30,16 @@ public class ReportDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_emergency_detail);
+        setContentView(R.layout.activity_report_detail);
 
         typeTextView = findViewById(R.id.typeTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
         locationTextView = findViewById(R.id.locationTextView);
         timestampTextView = findViewById(R.id.timestampTextView);
         imageView = findViewById(R.id.imageView);
-        btnEdit = findViewById(R.id.btnEdit);
-        btnDelete = findViewById(R.id.btnDelete);
+        Button btnEdit = findViewById(R.id.btnEdit);
+        Button btnDelete = findViewById(R.id.btnDelete);
+        Button btnViewOnMap = findViewById(R.id.btnViewOnMap);
 
         long emergencyId = getIntent().getLongExtra("emergencyId", -1L);
 
@@ -58,8 +60,10 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         btnEdit.setOnClickListener(v -> showEditDialog());
         btnDelete.setOnClickListener(v -> showDeleteConfirmation());
+        btnViewOnMap.setOnClickListener(v -> navigateToMap());
     }
 
+    @SuppressLint("DefaultLocale")
     private void populateViews() {
         typeTextView.setText(currentEmergency.getType());
         descriptionTextView.setText(currentEmergency.getDescription());
@@ -121,6 +125,15 @@ public class ReportDetailActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void navigateToMap() {
+        Intent intent = new Intent(this, OverviewActivity.class);
+        intent.putExtra("navigateToMap", true);
+        intent.putExtra("emergencyId", currentEmergency.getId());
+        intent.putExtra("latitude", currentEmergency.getLatitude());
+        intent.putExtra("longitude", currentEmergency.getLongitude());
+        startActivity(intent);
+        finish();
+    }
     private void openLocationSelection() {
         Intent intent = new Intent(this, SelectLocationActivity.class);
         intent.putExtra("latitude", currentEmergency.getLatitude());
