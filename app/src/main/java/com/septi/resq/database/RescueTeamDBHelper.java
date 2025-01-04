@@ -66,10 +66,19 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
             values.put(COLUMN_LATITUDE, Double.parseDouble(data[1]));
             values.put(COLUMN_LONGITUDE, Double.parseDouble(data[2]));
             values.put(COLUMN_CONTACT, data[3]);
-            values.put(COLUMN_AVAILABLE, 1);
+
+            // Set availability
+            if (data[0].contains("Sintang")) {
+                values.put(COLUMN_AVAILABLE, 0); // Not available
+            } else {
+                values.put(COLUMN_AVAILABLE, 1); // Available
+            }
+
             db.insert(TABLE_RESCUE_TEAMS, null, values);
         }
     }
+
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

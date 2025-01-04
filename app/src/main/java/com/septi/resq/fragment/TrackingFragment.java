@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -86,17 +87,29 @@ public class TrackingFragment extends Fragment {
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
         // Initialize rescue team markers
-        List<RescueTeam> availableTeams = dbHelper.getAvailableTeams();
-        for (RescueTeam team : availableTeams) {
+        List<RescueTeam> allTeams = dbHelper.getAllTeams(); // Ambil semua tim, termasuk yang sedang bertugas
+        for (RescueTeam team : allTeams) {
             Marker marker = new Marker(map);
             marker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             marker.setTitle(team.getName());
-            marker.setSnippet("Contact: " + team.getContactNumber());
 
             Drawable rescueIcon = getResources().getDrawable(R.drawable.ic_ambulance);
             Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
             marker.setIcon(resizedIcon);
+
+            // Atur status berdasarkan ketersediaan
+            if (!team.isAvailable()) {
+                marker.setSnippet("Tidak tersedia / Dalam tugas");
+            } else {
+                marker.setSnippet("Contact: " + team.getContactNumber());
+            }
+
+            marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
+                // Tampilkan informasi
+                clickedMarker.showInfoWindow();
+                return true; // Menghentikan event lebih lanjut
+            });
 
             map.getOverlays().add(marker);
             rescueTeamMarkers.put(team.getId(), marker);
@@ -104,15 +117,18 @@ public class TrackingFragment extends Fragment {
         }
     }
 
+
     private Long findNearestTeam(GeoPoint emergencyLocation) {
         return rescueTeamMarkers.entrySet().stream()
-                .filter(entry -> !Boolean.TRUE.equals(rescueTeamMovingStatus.get(entry.getKey())))
+                .filter(entry -> Boolean.TRUE.equals(rescueTeamMovingStatus.get(entry.getKey())) == false &&
+                        rescueTeamMarkers.get(entry.getKey()).getSnippet().contains("Contact:"))
                 .min((entry1, entry2) -> Double.compare(
                         calculateDistance(entry1.getValue().getPosition(), emergencyLocation),
                         calculateDistance(entry2.getValue().getPosition(), emergencyLocation)))
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
+
 
 
 
@@ -133,7 +149,11 @@ public class TrackingFragment extends Fragment {
                         calculateRoute(nearestTeamId, teamMarker.getPosition(), clickedMarker.getPosition());
                         teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
                         map.invalidate();
+                    } else {
+                        // Notifikasi atau log
+                        Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
                     }
+
                 }
         );
     }
