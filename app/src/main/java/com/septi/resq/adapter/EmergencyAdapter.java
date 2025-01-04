@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +26,17 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     private Context context;
     private EmergencyDBHelper dbHelper;
     private List<Emergency> emergencies;
-    private List<Emergency> allEmergencies; // Untuk menyimpan data asli
+    private List<Emergency> allEmergencies;
+    private EmergencyViewModel viewModel;
+
 
     // Update constructor
-    public EmergencyAdapter(List<Emergency> emergencies, Context context) {
+    public EmergencyAdapter(List<Emergency> emergencies, Context context, EmergencyViewModel viewModel) {
         this.emergencies = new ArrayList<>(emergencies);
         this.allEmergencies = new ArrayList<>(emergencies);
         this.context = context;
         this.dbHelper = new EmergencyDBHelper(context);
+        this.viewModel = viewModel;  // Now properly initialized
     }
 
     @NonNull
@@ -81,10 +85,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
                 .setPositiveButton("Save", (dialog, which) -> {
                     emergency.setType(etType.getText().toString());
                     emergency.setDescription(etDescription.getText().toString());
-
-                    if (dbHelper.updateEmergency(emergency)) {
-                        updateData(dbHelper.getAllEmergencies());
-                    }
+                    viewModel.updateEmergency(emergency);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -95,9 +96,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
                 .setTitle("Delete Emergency")
                 .setMessage("Are you sure you want to delete this emergency?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    if (dbHelper.deleteEmergency(emergency.getId())) {
-                        updateData(dbHelper.getAllEmergencies());
-                    }
+                    viewModel.deleteEmergency(emergency.getId());
                 })
                 .setNegativeButton("No", null)
                 .show();

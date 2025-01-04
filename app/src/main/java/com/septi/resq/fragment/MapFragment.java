@@ -97,11 +97,20 @@ public class MapFragment extends Fragment {
 
         // Observe new emergencies
         viewModel.getNewEmergency().observe(this, this::addEmergencyMarker);
+
+        // Observe updated emergencies
+        viewModel.getUpdatedEmergency().observe(this, this::updateEmergencyMarker);
+
+        // Observe deleted emergencies
+        viewModel.getDeletedEmergencyId().observe(this, this::removeEmergencyMarker);
+
+        // Observe full list updates
         viewModel.getEmergencies().observe(this, this::updateAllMarkers);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         dbHelper = new EmergencyDBHelper(requireContext());
         emergencyMarkers = new ArrayList<>();
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
@@ -156,6 +165,31 @@ public class MapFragment extends Fragment {
             addEmergencyMarker(emergency);
         }
     }
+    private void updateEmergencyMarker(Emergency emergency) {
+        for (Marker marker : emergencyMarkers) {
+            if (marker.getId().equals(String.valueOf(emergency.getId()))) {
+                updateMarkerInfo(marker, emergency);
+                mapView.invalidate();
+                break;
+            }
+        }
+    }
+
+    private void removeEmergencyMarker(long emergencyId) {
+        Marker markerToRemove = null;
+        for (Marker marker : emergencyMarkers) {
+            if (marker.getId().equals(String.valueOf(emergencyId))) {
+                markerToRemove = marker;
+                break;
+            }
+        }
+        if (markerToRemove != null) {
+            mapView.getOverlays().remove(markerToRemove);
+            emergencyMarkers.remove(markerToRemove);
+            mapView.invalidate();
+        }
+    }
+
 
 
     private File createImageFile() throws IOException {

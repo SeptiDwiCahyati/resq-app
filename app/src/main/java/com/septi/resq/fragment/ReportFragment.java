@@ -21,70 +21,61 @@ import com.septi.resq.viewmodel.EmergencyViewModel;
 import java.util.ArrayList;
 
 public class ReportFragment extends Fragment {
-    private EmergencyAdapter adapter; // Adapter buat nampilin data emergency
+    private EmergencyAdapter adapter;
+    private EmergencyViewModel viewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate layout fragment
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
-        // Setup AppBar (toolbar di atas)
+        // Setup AppBar
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
 
-        // Set judul toolbar dan matikan tombol back
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
         }
 
-        // RecyclerView buat nampilin daftar laporan
+        // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // Layout linear (vertikal)
-        recyclerView.setHasFixedSize(true); // Supaya performa lebih oke
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
 
-        // Ambil ViewModel dari activity
-        // ViewModel buat manage data dan UI
-        EmergencyViewModel viewModel1 = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        // Initialize ViewModel
+        viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
-        // SearchView buat filter data
-        // Komponen buat fitur pencarian
+        // Setup SearchView
         SearchView searchView = view.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Filter data berdasarkan query yang diketik
                 adapter.filter(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Filter data waktu user ngetik
                 adapter.filter(newText);
                 return true;
             }
         });
 
-        // Setup database helper
-        // Helper buat interaksi database
+        // Setup database helper and initialize ViewModel
         EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
-
-        // Inisialisasi ViewModel dengan database helper
-        EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.init(dbHelper);
 
-        // Setup adapter buat RecyclerView
-        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext());
+        // Initialize adapter with empty list and viewModel
+        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel);
         recyclerView.setAdapter(adapter);
 
-        // Observasi perubahan data dari ViewModel
+        // Observe changes in the ViewModel
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
-                adapter.updateData(emergencies); // Update data di adapter
+                adapter.updateData(emergencies);
             }
         });
 
-        return view; // Balikin view yang udah di-setup
+        return view;
     }
 }
