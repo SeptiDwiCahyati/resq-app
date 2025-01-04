@@ -104,6 +104,33 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
+    public Emergency getEmergencyById(int id) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_EMERGENCY, null, COLUMN_ID + " = ?",
+                new String[]{String.valueOf(id)}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            Emergency emergency = new Emergency(
+                    cursor.getDouble(cursor.getColumnIndex(COLUMN_LATITUDE)),
+                    cursor.getDouble(cursor.getColumnIndex(COLUMN_LONGITUDE)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_TIMESTAMP)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_PHOTO_PATH))
+            );
+            emergency.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+            cursor.close();
+            return emergency;
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        return null; // Return null if no record is found
+    }
+
+
+    @SuppressLint("Range")
     public List<Emergency> getAllEmergencies() {
         List<Emergency> emergencies = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -125,4 +152,5 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         cursor.close();
         return emergencies;
     }
+
 }

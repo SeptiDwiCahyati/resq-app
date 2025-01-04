@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.septi.resq.EmergencyDetailActivity;
 import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
@@ -60,7 +61,6 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         return new EmergencyViewHolder(view);
     }
 
-    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
@@ -73,14 +73,11 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
 
         // Decode the address using GeocodingHelper
         GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(), new GeocodingHelper.GeocodingCallback() {
-            @SuppressLint("SetTextI18n")
             @Override
             public void onAddressReceived(String address) {
-                // Update locationTextView with decoded address
                 holder.locationTextView.setText("Location: " + address);
             }
 
-            @SuppressLint("SetTextI18n")
             @Override
             public void onError(Exception e) {
                 holder.locationTextView.setText("Location: Unknown");
@@ -100,6 +97,13 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         } else {
             holder.imageView.setVisibility(View.GONE);
         }
+
+        // Add OnClickListener to the entire CardView
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, EmergencyDetailActivity.class);
+            intent.putExtra("emergencyId", emergency.getId());
+            context.startActivity(intent);
+        });
     }
 
 
