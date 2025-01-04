@@ -47,37 +47,11 @@
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray" />
 
-        <ImageView
-            android:id="@+id/emergencyImageView"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:contentDescription="Emergency Photo" />
 
-        <!-- Horizontal LinearLayout for buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:gravity="end">
 
-            <Button
-                android:id="@+id/btnEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Edit" />
 
-            <Button
-                android:id="@+id/btnDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete" />
 
-        </LinearLayout>
+
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

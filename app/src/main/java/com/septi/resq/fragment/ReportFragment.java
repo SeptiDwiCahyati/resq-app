@@ -1,12 +1,9 @@
 package com.septi.resq.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -23,26 +20,6 @@ import java.util.ArrayList;
 public class ReportFragment extends Fragment {
     private EmergencyAdapter adapter;
     private EmergencyViewModel viewModel;
-    private ActivityResultLauncher<Intent> locationSelectionLauncher;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Register the ActivityResultLauncher
-        locationSelectionLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (adapter != null) {
-                        adapter.handleLocationSelectionResult(
-                                EmergencyAdapter.LOCATION_SELECTION_REQUEST,
-                                result.getResultCode(),
-                                result.getData()
-                        );
-                    }
-                }
-        );
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -83,7 +60,7 @@ public class ReportFragment extends Fragment {
         EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
         viewModel.init(dbHelper);
 
-        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel, locationSelectionLauncher);
+        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel);
         recyclerView.setAdapter(adapter);
 
         // Observe changes
