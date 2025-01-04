@@ -23,6 +23,7 @@ public class EmergencyDetailActivity extends AppCompatActivity {
     private Button btnEdit, btnDelete;
     private EmergencyDBHelper dbHelper;
     private Emergency currentEmergency;
+    private static final int LOCATION_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,28 +82,64 @@ public class EmergencyDetailActivity extends AppCompatActivity {
 
         EditText etType = dialogView.findViewById(R.id.etType);
         EditText etDescription = dialogView.findViewById(R.id.etDescription);
+        Button btnEditLocation = dialogView.findViewById(R.id.btnEditLocation);
 
         etType.setText(currentEmergency.getType());
         etDescription.setText(currentEmergency.getDescription());
 
-        builder.setView(dialogView)
+        AlertDialog dialog = builder.setView(dialogView)
                 .setTitle("Edit Emergency")
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String newType = etType.getText().toString().trim();
-                    String newDescription = etDescription.getText().toString().trim();
-
-                    if (!newType.isEmpty()) {
-                        currentEmergency.setType(newType);
-                        currentEmergency.setDescription(newDescription);
-                        dbHelper.updateEmergency(currentEmergency);
-                        populateViews();
-                        Toast.makeText(this, "Emergency updated", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Type cannot be empty", Toast.LENGTH_SHORT).show();
-                    }
-                })
+                .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", null)
-                .show();
+                .create();
+
+        btnEditLocation.setOnClickListener(v -> {
+            dialog.dismiss();
+            openLocationSelection();
+        });
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String newType = etType.getText().toString().trim();
+                String newDescription = etDescription.getText().toString().trim();
+
+                if (!newType.isEmpty()) {
+                    currentEmergency.setType(newType);
+                    currentEmergency.setDescription(newDescription);
+                    dbHelper.updateEmergency(currentEmergency);
+                    populateViews();
+                    Toast.makeText(EmergencyDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(EmergencyDetailActivity.this, "Type cannot be empty", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void openLocationSelection() {
+        Intent intent = new Intent(this, SelectLocationActivity .class);
+        intent.putExtra("latitude", currentEmergency.getLatitude());
+        intent.putExtra("longitude", currentEmergency.getLongitude());
+        startActivityForResult(intent, LOCATION_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LOCATION_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            double latitude = data.getDoubleExtra("latitude", 0);
+            double longitude = data.getDoubleExtra("longitude", 0);
+
+            currentEmergency.setLatitude(latitude);
+            currentEmergency.setLongitude(longitude);
+            dbHelper.updateEmergency(currentEmergency);
+            populateViews();
+            Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showDeleteConfirmation() {
