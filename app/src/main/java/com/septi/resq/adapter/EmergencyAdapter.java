@@ -10,9 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.septi.resq.fragment.report.ReportDetailActivity;
 import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.fragment.report.ReportDetailActivity;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;

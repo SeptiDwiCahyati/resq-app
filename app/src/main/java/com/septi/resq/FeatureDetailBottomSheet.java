@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
@@ -14,13 +14,13 @@ import com.google.android.material.button.MaterialButton;
 public class FeatureDetailBottomSheet extends BottomSheetDialogFragment {
     private final String feature;
 
-    public FeatureDetailBottomSheet( String feature ) {
+    public FeatureDetailBottomSheet(String feature) {
         this.feature = feature;
     }
 
     @SuppressLint("SetTextI18n")
     @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_feature_detail, container, false);
 
         TextView titleText = view.findViewById(R.id.featureTitle);

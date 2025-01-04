@@ -5,8 +5,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.model.Emergency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +63,7 @@ public class EmergencyViewModel extends ViewModel {
             }
         }
     }
+
     public void updateEmergency(Emergency emergency) {
         if (dbHelper != null) {
             boolean updated = dbHelper.updateEmergency(emergency);

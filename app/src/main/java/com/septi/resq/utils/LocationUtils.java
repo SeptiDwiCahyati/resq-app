@@ -1,8 +1,5 @@
 package com.septi.resq.utils;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;

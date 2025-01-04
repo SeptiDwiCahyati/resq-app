@@ -22,8 +22,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.septi.resq.utils.LocationUtils;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
@@ -34,8 +32,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.septi.resq.R;
-import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.model.Emergency;
+import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.utils.MarkerUtils;
 import com.septi.resq.utils.PulsingLocationOverlay;
 import com.septi.resq.viewmodel.EmergencyViewModel;

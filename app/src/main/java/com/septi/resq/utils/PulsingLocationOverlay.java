@@ -18,7 +18,7 @@ public class PulsingLocationOverlay extends org.osmdroid.views.overlay.Overlay {
     private long startTime;
     private boolean isAnimating = true;
 
-    public PulsingLocationOverlay( Context context, MapView mapView, GeoPoint location) {
+    public PulsingLocationOverlay(Context context, MapView mapView, GeoPoint location) {
         super(context);
         this.mapView = mapView;
         this.location = location;

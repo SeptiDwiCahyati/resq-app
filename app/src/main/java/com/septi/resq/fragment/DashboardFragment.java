@@ -11,7 +11,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.septi.resq.R;
@@ -23,22 +30,14 @@ import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.model.QuickAction;
-import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.Report;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.button.MaterialButton;
+import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.UserProfile;
+import com.septi.resq.utils.DummyData;
 import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 import com.septi.resq.viewmodel.UserProfileViewModel;
-import com.septi.resq.utils.DummyData;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

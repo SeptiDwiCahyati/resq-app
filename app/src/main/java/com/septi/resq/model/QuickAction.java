@@ -4,7 +4,7 @@ public class QuickAction {
     private final String title;
     private final int iconResource;
 
-    public QuickAction( String title, int iconResource ) {
+    public QuickAction(String title, int iconResource) {
         this.title = title;
         this.iconResource = iconResource;
     }
