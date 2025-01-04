@@ -1,9 +1,10 @@
-package com.septi.resq.fragment;
+package com.septi.resq.fragment.report;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -11,10 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
+
 import java.util.ArrayList;
 
 public class ReportFragment extends Fragment {

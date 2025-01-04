@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.septi.resq.EmergencyDetailActivity;
+import com.septi.resq.fragment.report.ReportDetailActivity;
 import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.model.Emergency;
@@ -69,7 +69,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
 
         // Add OnClickListener to the entire CardView
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, EmergencyDetailActivity.class);
+            Intent intent = new Intent(context, ReportDetailActivity.class);
             intent.putExtra("emergencyId", emergency.getId());
             context.startActivity(intent);
         });

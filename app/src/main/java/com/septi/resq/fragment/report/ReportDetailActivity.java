@@ -1,6 +1,5 @@
-package com.septi.resq;
+package com.septi.resq.fragment.report;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -14,10 +13,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.septi.resq.R;
+import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.model.Emergency;
 
-public class EmergencyDetailActivity extends AppCompatActivity {
+public class ReportDetailActivity extends AppCompatActivity {
     private TextView typeTextView, descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
     private Button btnEdit, btnDelete;
@@ -109,10 +110,10 @@ public class EmergencyDetailActivity extends AppCompatActivity {
                     currentEmergency.setDescription(newDescription);
                     dbHelper.updateEmergency(currentEmergency);
                     populateViews();
-                    Toast.makeText(EmergencyDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReportDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(EmergencyDetailActivity.this, "Type cannot be empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReportDetailActivity.this, "Type cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -121,7 +122,7 @@ public class EmergencyDetailActivity extends AppCompatActivity {
     }
 
     private void openLocationSelection() {
-        Intent intent = new Intent(this, SelectLocationActivity .class);
+        Intent intent = new Intent(this, SelectLocationActivity.class);
         intent.putExtra("latitude", currentEmergency.getLatitude());
         intent.putExtra("longitude", currentEmergency.getLongitude());
         startActivityForResult(intent, LOCATION_REQUEST_CODE);

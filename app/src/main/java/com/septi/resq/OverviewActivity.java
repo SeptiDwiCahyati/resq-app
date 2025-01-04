@@ -13,7 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.septi.resq.fragment.DashboardFragment;
 import com.septi.resq.fragment.MapFragment;
 import com.septi.resq.fragment.ProfileFragment;
-import com.septi.resq.fragment.ReportFragment;
+import com.septi.resq.fragment.report.ReportFragment;
 import com.septi.resq.fragment.TrackingFragment;
 import com.septi.resq.utils.LocationUtils;
 

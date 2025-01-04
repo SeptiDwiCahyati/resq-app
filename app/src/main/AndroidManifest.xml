@@ -42,7 +42,7 @@
             android:name=".OverviewActivity"
             android:exported="false" />
         <!-- Aktivitas detail emergency -->
-        <activity android:name=".EmergencyDetailActivity" />
+        <activity android:name=".fragment.report.ReportDetailActivity" />
 
         <!-- Add FileProvider configuration -->
         <provider
