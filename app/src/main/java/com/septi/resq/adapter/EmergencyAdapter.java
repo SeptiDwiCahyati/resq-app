@@ -1,5 +1,6 @@
 package com.septi.resq.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 import androidx.activity.result.ActivityResultLauncher;
 import java.util.ArrayList;
@@ -58,14 +60,33 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         return new EmergencyViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
         holder.timestampTextView.setText(emergency.getTimestamp());
-        holder.locationTextView.setText(String.format("Location: %.6f, %.6f",
-                emergency.getLatitude(), emergency.getLongitude()));
+
+        // Show the location as coordinates initially
+        holder.locationTextView.setText(String.format("Location: %.6f, %.6f", emergency.getLatitude(), emergency.getLongitude()));
+
+        // Decode the address using GeocodingHelper
+        GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(), new GeocodingHelper.GeocodingCallback() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onAddressReceived(String address) {
+                // Update locationTextView with decoded address
+                holder.locationTextView.setText("Location: " + address);
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onError(Exception e) {
+                holder.locationTextView.setText("Location: Unknown");
+            }
+        });
+
         holder.btnEdit.setOnClickListener(v -> showEditDialog(emergency));
         holder.btnDelete.setOnClickListener(v -> showDeleteConfirmation(emergency));
 
@@ -80,6 +101,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
             holder.imageView.setVisibility(View.GONE);
         }
     }
+
 
     private void showEditDialog(Emergency emergency) {
         currentEditingEmergency = emergency;
