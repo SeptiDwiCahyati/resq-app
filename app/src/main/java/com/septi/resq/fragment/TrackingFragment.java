@@ -56,14 +56,10 @@ public class TrackingFragment extends Fragment {
     private RescueTeamDBHelper dbHelper;
 
 
-    private Marker ambulanceMarker;
 
 
     private Polyline routeLine;
 
-    private List<GeoPoint> currentRoute;
-    private int currentRouteIndex = 0;
-    private boolean isMoving = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -195,7 +191,6 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
     private void updateAllMarkers(List<Emergency> emergencies) {
         // Clear existing markers
         for (Marker marker : emergencyMarkers) {
@@ -257,6 +252,7 @@ public class TrackingFragment extends Fragment {
             }
         }).start();
     }
+
     private void drawRoute(List<GeoPoint> points) {
         if (routeLine != null) {
             map.getOverlays().remove(routeLine);
