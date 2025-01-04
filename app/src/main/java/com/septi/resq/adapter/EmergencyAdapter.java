@@ -77,15 +77,23 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         EditText etType = dialogView.findViewById(R.id.etType);
         EditText etDescription = dialogView.findViewById(R.id.etDescription);
 
-        etType.setText(emergency.getType());
-        etDescription.setText(emergency.getDescription());
+        // Ensure we're not setting null values
+        etType.setText(emergency.getType() != null ? emergency.getType() : "");
+        etDescription.setText(emergency.getDescription() != null ? emergency.getDescription() : "");
 
         builder.setView(dialogView)
                 .setTitle("Edit Emergency")
                 .setPositiveButton("Save", (dialog, which) -> {
-                    emergency.setType(etType.getText().toString());
-                    emergency.setDescription(etDescription.getText().toString());
-                    viewModel.updateEmergency(emergency);
+                    // Ensure we're not saving null values
+                    String newType = etType.getText().toString().trim();
+                    String newDescription = etDescription.getText().toString().trim();
+
+                    // Only update if we have valid data
+                    if (!newType.isEmpty()) {
+                        emergency.setType(newType);
+                        emergency.setDescription(newDescription);
+                        viewModel.updateEmergency(emergency);
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

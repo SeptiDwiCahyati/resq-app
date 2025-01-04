@@ -166,9 +166,14 @@ public class MapFragment extends Fragment {
         }
     }
     private void updateEmergencyMarker(Emergency emergency) {
+        if (emergency == null) return;
+
         for (Marker marker : emergencyMarkers) {
-            if (marker.getId().equals(String.valueOf(emergency.getId()))) {
-                updateMarkerInfo(marker, emergency);
+            String markerId = marker.getId(); // or however you're storing the emergency ID
+            if (markerId != null && markerId.equals(String.valueOf(emergency.getId()))) {
+                // Update marker
+                marker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
+                // Update other marker properties
                 mapView.invalidate();
                 break;
             }
