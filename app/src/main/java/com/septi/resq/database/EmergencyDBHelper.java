@@ -50,6 +50,26 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public boolean deleteEmergency(long id) {
+        SQLiteDatabase db = getWritableDatabase();
+        return db.delete(TABLE_EMERGENCY, COLUMN_ID + "=?",
+                new String[]{String.valueOf(id)}) > 0;
+    }
+
+    public boolean updateEmergency(Emergency emergency) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TYPE, emergency.getType());
+        values.put(COLUMN_DESCRIPTION, emergency.getDescription());
+        values.put(COLUMN_LATITUDE, emergency.getLatitude());
+        values.put(COLUMN_LONGITUDE, emergency.getLongitude());
+        values.put(COLUMN_PHOTO_PATH, emergency.getPhotoPath());
+
+        return db.update(TABLE_EMERGENCY, values,
+                COLUMN_ID + "=?",
+                new String[]{String.valueOf(emergency.getId())}) > 0;
+    }
+
     public long insertEmergency(Emergency emergency) {
         // Cek apakah data dengan timestamp yang sama sudah ada
         SQLiteDatabase db = getReadableDatabase();

@@ -67,11 +67,8 @@ public class ReportFragment extends Fragment {
         EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.init(dbHelper);
 
-        adapter = new EmergencyAdapter(dbHelper.getAllEmergencies());
+        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext());
         recyclerView.setAdapter(adapter);
-
-        // Initialize adapter with empty list
-        adapter = new EmergencyAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {

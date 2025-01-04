@@ -4,8 +4,8 @@ public class Emergency {
     private long id;
     private final double latitude;
     private final double longitude;
-    private final String type;
-    private final String description;
+    private String type;
+    private String description;
     private final String timestamp;
     private String photoPath;
 
@@ -16,6 +16,14 @@ public class Emergency {
         this.description = description;
         this.timestamp = timestamp;
         this.photoPath = photoPath;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Emergency(double latitude, double longitude, String type, String description, String timestamp) {
