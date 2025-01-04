@@ -1,5 +1,7 @@
 package com.septi.resq.fragment;
 
+import static com.septi.resq.utils.PolylineUtils.decodePolyline;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -335,35 +337,6 @@ public class TrackingFragment extends Fragment {
         return R * c;
     }
 
-    private List<GeoPoint> decodePolyline(String encoded) {
-        List<GeoPoint> points = new ArrayList<>();
-        int index = 0, len = encoded.length();
-        int lat = 0, lng = 0;
-
-        while (index < len) {
-            int result = 1;
-            int shift = 0;
-            int b;
-            do {
-                b = encoded.charAt(index++) - 63 - 1;
-                result += b << shift;
-                shift += 5;
-            } while (b >= 0x1f);
-            lat += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-
-            result = 1;
-            shift = 0;
-            do {
-                b = encoded.charAt(index++) - 63 - 1;
-                result += b << shift;
-                shift += 5;
-            } while (b >= 0x1f);
-            lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-
-            points.add(new GeoPoint(lat * 1e-5, lng * 1e-5));
-        }
-        return points;
-    }
 
     @Override
     public void onResume() {
