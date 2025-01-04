@@ -59,14 +59,12 @@ public class ReportFragment extends Fragment {
             }
         });
 
-        // Setup database and adapter
         EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
         viewModel.init(dbHelper);
 
         adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel);
         recyclerView.setAdapter(adapter);
 
-        // Observe changes
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
                 adapter.updateData(emergencies);
@@ -74,5 +72,16 @@ public class ReportFragment extends Fragment {
         });
 
         return view;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.loadEmergencies();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        viewModel.loadEmergencies();
     }
 }

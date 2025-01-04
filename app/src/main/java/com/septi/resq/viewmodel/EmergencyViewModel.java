@@ -64,42 +64,5 @@ public class EmergencyViewModel extends ViewModel {
         }
     }
 
-    public void updateEmergency(Emergency emergency) {
-        if (dbHelper != null && dbHelper.updateEmergency(emergency)) {
-            List<Emergency> currentList = emergencies.getValue();
-            if (currentList != null) {
-                int index = -1;
-                for (int i = 0; i < currentList.size(); i++) {
-                    if (currentList.get(i).getId() == emergency.getId()) {
-                        index = i;
-                        break;
-                    }
-                }
-                if (index != -1) {
-                    currentList.set(index, emergency);
-                    emergencies.setValue(currentList);
-                    updatedEmergency.setValue(emergency);
-                }
-            }
-        }
-    }
-
-    public void deleteEmergency(long emergencyId) {
-        if (dbHelper != null && dbHelper.deleteEmergency(emergencyId)) {
-            List<Emergency> currentList = emergencies.getValue();
-            if (currentList != null) {
-                List<Emergency> newList = new ArrayList<>();
-                for (Emergency e : currentList) {
-                    if (e.getId() != emergencyId) {
-                        newList.add(e);
-                    }
-                }
-                emergencies.setValue(newList);
-                deletedEmergencyId.setValue(emergencyId);
-            }
-        }
-    }
-
-
 }
 
