@@ -47,6 +47,14 @@
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray" />
 
+        <ImageView
+            android:id="@+id/emergencyImageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="Emergency Photo" />
 
         <!-- Horizontal LinearLayout for buttons -->
         <LinearLayout

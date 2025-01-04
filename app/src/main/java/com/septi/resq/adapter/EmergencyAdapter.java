@@ -90,7 +90,16 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         holder.btnEdit.setOnClickListener(v -> showEditDialog(emergency));
         holder.btnDelete.setOnClickListener(v -> showDeleteConfirmation(emergency));
 
-
+        if (emergency.getPhotoPath() != null && !emergency.getPhotoPath().isEmpty()) {
+            holder.imageView.setVisibility(View.VISIBLE);
+            Glide.with(holder.itemView.getContext())
+                    .load(emergency.getPhotoPath())
+                    .placeholder(R.drawable.error_image)
+                    .error(R.drawable.error_image)
+                    .into(holder.imageView);
+        } else {
+            holder.imageView.setVisibility(View.GONE);
+        }
     }
 
 
@@ -214,6 +223,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
             descriptionTextView = itemView.findViewById(R.id.emergencyDescriptionTextView);
             timestampTextView = itemView.findViewById(R.id.emergencyTimestampTextView);
             locationTextView = itemView.findViewById(R.id.locationTextView);
+            imageView = itemView.findViewById(R.id.emergencyImageView);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
