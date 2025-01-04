@@ -4,6 +4,7 @@ package com.septi.resq.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import com.septi.resq.model.Emergency;
 import com.septi.resq.database.EmergencyDBHelper;
 
@@ -35,6 +36,7 @@ public class EmergencyViewModel extends ViewModel {
             emergencies.setValue(emergencyList);
         }
     }
+
     public void addEmergency(Emergency emergency) {
         if (dbHelper != null) {
             long id = dbHelper.insertEmergency(emergency);

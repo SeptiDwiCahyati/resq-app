@@ -79,7 +79,7 @@ public class MapFragment extends Fragment {
     private EmergencyViewModel viewModel;
 
     @Override
-    public void onCreate( Bundle savedInstanceState ) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.init(dbHelper);
@@ -137,7 +137,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void addEmergencyMarker( Emergency emergency ) {
+    private void addEmergencyMarker(Emergency emergency) {
         Marker newMarker = new Marker(mapView);
         newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
         updateMarkerInfo(newMarker, emergency);
@@ -146,7 +146,7 @@ public class MapFragment extends Fragment {
         mapView.invalidate();
     }
 
-    private void updateAllMarkers( List<Emergency> emergencies ) {
+    private void updateAllMarkers(List<Emergency> emergencies) {
         for (Marker marker : emergencyMarkers) {
             mapView.getOverlays().remove(marker);
         }
@@ -166,7 +166,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void setupUIControls( View view ) {
+    private void setupUIControls(View view) {
         FloatingActionButton myLocationButton = view.findViewById(R.id.my_location_button);
         myLocationButton.setOnClickListener(v -> getCurrentLocation());
 
@@ -177,7 +177,7 @@ public class MapFragment extends Fragment {
     private void setupMapClickListener() {
         mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
             @Override
-            public boolean onSingleTapConfirmed( MotionEvent e, MapView mapView ) {
+            public boolean onSingleTapConfirmed(MotionEvent e, MapView mapView) {
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
 
                 boolean clickedOnMarker = false;
@@ -202,7 +202,7 @@ public class MapFragment extends Fragment {
             }
 
             @Override
-            public boolean onLongPress( MotionEvent e, MapView mapView ) {
+            public boolean onLongPress(MotionEvent e, MapView mapView) {
                 org.osmdroid.api.IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
                 if (selectedLocation != null) {
                     mapView.getOverlays().remove(selectedLocation);
@@ -265,12 +265,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-
-
-
-
-
-    private void updateCurrentLocation( Location location ) {
+    private void updateCurrentLocation(Location location) {
         GeoPoint currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
         lastKnownLocation = currentLocation;
 
@@ -307,7 +302,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void showReportDialog( final double latitude, final double longitude ) {
+    private void showReportDialog(final double latitude, final double longitude) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
 
         Spinner typeSpinner = dialogView.findViewById(R.id.spinner_emergency_type);
@@ -394,7 +389,7 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void updateMarkerInfo( Marker marker, Emergency emergency ) {
+    private void updateMarkerInfo(Marker marker, Emergency emergency) {
         marker.setTitle(emergency.getType());
         marker.setSnippet("Waktu: " + emergency.getTimestamp() + "\n" + "Deskripsi: " + emergency.getDescription());
 
@@ -436,13 +431,13 @@ public class MapFragment extends Fragment {
         private Handler autoCloseHandler;
         private static final long AUTO_CLOSE_DELAY = 10000;
 
-        public CustomInfoWindow( MapView mapView ) {
+        public CustomInfoWindow(MapView mapView) {
             super(R.layout.marker_info_window, mapView);
             autoCloseHandler = new Handler();
         }
 
         @Override
-        public void onOpen( Object item ) {
+        public void onOpen(Object item) {
             Marker marker = (Marker) item;
             View view = getView();
             if (view != null) {
@@ -477,7 +472,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private Emergency findEmergencyForMarker( Marker marker ) {
+    private Emergency findEmergencyForMarker(Marker marker) {
         GeoPoint position = marker.getPosition();
         List<Emergency> emergencies = dbHelper.getAllEmergencies();
         for (Emergency emergency : emergencies) {
@@ -500,7 +495,7 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onRequestPermissionsResult( int requestCode, String[] permissions, int[] grantResults ) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 launchCamera();
