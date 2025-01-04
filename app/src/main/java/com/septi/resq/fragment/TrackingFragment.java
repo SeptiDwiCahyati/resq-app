@@ -1,7 +1,5 @@
 package com.septi.resq.fragment;
 
-import static com.septi.resq.utils.PolylineUtils.decodePolyline;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -21,20 +19,17 @@ import com.septi.resq.R;
 import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.model.RescueTeam;
+import com.septi.resq.utils.EmergencyMarkerUtils;
 import com.septi.resq.utils.MarkerUtils;
+import com.septi.resq.utils.RouteCalculator;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
-import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,15 +47,10 @@ public class TrackingFragment extends Fragment {
     private final Map<Long, Polyline> rescueTeamRouteLines = new HashMap<>();
 
     private final List<Marker> emergencyMarkers = new ArrayList<>();
-    private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
+
     private static final float SPEED = 80.0f;
     private final Handler animationHandler = new Handler();
     private RescueTeamDBHelper dbHelper;
-
-
-
-
-    private Polyline routeLine;
 
 
     @Override
@@ -115,81 +105,37 @@ public class TrackingFragment extends Fragment {
     }
 
     private Long findNearestTeam(GeoPoint emergencyLocation) {
-        Long nearestTeamId = null;
-        double shortestDistance = Double.MAX_VALUE;
-
-        for (Map.Entry<Long, Marker> entry : rescueTeamMarkers.entrySet()) {
-            Long teamId = entry.getKey();
-            Marker teamMarker = entry.getValue();
-            double distance = calculateDistance(teamMarker.getPosition(), emergencyLocation);
-
-            if (distance < shortestDistance && Boolean.FALSE.equals(rescueTeamMovingStatus.get(teamId))) {
-                shortestDistance = distance;
-                nearestTeamId = teamId;
-            }
-        }
-
-        return nearestTeamId;
+        return rescueTeamMarkers.entrySet().stream()
+                .filter(entry -> !Boolean.TRUE.equals(rescueTeamMovingStatus.get(entry.getKey())))
+                .min((entry1, entry2) -> Double.compare(
+                        calculateDistance(entry1.getValue().getPosition(), emergencyLocation),
+                        calculateDistance(entry2.getValue().getPosition(), emergencyLocation)))
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 
 
+
     private void addEmergencyMarker(Emergency emergency) {
-        GeoPoint emergencyPosition = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
-        Marker marker = new Marker(map);
-        marker.setPosition(emergencyPosition);
-        marker.setTitle(emergency.getType());
-        marker.setSnippet(emergency.getDescription());
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
-        // Set emergency icon based on type
-        int iconDrawable;
-        switch (emergency.getType()) {
-            case "Kecelakaan":
-                iconDrawable = R.drawable.ic_accident;
-                break;
-            case "Kebakaran":
-                iconDrawable = R.drawable.ic_fire;
-                break;
-            case "Bencana Alam":
-                iconDrawable = R.drawable.ic_disaster;
-                break;
-            case "Kriminal":
-                iconDrawable = R.drawable.ic_police;
-                break;
-            case "Medis":
-                iconDrawable = R.drawable.ic_emergency;
-                break;
-            default:
-                iconDrawable = R.drawable.error_image;
-                break;
-        }
-
-        Drawable icon = getResources().getDrawable(iconDrawable);
-        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), icon, MARKER_SIZE_DP);
-        marker.setIcon(resizedIcon);
-
-        marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
-            // Find the nearest available rescue team
-            Long nearestTeamId = findNearestTeam(clickedMarker.getPosition());
-
-            if (nearestTeamId != null) {
-                // Stop any existing movement of this team
-                stopRescueTeamMovement(nearestTeamId);
-
-                // Calculate route for nearest team
-                Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
-                calculateRoute(nearestTeamId, teamMarker.getPosition(), clickedMarker.getPosition());
-
-                // Update marker title to show it's responding
-                teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
-                map.invalidate();
-            }
-            return true;
-        });
-
-        map.getOverlays().add(marker);
-        emergencyMarkers.add(marker);
-        map.invalidate();
+        EmergencyMarkerUtils.addEmergencyMarker(
+                getContext(),
+                map,
+                emergency,
+                rescueTeamMarkers,
+                rescueTeamMovingStatus,
+                emergencyMarkers,
+                MARKER_SIZE_DP,
+                clickedMarker -> {
+                    Long nearestTeamId = findNearestTeam(clickedMarker.getPosition());
+                    if (nearestTeamId != null) {
+                        stopRescueTeamMovement(nearestTeamId);
+                        Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
+                        calculateRoute(nearestTeamId, teamMarker.getPosition(), clickedMarker.getPosition());
+                        teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
+                        map.invalidate();
+                    }
+                }
+        );
     }
 
 
@@ -207,31 +153,9 @@ public class TrackingFragment extends Fragment {
     }
 
     private void calculateRoute(Long teamId, GeoPoint start, GeoPoint end) {
-        String url = OSRM_API_URL +
-                start.getLongitude() + "," + start.getLatitude() + ";" +
-                end.getLongitude() + "," + end.getLatitude() +
-                "?overview=full&geometries=polyline";
-
-        new Thread(() -> {
-            try {
-                URL routeUrl = new URL(url);
-                HttpURLConnection conn = (HttpURLConnection) routeUrl.openConnection();
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream()));
-
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                String geometry = jsonResponse.getJSONArray("routes")
-                        .getJSONObject(0)
-                        .getString("geometry");
-
-                List<GeoPoint> route = decodePolyline(geometry);
+        RouteCalculator.calculateRoute(getContext(), start, end, new RouteCalculator.RouteCalculationCallback() {
+            @Override
+            public void onRouteCalculated(List<GeoPoint> route) {
                 rescueTeamRoutes.put(teamId, route);
                 rescueTeamRouteIndexes.put(teamId, 0);
 
@@ -248,25 +172,15 @@ public class TrackingFragment extends Fragment {
                     drawRoute(teamId, route);
                     startRescueTeamMovement(teamId);
                 });
+            }
 
-            } catch (Exception e) {
+            @Override
+            public void onError(Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
     }
 
-    private void drawRoute(List<GeoPoint> points) {
-        if (routeLine != null) {
-            map.getOverlays().remove(routeLine);
-        }
-
-        routeLine = new Polyline();
-        routeLine.setPoints(points);
-        routeLine.setColor(Color.BLUE);
-        routeLine.setWidth(10f);
-        map.getOverlays().add(routeLine);
-        map.invalidate();
-    }
 
     private void drawRoute(Long teamId, List<GeoPoint> points) {
         Polyline existingRoute = rescueTeamRouteLines.get(teamId);
