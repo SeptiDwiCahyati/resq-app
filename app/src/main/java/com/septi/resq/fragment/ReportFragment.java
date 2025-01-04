@@ -1,10 +1,12 @@
 package com.septi.resq.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -12,24 +14,41 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
-
 import java.util.ArrayList;
 
 public class ReportFragment extends Fragment {
     private EmergencyAdapter adapter;
     private EmergencyViewModel viewModel;
+    private ActivityResultLauncher<Intent> locationSelectionLauncher;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Register the ActivityResultLauncher
+        locationSelectionLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (adapter != null) {
+                        adapter.handleLocationSelectionResult(
+                                EmergencyAdapter.LOCATION_SELECTION_REQUEST,
+                                result.getResultCode(),
+                                result.getData()
+                        );
+                    }
+                }
+        );
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate layout fragment_report.xml
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
-        // Setup AppBar dengan toolbar dan judul "Emergency Reports"
+        // Setup toolbar
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
@@ -37,45 +56,43 @@ public class ReportFragment extends Fragment {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
         }
 
-        // Setup RecyclerView dengan LinearLayoutManager dan ukuran tetap
+        // Setup RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
 
-        // Inisialisasi ViewModel untuk mengelola data UI
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
-        // Setup SearchView untuk memfilter data berdasarkan input pengguna
+        // Setup SearchView
         SearchView searchView = view.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapter.filter(query); // Filter data saat query dikirimkan
+                adapter.filter(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.filter(newText); // Filter data saat mengetik
+                adapter.filter(newText);
                 return true;
             }
         });
 
-        // Setup helper database dan inisialisasi ViewModel
+        // Setup database and adapter
         EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
         viewModel.init(dbHelper);
 
-        // Inisialisasi adapter dengan daftar kosong dan ViewModel untuk mengikat data
-        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel);
+        adapter = new EmergencyAdapter(new ArrayList<>(), requireContext(), viewModel, locationSelectionLauncher);
         recyclerView.setAdapter(adapter);
 
-        // Observasi perubahan data di ViewModel dan update RecyclerView
+        // Observe changes
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
-                adapter.updateData(emergencies); // Update data adapter jika data berubah
+                adapter.updateData(emergencies);
             }
         });
 
-        return view; // Kembalikan view fragment
+        return view;
     }
 }

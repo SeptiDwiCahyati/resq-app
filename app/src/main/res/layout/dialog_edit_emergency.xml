@@ -9,13 +9,20 @@
         android:id="@+id/etType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Emergency Type"/>
+        android:hint="Emergency Type" />
 
     <EditText
         android:id="@+id/etDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Description"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/btnEditLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Location"
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

@@ -2,8 +2,8 @@ package com.septi.resq.model;
 
 public class Emergency {
     private long id;
-    private final double latitude;
-    private final double longitude;
+    private double latitude;
+    private double longitude;
     private String type;
     private String description;
     private final String timestamp;
@@ -24,6 +24,14 @@ public class Emergency {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public Emergency(double latitude, double longitude, String type, String description, String timestamp) {

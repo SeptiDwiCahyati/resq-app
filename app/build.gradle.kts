@@ -38,6 +38,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.airbnb.android:lottie:6.3.0")
+    implementation("com.github.MKergall:osmbonuspack:6.9.0")
     implementation("org.osmdroid:osmdroid-wms:6.1.16")
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.16")
     implementation("com.github.MKergall:osmbonuspack:6.9.0")

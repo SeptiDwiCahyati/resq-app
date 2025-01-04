@@ -35,7 +35,9 @@
         <activity
             android:name=".LandingActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".SelectLocationActivity"
+            android:label="Select Location" />
         <activity
             android:name=".OverviewActivity"
             android:exported="false" />
