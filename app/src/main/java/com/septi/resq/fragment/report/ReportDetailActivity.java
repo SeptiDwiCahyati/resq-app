@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.septi.resq.OverviewActivity;
@@ -19,6 +20,7 @@ import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.viewmodel.EmergencyViewModel;
 
 public class ReportDetailActivity extends AppCompatActivity {
     private TextView typeTextView, descriptionTextView, locationTextView, timestampTextView;
@@ -26,6 +28,7 @@ public class ReportDetailActivity extends AppCompatActivity {
     private EmergencyDBHelper dbHelper;
     private Emergency currentEmergency;
     private static final int LOCATION_REQUEST_CODE = 1001;
+    private EmergencyViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,8 @@ public class ReportDetailActivity extends AppCompatActivity {
         Button btnEdit = findViewById(R.id.btnEdit);
         Button btnDelete = findViewById(R.id.btnDelete);
         Button btnViewOnMap = findViewById(R.id.btnViewOnMap);
+        viewModel = new ViewModelProvider(this).get(EmergencyViewModel.class);
+        viewModel.init(new EmergencyDBHelper(this));
 
         long emergencyId = getIntent().getLongExtra("emergencyId", -1L);
 
@@ -112,7 +117,7 @@ public class ReportDetailActivity extends AppCompatActivity {
                 if (!newType.isEmpty()) {
                     currentEmergency.setType(newType);
                     currentEmergency.setDescription(newDescription);
-                    dbHelper.updateEmergency(currentEmergency);
+                    viewModel.updateEmergency(currentEmergency);
                     populateViews();
                     Toast.makeText(ReportDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
@@ -124,6 +129,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         dialog.show();
     }
+
 
     private void navigateToMap() {
         Intent intent = new Intent(this, OverviewActivity.class);
@@ -161,11 +167,12 @@ public class ReportDetailActivity extends AppCompatActivity {
                 .setTitle("Delete Emergency")
                 .setMessage("Are you sure you want to delete this emergency?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    dbHelper.deleteEmergency(currentEmergency.getId());
+                    viewModel.deleteEmergency(currentEmergency.getId());
                     Toast.makeText(this, "Emergency deleted", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .setNegativeButton("No", null)
                 .show();
     }
+
 }
