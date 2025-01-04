@@ -16,7 +16,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.septi.resq.R;
+import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.model.RescueTeam;
 import com.septi.resq.utils.MarkerUtils;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
@@ -32,20 +34,33 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class TrackingFragment extends Fragment {
     private MapView map;
     private static final int MARKER_SIZE_DP = 40;
 
-    private Marker ambulanceMarker;
-    private final List<Marker> emergencyMarkers = new ArrayList<>();
+    private final Map<Long, Marker> rescueTeamMarkers = new HashMap<>();
+    private final Map<Long, List<GeoPoint>> rescueTeamRoutes = new HashMap<>();
+    private final Map<Long, Integer> rescueTeamRouteIndexes = new HashMap<>();
+    private final Map<Long, Boolean> rescueTeamMovingStatus = new HashMap<>();
+    private final Map<Long, Polyline> rescueTeamRouteLines = new HashMap<>();
 
-    private Polyline routeLine;
+    private final List<Marker> emergencyMarkers = new ArrayList<>();
     private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
     private static final float SPEED = 80.0f;
     private final Handler animationHandler = new Handler();
+    private RescueTeamDBHelper dbHelper;
+
+
+    private Marker ambulanceMarker;
+
+
+    private Polyline routeLine;
+
     private List<GeoPoint> currentRoute;
     private int currentRouteIndex = 0;
     private boolean isMoving = false;
@@ -55,6 +70,7 @@ public class TrackingFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Context ctx = requireActivity().getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        dbHelper = new RescueTeamDBHelper(ctx);
     }
 
     @Override
@@ -64,11 +80,12 @@ public class TrackingFragment extends Fragment {
         EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), this::updateAllMarkers);
         viewModel.getNewEmergency().observe(getViewLifecycleOwner(), this::addEmergencyMarker);
-        Toolbar toolbar = view.findViewById(R.id.toolbar);  // Add this line
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
 
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
-            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false); // No back button
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle("Tracking");
         }
         return view;
@@ -80,31 +97,53 @@ public class TrackingFragment extends Fragment {
         map.getController().setZoom(15.0);
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
-        ambulanceMarker = new Marker(map);
-//        ambulanceMarker.setPosition(new GeoPoint(-0.032557, 109.334169));
-        ambulanceMarker.setPosition(new GeoPoint(0.0530266, 111.4755201));
-        ambulanceMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        ambulanceMarker.setTitle("Ambulance");
+        // Initialize rescue team markers
+        List<RescueTeam> availableTeams = dbHelper.getAvailableTeams();
+        for (RescueTeam team : availableTeams) {
+            Marker marker = new Marker(map);
+            marker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            marker.setTitle(team.getName());
+            marker.setSnippet("Contact: " + team.getContactNumber());
 
+            Drawable rescueIcon = getResources().getDrawable(R.drawable.ic_ambulance);
+            Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
+            marker.setIcon(resizedIcon);
 
-        // Set new icon for ambulance
-        Drawable newAmbulanceIcon = getResources().getDrawable(R.drawable.ic_ambulance);
-        Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), newAmbulanceIcon, MARKER_SIZE_DP);
-        ambulanceMarker.setIcon(resizedIcon);
+            map.getOverlays().add(marker);
+            rescueTeamMarkers.put(team.getId(), marker);
+            rescueTeamMovingStatus.put(team.getId(), false);
+        }
+    }
 
-        map.getOverlays().add(ambulanceMarker);
+    private Long findNearestTeam(GeoPoint emergencyLocation) {
+        Long nearestTeamId = null;
+        double shortestDistance = Double.MAX_VALUE;
+
+        for (Map.Entry<Long, Marker> entry : rescueTeamMarkers.entrySet()) {
+            Long teamId = entry.getKey();
+            Marker teamMarker = entry.getValue();
+            double distance = calculateDistance(teamMarker.getPosition(), emergencyLocation);
+
+            if (distance < shortestDistance && Boolean.FALSE.equals(rescueTeamMovingStatus.get(teamId))) {
+                shortestDistance = distance;
+                nearestTeamId = teamId;
+            }
+        }
+
+        return nearestTeamId;
     }
 
 
     private void addEmergencyMarker(Emergency emergency) {
-        GeoPoint position = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
+        GeoPoint emergencyPosition = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
         Marker marker = new Marker(map);
-        marker.setPosition(position);
+        marker.setPosition(emergencyPosition);
         marker.setTitle(emergency.getType());
         marker.setSnippet(emergency.getDescription());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
-        // Set and resize icon
+        // Set emergency icon based on type
         int iconDrawable;
         switch (emergency.getType()) {
             case "Kecelakaan":
@@ -129,12 +168,24 @@ public class TrackingFragment extends Fragment {
 
         Drawable icon = getResources().getDrawable(iconDrawable);
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), icon, MARKER_SIZE_DP);
-
         marker.setIcon(resizedIcon);
 
         marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
-            stopAmbulanceMovement();
-            calculateRoute(ambulanceMarker.getPosition(), clickedMarker.getPosition());
+            // Find the nearest available rescue team
+            Long nearestTeamId = findNearestTeam(clickedMarker.getPosition());
+
+            if (nearestTeamId != null) {
+                // Stop any existing movement of this team
+                stopRescueTeamMovement(nearestTeamId);
+
+                // Calculate route for nearest team
+                Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
+                calculateRoute(nearestTeamId, teamMarker.getPosition(), clickedMarker.getPosition());
+
+                // Update marker title to show it's responding
+                teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
+                map.invalidate();
+            }
             return true;
         });
 
@@ -142,6 +193,7 @@ public class TrackingFragment extends Fragment {
         emergencyMarkers.add(marker);
         map.invalidate();
     }
+
 
 
     private void updateAllMarkers(List<Emergency> emergencies) {
@@ -157,7 +209,7 @@ public class TrackingFragment extends Fragment {
         }
     }
 
-    private void calculateRoute(GeoPoint start, GeoPoint end) {
+    private void calculateRoute(Long teamId, GeoPoint start, GeoPoint end) {
         String url = OSRM_API_URL +
                 start.getLongitude() + "," + start.getLatitude() + ";" +
                 end.getLongitude() + "," + end.getLatitude() +
@@ -182,11 +234,22 @@ public class TrackingFragment extends Fragment {
                         .getJSONObject(0)
                         .getString("geometry");
 
-                currentRoute = decodePolyline(geometry);
+                List<GeoPoint> route = decodePolyline(geometry);
+                rescueTeamRoutes.put(teamId, route);
+                rescueTeamRouteIndexes.put(teamId, 0);
 
                 requireActivity().runOnUiThread(() -> {
-                    drawRoute(currentRoute);
-                    startAmbulanceMovement();
+                    // Clear any existing routes on the map
+                    for (Polyline routeLine : rescueTeamRouteLines.values()) {
+                        if (routeLine != null) {
+                            map.getOverlays().remove(routeLine);
+                        }
+                    }
+                    rescueTeamRouteLines.clear();
+
+                    // Draw new route and start movement
+                    drawRoute(teamId, route);
+                    startRescueTeamMovement(teamId);
                 });
 
             } catch (Exception e) {
@@ -194,7 +257,6 @@ public class TrackingFragment extends Fragment {
             }
         }).start();
     }
-
     private void drawRoute(List<GeoPoint> points) {
         if (routeLine != null) {
             map.getOverlays().remove(routeLine);
@@ -208,40 +270,63 @@ public class TrackingFragment extends Fragment {
         map.invalidate();
     }
 
-    private void startAmbulanceMovement() {
-        if (!isMoving && currentRoute != null && !currentRoute.isEmpty()) {
-            isMoving = true;
-            currentRouteIndex = 0;
-            moveAmbulance();
+    private void drawRoute(Long teamId, List<GeoPoint> points) {
+        Polyline existingRoute = rescueTeamRouteLines.get(teamId);
+        if (existingRoute != null) {
+            map.getOverlays().remove(existingRoute);
+        }
+
+        Polyline routeLine = new Polyline();
+        routeLine.setPoints(points);
+        routeLine.setColor(Color.BLUE);
+        routeLine.setWidth(10f);
+        map.getOverlays().add(routeLine);
+        rescueTeamRouteLines.put(teamId, routeLine);
+        map.invalidate();
+    }
+
+    private void startRescueTeamMovement(Long teamId) {
+        if (!Boolean.TRUE.equals(rescueTeamMovingStatus.get(teamId)) &&
+                rescueTeamRoutes.get(teamId) != null &&
+                !rescueTeamRoutes.get(teamId).isEmpty()) {
+
+            rescueTeamMovingStatus.put(teamId, true);
+            rescueTeamRouteIndexes.put(teamId, 0);
+            moveRescueTeam(teamId);
         }
     }
 
-    private void stopAmbulanceMovement() {
-        isMoving = false;
+    private void stopRescueTeamMovement(Long teamId) {
+        rescueTeamMovingStatus.put(teamId, false);
         animationHandler.removeCallbacksAndMessages(null);
     }
 
-    private void moveAmbulance() {
-        if (!isMoving || currentRouteIndex >= currentRoute.size() - 1) {
-            isMoving = false;
+    private void moveRescueTeam(Long teamId) {
+        List<GeoPoint> route = rescueTeamRoutes.get(teamId);
+        Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
+
+        if (!Boolean.TRUE.equals(rescueTeamMovingStatus.get(teamId)) ||
+                currentIndex >= route.size() - 1) {
+            rescueTeamMovingStatus.put(teamId, false);
             return;
         }
 
-        GeoPoint current = currentRoute.get(currentRouteIndex);
-        GeoPoint next = currentRoute.get(currentRouteIndex + 1);
+        GeoPoint current = route.get(currentIndex);
+        GeoPoint next = route.get(currentIndex + 1);
 
         double distance = calculateDistance(current, next);
-
         long timeForSegment = (long) ((distance / SPEED) * 3600000);
 
-        ambulanceMarker.setPosition(current);
+        Marker marker = rescueTeamMarkers.get(teamId);
+        marker.setPosition(current);
         map.invalidate();
 
         animationHandler.postDelayed(() -> {
-            currentRouteIndex++;
-            moveAmbulance();
+            rescueTeamRouteIndexes.put(teamId, currentIndex + 1);
+            moveRescueTeam(teamId);
         }, Math.max(timeForSegment, 16));
     }
+
 
     private double calculateDistance(GeoPoint p1, GeoPoint p2) {
         double R = 6371;
@@ -299,6 +384,8 @@ public class TrackingFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopAmbulanceMovement();
+        for (Long teamId : rescueTeamMarkers.keySet()) {
+            stopRescueTeamMovement(teamId);
+        }
     }
 }
