@@ -132,6 +132,7 @@ public class TrackingFragment extends Fragment {
 
 
 
+    // Modify your addEmergencyMarker method in TrackingFragment
     private void addEmergencyMarker(Emergency emergency) {
         EmergencyMarkerUtils.addEmergencyMarker(
                 getContext(),
@@ -142,21 +143,59 @@ public class TrackingFragment extends Fragment {
                 emergencyMarkers,
                 MARKER_SIZE_DP,
                 clickedMarker -> {
-                    Long nearestTeamId = findNearestTeam(clickedMarker.getPosition());
-                    if (nearestTeamId != null) {
-                        stopRescueTeamMovement(nearestTeamId);
-                        Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
-                        calculateRoute(nearestTeamId, teamMarker.getPosition(), clickedMarker.getPosition());
-                        teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
-                        map.invalidate();
-                    } else {
-                        // Notifikasi atau log
-                        Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
+                    // This will still handle manual clicks if needed
+                    if (emergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU) {
+                        Long nearestTeamId = findNearestTeam(clickedMarker.getPosition());
+                        if (nearestTeamId != null) {
+                            checkAndDispatchRescueTeam(emergency);
+                        } else {
+                            Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
+                        }
                     }
-
                 }
         );
+
+        // Automatically check for dispatch when marker is added
+        checkAndDispatchRescueTeam(emergency);
     }
+
+    private void checkAndDispatchRescueTeam(Emergency emergency) {
+        if (emergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU) {
+            GeoPoint emergencyLocation = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
+            Long nearestTeamId = findNearestTeam(emergencyLocation);
+
+            if (nearestTeamId != null) {
+                // Get the team marker
+                Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
+
+                // Stop any existing movement
+                stopRescueTeamMovement(nearestTeamId);
+
+                // Calculate and start the route
+                calculateRoute(nearestTeamId, teamMarker.getPosition(), emergencyLocation);
+
+                // Update team marker title and snippet
+                teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
+                teamMarker.setSnippet("Tidak tersedia / Dalam tugas");
+
+                // Update rescue team availability in database
+                RescueTeam team = dbHelper.getTeamById(nearestTeamId);
+                if (team != null) {
+                    team.setIsAvailable(false);  // Using the new setter
+                    dbHelper.updateTeamAvailability(team.getId(), false);
+                }
+
+                // Update emergency status
+                emergency.setStatus(Emergency.EmergencyStatus.PROSES);
+                EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+                viewModel.updateEmergency(emergency);
+
+                // Update the map
+                map.invalidate();
+            }
+        }
+    }
+
 
 
     private void updateAllMarkers(List<Emergency> emergencies) {

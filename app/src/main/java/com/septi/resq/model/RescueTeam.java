@@ -31,4 +31,8 @@ public class RescueTeam {
     public String getStatus() { return isAvailable ? "Tersedia" : "Dalam Tugas"; }
 
     public void setDistance(Double distance) { this.distance = distance; }
+
+    public void setIsAvailable(boolean available) {
+        this.isAvailable = available;
+    }
 }

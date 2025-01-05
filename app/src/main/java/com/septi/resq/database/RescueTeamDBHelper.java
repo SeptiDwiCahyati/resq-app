@@ -112,6 +112,38 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
         return teams;
     }
 
+    public RescueTeam getTeamById(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_RESCUE_TEAMS, null,
+                COLUMN_ID + "=?", new String[]{String.valueOf(id)},
+                null, null, null);
+
+        RescueTeam team = null;
+        if (cursor.moveToFirst()) {
+            team = new RescueTeam(
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                    cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUDE)),
+                    cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUDE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT)),
+                    cursor.isNull(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE)) ? null :
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_AVAILABLE)) == 1
+            );
+        }
+        cursor.close();
+        return team;
+    }
+    public void updateTeamAvailability(long id, boolean isAvailable) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_AVAILABLE, isAvailable ? 1 : 0);
+
+        db.update(TABLE_RESCUE_TEAMS, values,
+                COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+    }
+
+
     public List<RescueTeam> getAvailableTeams() {
         List<RescueTeam> teams = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_RESCUE_TEAMS +
