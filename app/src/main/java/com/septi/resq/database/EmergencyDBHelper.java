@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.septi.resq.model.Emergency;
-import com.septi.resq.model.EmergencyStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +131,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(COLUMN_PHOTO_PATH))
             );
             emergency.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
-            emergency.setStatus(EmergencyStatus.valueOf(
+            emergency.setStatus(Emergency.EmergencyStatus.valueOf(
                     cursor.getString(cursor.getColumnIndex(COLUMN_STATUS))));
             cursor.close();
             return emergency;
@@ -162,7 +161,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(COLUMN_PHOTO_PATH))
             );
             emergency.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
-            emergency.setStatus(EmergencyStatus.valueOf(
+            emergency.setStatus(Emergency.EmergencyStatus.valueOf(
                     cursor.getString(cursor.getColumnIndex(COLUMN_STATUS))));
             emergencies.add(emergency);
         }

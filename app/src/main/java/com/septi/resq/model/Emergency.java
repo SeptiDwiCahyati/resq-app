@@ -1,6 +1,15 @@
+
 package com.septi.resq.model;
 
 public class Emergency {
+
+    // Enum untuk status darurat
+    public enum EmergencyStatus {
+        MENUNGGU,
+        PROSES,
+        SELESAI
+    }
+
     private long id;
     private double latitude;
     private double longitude;
@@ -10,6 +19,7 @@ public class Emergency {
     private String photoPath;
     private EmergencyStatus status;
 
+    // Constructor utama
     public Emergency(double latitude, double longitude, String type, String description, String timestamp, String photoPath) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -19,65 +29,74 @@ public class Emergency {
         this.photoPath = photoPath;
         this.status = EmergencyStatus.MENUNGGU; // Default status
     }
-    // Add getters and setters for status
-    public EmergencyStatus getStatus() {
-        return status;
-    }
 
-    public void setStatus(EmergencyStatus status) {
-        this.status = status;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
+    // Constructor tanpa photoPath
     public Emergency(double latitude, double longitude, String type, String description, String timestamp) {
         this(latitude, longitude, type, description, timestamp, null);
     }
 
+    // Getters dan Setters
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public double getLatitude() {
         return latitude;
     }
 
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
     public double getLongitude() {
         return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getPhotoPath() {
         return photoPath;
     }
 
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
+    }
 
-    public void setId(long id) {
-        this.id = id;
+    public EmergencyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EmergencyStatus status) {
+        this.status = status;
     }
 }
