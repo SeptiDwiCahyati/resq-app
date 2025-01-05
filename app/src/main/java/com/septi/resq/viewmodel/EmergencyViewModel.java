@@ -97,6 +97,16 @@ public class EmergencyViewModel extends ViewModel {
         }
     }
 
+    // Add this method to EmergencyViewModel:
+    public Emergency getEmergencyById(long emergencyId) {
+        for (Emergency emergency : getEmergencies().getValue()) {
+            if (emergency.getId() == emergencyId) {
+                return emergency;
+            }
+        }
+        return null;
+    }
+
 
 }
 
