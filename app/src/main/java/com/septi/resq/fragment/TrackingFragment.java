@@ -260,8 +260,14 @@ public class TrackingFragment extends Fragment {
             map.getOverlays().remove(existingRoute);
         }
 
+        // Hanya gambar rute dari posisi saat ini sampai akhir
+        Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
+        if (currentIndex == null) currentIndex = 0;
+
+        List<GeoPoint> remainingPoints = new ArrayList<>(points.subList(currentIndex, points.size()));
+
         Polyline routeLine = new Polyline();
-        routeLine.setPoints(points);
+        routeLine.setPoints(remainingPoints);
 
         int routeColor = getRouteColor(teamId);
         routeLine.setColor(routeColor);
@@ -271,6 +277,7 @@ public class TrackingFragment extends Fragment {
         rescueTeamRouteLines.put(teamId, routeLine);
         map.invalidate();
     }
+
 
     private int getRouteColor(Long teamId) {
         int baseColor = Math.abs(teamId.hashCode());
@@ -304,6 +311,7 @@ public class TrackingFragment extends Fragment {
         animationHandler.removeCallbacksAndMessages(null);
     }
 
+
     private void moveRescueTeam(Long teamId) {
         List<GeoPoint> route = rescueTeamRoutes.get(teamId);
         Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
@@ -316,11 +324,17 @@ public class TrackingFragment extends Fragment {
                 currentIndex >= route.size() - 1) {
             rescueTeamMovingStatus.put(teamId, false);
 
+            // Hapus garis rute ketika sampai tujuan
+            Polyline existingRoute = rescueTeamRouteLines.get(teamId);
+            if (existingRoute != null) {
+                map.getOverlays().remove(existingRoute);
+                rescueTeamRouteLines.remove(teamId);
+                map.invalidate();
+            }
+
             if (currentIndex >= route.size() - 1) {
-                // Get the emergency ID from active tracking
                 TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
                 if (currentTracking != null) {
-                    // Update final position and status
                     TrackingStatus status = new TrackingStatus();
                     status.setTeamId(teamId);
                     status.setEmergencyId(currentTracking.getEmergencyId());
@@ -332,7 +346,6 @@ public class TrackingFragment extends Fragment {
                     status.setRouteIndex(currentIndex);
                     dbHelperTracking.updateTracking(status);
 
-                    // Update emergency status if needed
                     EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
                     Emergency emergency = viewModel.getEmergencyById(currentTracking.getEmergencyId());
                     if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
@@ -352,12 +365,14 @@ public class TrackingFragment extends Fragment {
 
         Marker marker = rescueTeamMarkers.get(teamId);
         marker.setPosition(current);
+
+        // Update garis rute untuk menampilkan sisa rute
+        drawRoute(teamId, route);
+
         map.invalidate();
 
-        // Get emergency ID from active tracking
         TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
         if (currentTracking != null) {
-            // Update tracking status with current position
             TrackingStatus status = new TrackingStatus();
             status.setTeamId(teamId);
             status.setEmergencyId(currentTracking.getEmergencyId());
