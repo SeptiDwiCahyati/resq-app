@@ -157,6 +157,7 @@ public class MapFragment extends Fragment {
 
         return view;
     }
+
     private void showHighlightedEmergency(long emergencyId) {
         Emergency emergency = dbHelper.getEmergencyById((int) emergencyId);
         if (emergency != null) {
@@ -178,8 +179,6 @@ public class MapFragment extends Fragment {
     }
 
 
-
-
     private void addEmergencyMarker(Emergency emergency) {
         Marker newMarker = new Marker(mapView);
         newMarker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
@@ -199,6 +198,7 @@ public class MapFragment extends Fragment {
             addEmergencyMarker(emergency);
         }
     }
+
     private void updateEmergencyMarker(Emergency emergency) {
         if (emergency == null) return;
 
@@ -228,7 +228,6 @@ public class MapFragment extends Fragment {
             mapView.invalidate();
         }
     }
-
 
 
     private File createImageFile() throws IOException {
