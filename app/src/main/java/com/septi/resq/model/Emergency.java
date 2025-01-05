@@ -6,8 +6,9 @@ public class Emergency {
     private double longitude;
     private String type;
     private String description;
-    private final String timestamp;
+    private String timestamp;
     private String photoPath;
+    private EmergencyStatus status;
 
     public Emergency(double latitude, double longitude, String type, String description, String timestamp, String photoPath) {
         this.latitude = latitude;
@@ -16,6 +17,15 @@ public class Emergency {
         this.description = description;
         this.timestamp = timestamp;
         this.photoPath = photoPath;
+        this.status = EmergencyStatus.MENUNGGU; // Default status
+    }
+    // Add getters and setters for status
+    public EmergencyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EmergencyStatus status) {
+        this.status = status;
     }
 
     public void setType(String type) {

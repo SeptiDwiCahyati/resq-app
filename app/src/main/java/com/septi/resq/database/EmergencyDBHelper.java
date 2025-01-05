@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.septi.resq.model.Emergency;
+import com.septi.resq.model.EmergencyStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TIMESTAMP = "timestamp";
     public static final String COLUMN_PHOTO_PATH = "photo_path";
 
+    public static final String COLUMN_STATUS = "status";
+
     private static final String CREATE_TABLE_EMERGENCY =
             "CREATE TABLE " + TABLE_EMERGENCY + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -33,7 +36,8 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
                     COLUMN_TYPE + " TEXT NOT NULL, " +
                     COLUMN_DESCRIPTION + " TEXT, " +
                     COLUMN_TIMESTAMP + " TEXT NOT NULL, " +
-                    COLUMN_PHOTO_PATH + " TEXT);";
+                    COLUMN_PHOTO_PATH + " TEXT, " +
+                    COLUMN_STATUS + " TEXT NOT NULL DEFAULT 'MENUNGGU');";
 
     public EmergencyDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -49,6 +53,10 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         if (oldVersion < 2) {
             db.execSQL("ALTER TABLE " + TABLE_EMERGENCY +
                     " ADD COLUMN " + COLUMN_PHOTO_PATH + " TEXT;");
+        }
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE " + TABLE_EMERGENCY +
+                    " ADD COLUMN " + COLUMN_STATUS + " TEXT NOT NULL DEFAULT 'MENUNGGU';");
         }
     }
 
@@ -66,6 +74,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_LATITUDE, emergency.getLatitude());
         values.put(COLUMN_LONGITUDE, emergency.getLongitude());
         values.put(COLUMN_PHOTO_PATH, emergency.getPhotoPath());
+        values.put(COLUMN_STATUS, emergency.getStatus().name());
 
         return db.update(TABLE_EMERGENCY, values,
                 COLUMN_ID + "=?",
@@ -73,7 +82,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     }
 
     public long insertEmergency(Emergency emergency) {
-        // Cek apakah data dengan timestamp yang sama sudah ada
+        // Check for existing data with same timestamp
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_EMERGENCY,
                 null,
@@ -101,9 +110,11 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DESCRIPTION, emergency.getDescription());
         values.put(COLUMN_TIMESTAMP, emergency.getTimestamp());
         values.put(COLUMN_PHOTO_PATH, emergency.getPhotoPath());
+        values.put(COLUMN_STATUS, emergency.getStatus().name());
 
         return db.insert(TABLE_EMERGENCY, null, values);
     }
+
 
     @SuppressLint("Range")
     public Emergency getEmergencyById(int id) {
@@ -121,6 +132,8 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(COLUMN_PHOTO_PATH))
             );
             emergency.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+            emergency.setStatus(EmergencyStatus.valueOf(
+                    cursor.getString(cursor.getColumnIndex(COLUMN_STATUS))));
             cursor.close();
             return emergency;
         }
@@ -128,7 +141,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             cursor.close();
         }
-        return null; // Return null if no record is found
+        return null;
     }
 
 
@@ -149,10 +162,11 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(COLUMN_PHOTO_PATH))
             );
             emergency.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+            emergency.setStatus(EmergencyStatus.valueOf(
+                    cursor.getString(cursor.getColumnIndex(COLUMN_STATUS))));
             emergencies.add(emergency);
         }
         cursor.close();
         return emergencies;
     }
-
 }
