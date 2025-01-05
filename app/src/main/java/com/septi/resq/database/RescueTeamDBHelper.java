@@ -66,8 +66,6 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
             values.put(COLUMN_LATITUDE, Double.parseDouble(data[1]));
             values.put(COLUMN_LONGITUDE, Double.parseDouble(data[2]));
             values.put(COLUMN_CONTACT, data[3]);
-
-            // Set availability to always available (1)
             values.put(COLUMN_AVAILABLE, 1);
 
             db.insert(TABLE_RESCUE_TEAMS, null, values);

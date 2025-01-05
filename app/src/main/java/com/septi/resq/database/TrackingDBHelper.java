@@ -1,6 +1,7 @@
 // TrackingDBHelper.java
 package com.septi.resq.database;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -48,7 +49,7 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertTracking(TrackingStatus status) {
+    public void insertTracking(TrackingStatus status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TEAM_ID, status.getTeamId());
@@ -59,9 +60,10 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DESTINATION_LAT, status.getDestinationLat());
         values.put(COLUMN_DESTINATION_LON, status.getDestinationLon());
         values.put(COLUMN_ROUTE_INDEX, status.getRouteIndex());
-        return db.insert(TABLE_TRACKING, null, values);
+        db.insert(TABLE_TRACKING, null, values);
     }
 
+    @SuppressLint("Range")
     public TrackingStatus getLastTrackingStatus(long teamId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TRACKING,
@@ -70,8 +72,8 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(teamId)},
                 null,
                 null,
-                COLUMN_ID + " DESC",  // Order by ID descending to get the latest
-                "1");  // Limit 1 to get only the most recent
+                COLUMN_ID + " DESC",
+                "1");
 
         TrackingStatus status = null;
         if (cursor.moveToFirst()) {
@@ -90,7 +92,7 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
         return status;
     }
 
-    public boolean updateTracking(TrackingStatus status) {
+    public void updateTracking(TrackingStatus status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_STATUS, status.getStatus());
@@ -98,12 +100,13 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
         values.put(COLUMN_CURRENT_LON, status.getCurrentLon());
         values.put(COLUMN_ROUTE_INDEX, status.getRouteIndex());
 
-        return db.update(TABLE_TRACKING, values,
+        db.update(TABLE_TRACKING, values,
                 COLUMN_TEAM_ID + " = ? AND " + COLUMN_EMERGENCY_ID + " = ?",
                 new String[]{String.valueOf(status.getTeamId()),
-                        String.valueOf(status.getEmergencyId())}) > 0;
+                        String.valueOf(status.getEmergencyId())});
     }
 
+    @SuppressLint("Range")
     public TrackingStatus getActiveTracking(long teamId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TRACKING,

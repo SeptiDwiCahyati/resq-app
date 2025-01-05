@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +62,7 @@ public class TrackingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context ctx = requireActivity().getApplicationContext();
-        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        Configuration.getInstance().load(ctx, ctx.getSharedPreferences("osmdroid_prefs", Context.MODE_PRIVATE));
         dbHelper = new RescueTeamDBHelper(ctx);
         dbHelperTracking = new TrackingDBHelper(ctx);
     }
@@ -140,8 +139,8 @@ public class TrackingFragment extends Fragment {
 
     private Long findNearestTeam(GeoPoint emergencyLocation) {
         return rescueTeamMarkers.entrySet().stream()
-                .filter(entry -> Boolean.TRUE.equals(rescueTeamMovingStatus.get(entry.getKey())) == false &&
-                        rescueTeamMarkers.get(entry.getKey()).getSnippet().contains("Contact:"))
+                .filter(entry -> !Boolean.TRUE.equals(rescueTeamMovingStatus.get(entry.getKey())) &&
+                        Objects.requireNonNull(rescueTeamMarkers.get(entry.getKey())).getSnippet().contains("Contact:"))
                 .min((entry1, entry2) -> Double.compare(
                         calculateDistance(entry1.getValue().getPosition(), emergencyLocation),
                         calculateDistance(entry2.getValue().getPosition(), emergencyLocation)))
@@ -191,6 +190,7 @@ public class TrackingFragment extends Fragment {
                 status.setTeamId(nearestTeamId);
                 status.setEmergencyId(emergency.getId());
                 status.setStatus("IN_PROGRESS");
+                assert teamMarker != null;
                 status.setCurrentLat(teamMarker.getPosition().getLatitude());
                 status.setCurrentLon(teamMarker.getPosition().getLongitude());
                 status.setDestinationLat(emergencyLocation.getLatitude());
@@ -298,7 +298,7 @@ public class TrackingFragment extends Fragment {
     private void startRescueTeamMovement(Long teamId) {
         if (!Boolean.TRUE.equals(rescueTeamMovingStatus.get(teamId)) &&
                 rescueTeamRoutes.get(teamId) != null &&
-                !rescueTeamRoutes.get(teamId).isEmpty()) {
+                !Objects.requireNonNull(rescueTeamRoutes.get(teamId)).isEmpty()) {
 
             rescueTeamMovingStatus.put(teamId, true);
             rescueTeamRouteIndexes.put(teamId, 0);
@@ -364,6 +364,7 @@ public class TrackingFragment extends Fragment {
         long timeForSegment = (long) ((distance / SPEED) * 3600000);
 
         Marker marker = rescueTeamMarkers.get(teamId);
+        assert marker != null;
         marker.setPosition(current);
 
         // Update garis rute untuk menampilkan sisa rute

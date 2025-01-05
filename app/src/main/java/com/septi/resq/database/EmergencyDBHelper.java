@@ -81,7 +81,6 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
     }
 
     public long insertEmergency(Emergency emergency) {
-        // Check for existing data with same timestamp
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_EMERGENCY,
                 null,
