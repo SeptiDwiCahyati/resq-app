@@ -93,10 +93,21 @@ public class TrackingFragment extends Fragment {
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
         // Initialize rescue team markers
-        List<RescueTeam> allTeams = dbHelper.getAllTeams(); // Ambil semua tim, termasuk yang sedang bertugas
+        List<RescueTeam> allTeams = dbHelper.getAllTeams();
         for (RescueTeam team : allTeams) {
             Marker marker = new Marker(map);
-            marker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
+
+            // Cek status tracking terakhir untuk tim ini
+            TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(team.getId());
+
+            if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
+                // Jika ada tracking yang completed, gunakan posisi terakhir
+                marker.setPosition(new GeoPoint(lastStatus.getCurrentLat(), lastStatus.getCurrentLon()));
+            } else {
+                // Jika tidak ada atau belum completed, gunakan posisi default
+                marker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
+            }
+
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             marker.setTitle(team.getName());
 
@@ -104,17 +115,20 @@ public class TrackingFragment extends Fragment {
             Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
             marker.setIcon(resizedIcon);
 
-            // Atur status berdasarkan ketersediaan
+            // Update snippet berdasarkan status
             if (!team.isAvailable()) {
-                marker.setSnippet("Tidak tersedia / Dalam tugas");
+                if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
+                    marker.setSnippet("Selesai bertugas di lokasi");
+                } else {
+                    marker.setSnippet("Tidak tersedia / Dalam tugas");
+                }
             } else {
                 marker.setSnippet("Contact: " + team.getContactNumber());
             }
 
             marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
-                // Tampilkan informasi
                 clickedMarker.showInfoWindow();
-                return true; // Menghentikan event lebih lanjut
+                return true;
             });
 
             map.getOverlays().add(marker);
@@ -380,18 +394,27 @@ public class TrackingFragment extends Fragment {
         super.onResume();
         map.onResume();
 
-        // Tambahkan null check
         if (dbHelperTracking != null) {
-            // Check for active trackings
+            // Check untuk setiap tim
             for (Long teamId : rescueTeamMarkers.keySet()) {
-                TrackingStatus status = dbHelperTracking.getActiveTracking(teamId);
-                if (status != null) {
-                    // Resume tracking from saved position
-                    GeoPoint currentPos = new GeoPoint(status.getCurrentLat(), status.getCurrentLon());
-                    GeoPoint destination = new GeoPoint(status.getDestinationLat(), status.getDestinationLon());
+                TrackingStatus activeStatus = dbHelperTracking.getActiveTracking(teamId);
+                TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(teamId);
 
-                    rescueTeamRouteIndexes.put(teamId, status.getRouteIndex());
+                if (activeStatus != null) {
+                    // Ada tracking aktif, lanjutkan rute
+                    GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
+                    GeoPoint destination = new GeoPoint(activeStatus.getDestinationLat(), activeStatus.getDestinationLon());
+
+                    rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
                     calculateRoute(teamId, currentPos, destination);
+                } else if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
+                    // Tracking sudah selesai, update posisi marker ke posisi terakhir
+                    Marker marker = rescueTeamMarkers.get(teamId);
+                    if (marker != null) {
+                        marker.setPosition(new GeoPoint(lastStatus.getCurrentLat(), lastStatus.getCurrentLon()));
+                        marker.setSnippet("Selesai bertugas di lokasi");
+                        map.invalidate();
+                    }
                 }
             }
         }
