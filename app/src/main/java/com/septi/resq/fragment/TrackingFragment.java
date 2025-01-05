@@ -199,7 +199,7 @@ public class TrackingFragment extends Fragment {
 
 
     private void updateAllMarkers(List<Emergency> emergencies) {
-        // Clear existing markers
+        // Remove only emergency markers, not routes
         for (Marker marker : emergencyMarkers) {
             map.getOverlays().remove(marker);
         }
@@ -211,6 +211,7 @@ public class TrackingFragment extends Fragment {
         }
     }
 
+
     private void calculateRoute(Long teamId, GeoPoint start, GeoPoint end) {
         RouteCalculator.calculateRoute(getContext(), start, end, new RouteCalculator.RouteCalculationCallback() {
             @Override
@@ -219,15 +220,7 @@ public class TrackingFragment extends Fragment {
                 rescueTeamRouteIndexes.put(teamId, 0);
 
                 requireActivity().runOnUiThread(() -> {
-                    // Clear any existing routes on the map
-                    for (Polyline routeLine : rescueTeamRouteLines.values()) {
-                        if (routeLine != null) {
-                            map.getOverlays().remove(routeLine);
-                        }
-                    }
-                    rescueTeamRouteLines.clear();
-
-                    // Draw new route and start movement
+                    // Instead of clearing all routes, just draw the new one
                     drawRoute(teamId, route);
                     startRescueTeamMovement(teamId);
                 });
@@ -242,18 +235,41 @@ public class TrackingFragment extends Fragment {
 
 
     private void drawRoute(Long teamId, List<GeoPoint> points) {
+        // Remove only the specific team's previous route if it exists
         Polyline existingRoute = rescueTeamRouteLines.get(teamId);
         if (existingRoute != null) {
             map.getOverlays().remove(existingRoute);
         }
 
+        // Create and add the new route
         Polyline routeLine = new Polyline();
         routeLine.setPoints(points);
-        routeLine.setColor(Color.BLUE);
+
+        // Assign different colors for different teams
+        int routeColor = getRouteColor(teamId);
+        routeLine.setColor(routeColor);
         routeLine.setWidth(10f);
+
         map.getOverlays().add(routeLine);
         rescueTeamRouteLines.put(teamId, routeLine);
         map.invalidate();
+    }
+
+    private int getRouteColor(Long teamId) {
+        // Use the teamId to generate different colors
+        int baseColor = Math.abs(teamId.hashCode());
+        switch (Math.abs(baseColor % 5)) {
+            case 0:
+                return Color.BLUE;
+            case 1:
+                return Color.RED;
+            case 2:
+                return Color.GREEN;
+            case 3:
+                return Color.MAGENTA;
+            default:
+                return Color.CYAN;
+        }
     }
 
     private void startRescueTeamMovement(Long teamId) {
@@ -323,11 +339,19 @@ public class TrackingFragment extends Fragment {
         map.onPause();
     }
 
-    @Override
     public void onDestroy() {
         super.onDestroy();
+        // Stop all team movements
         for (Long teamId : rescueTeamMarkers.keySet()) {
             stopRescueTeamMovement(teamId);
         }
+
+        // Clear all routes
+        for (Polyline routeLine : rescueTeamRouteLines.values()) {
+            if (routeLine != null) {
+                map.getOverlays().remove(routeLine);
+            }
+        }
+        rescueTeamRouteLines.clear();
     }
 }
