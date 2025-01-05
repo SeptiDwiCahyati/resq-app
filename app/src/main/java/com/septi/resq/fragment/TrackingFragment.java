@@ -52,7 +52,7 @@ public class TrackingFragment extends Fragment {
     private final Map<Long, Polyline> rescueTeamRouteLines = new HashMap<>();
 
     private final List<Marker> emergencyMarkers = new ArrayList<>();
-    private TrackingDBHelper dbHelperTracking; // Tambahkan ini
+    private TrackingDBHelper dbHelperTracking;
 
     private static final float SPEED = 200.0f;
     private final Handler animationHandler = new Handler();
