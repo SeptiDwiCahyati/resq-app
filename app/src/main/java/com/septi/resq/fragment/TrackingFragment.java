@@ -201,46 +201,59 @@ public class TrackingFragment extends Fragment {
             Long nearestTeamId = findNearestTeam(emergencyLocation);
 
             if (nearestTeamId != null) {
-                Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
+                Toast.makeText(getContext(), "Tim akan dikirim dalam 30 detik...", Toast.LENGTH_LONG).show();
 
-                // Start tracking service
-                Intent serviceIntent = new Intent(getContext(), TrackingService.class);
-                requireContext().startForegroundService(serviceIntent);
-
-                // Save initial tracking status
-                TrackingStatus status = new TrackingStatus();
-                status.setTeamId(nearestTeamId);
-                status.setEmergencyId(emergency.getId());
-                status.setStatus("IN_PROGRESS");
-                assert teamMarker != null;
-                status.setCurrentLat(teamMarker.getPosition().getLatitude());
-                status.setCurrentLon(teamMarker.getPosition().getLongitude());
-                status.setDestinationLat(emergencyLocation.getLatitude());
-                status.setDestinationLon(emergencyLocation.getLongitude());
-                status.setRouteIndex(0);
-
-                dbHelperTracking.insertTracking(status);
-                stopRescueTeamMovement(nearestTeamId);
-                calculateRoute(nearestTeamId, teamMarker.getPosition(), emergencyLocation);
-
-                // Update team marker title and snippet
-                teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
-                teamMarker.setSnippet("Tidak tersedia / Dalam tugas");
-
-                RescueTeam team = dbHelper.getTeamById(nearestTeamId);
-                if (team != null) {
-                    team.setIsAvailable(false);
-                    dbHelper.updateTeamAvailability(team.getId(), false);
-                }
-
-                emergency.setStatus(Emergency.EmergencyStatus.PROSES);
-                EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-                viewModel.updateEmergency(emergency);
-
-                map.invalidate();
+                // Tambahkan jeda 30 detik sebelum dispatch
+                new Handler().postDelayed(() -> {
+                    dispatchRescueTeam(emergency, nearestTeamId, emergencyLocation);
+                }, 30000); // 30 detik dalam milidetik
+            } else {
+                Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
             }
         }
     }
+
+    private void dispatchRescueTeam(Emergency emergency, Long nearestTeamId, GeoPoint emergencyLocation) {
+        Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
+
+        // Start tracking service
+        Intent serviceIntent = new Intent(getContext(), TrackingService.class);
+        requireContext().startForegroundService(serviceIntent);
+
+        // Save initial tracking status
+        TrackingStatus status = new TrackingStatus();
+        status.setTeamId(nearestTeamId);
+        status.setEmergencyId(emergency.getId());
+        status.setStatus("IN_PROGRESS");
+        assert teamMarker != null;
+        status.setCurrentLat(teamMarker.getPosition().getLatitude());
+        status.setCurrentLon(teamMarker.getPosition().getLongitude());
+        status.setDestinationLat(emergencyLocation.getLatitude());
+        status.setDestinationLon(emergencyLocation.getLongitude());
+        status.setRouteIndex(0);
+
+        dbHelperTracking.insertTracking(status);
+        stopRescueTeamMovement(nearestTeamId);
+        calculateRoute(nearestTeamId, teamMarker.getPosition(), emergencyLocation);
+
+        // Update team marker title and snippet
+        teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
+        teamMarker.setSnippet("Tidak tersedia / Dalam tugas");
+
+        RescueTeam team = dbHelper.getTeamById(nearestTeamId);
+        if (team != null) {
+            team.setIsAvailable(false);
+            dbHelper.updateTeamAvailability(team.getId(), false);
+        }
+
+        emergency.setStatus(Emergency.EmergencyStatus.PROSES);
+        EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        viewModel.updateEmergency(emergency);
+
+        map.invalidate();
+    }
+
+
 
 
     private void updateAllMarkers(List<Emergency> emergencies) {
