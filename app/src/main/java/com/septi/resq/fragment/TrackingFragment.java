@@ -201,8 +201,6 @@ public class TrackingFragment extends Fragment {
             Long nearestTeamId = findNearestTeam(emergencyLocation);
 
             if (nearestTeamId != null) {
-                Toast.makeText(getContext(), "Tim akan dikirim dalam 30 detik...", Toast.LENGTH_LONG).show();
-
                 // Tambahkan jeda 30 detik sebelum dispatch
                 new Handler().postDelayed(() -> {
                     dispatchRescueTeam(emergency, nearestTeamId, emergencyLocation);
