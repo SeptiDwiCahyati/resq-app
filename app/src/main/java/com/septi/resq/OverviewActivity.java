@@ -2,6 +2,7 @@ package com.septi.resq;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.septi.resq.fragment.DashboardFragment;
 import com.septi.resq.fragment.MapFragment;
@@ -28,40 +30,36 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
     private final Fragment mapFragment = new MapFragment(); // Fragment untuk peta
     private final Fragment trackingFragment = new TrackingFragment(); // Fragment untuk pelacakan
     private final Fragment profileFragment = new ProfileFragment(); // Fragment untuk profil pengguna
+    private LottieAnimationView loadingAnimation;
 
     private Fragment activeFragment = homeFragment; // Fragment yang sedang aktif ditampilkan
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_overview); // Menghubungkan dengan layout activity_overview
+        setContentView(R.layout.activity_overview);
 
-        // Mengatur warna status bar agar sesuai dengan tema aplikasi
-        Window window = getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+        // Inisialisasi Loading Animation
+        loadingAnimation = findViewById(R.id.loading_animation);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation); // Menginisialisasi bottom navigation
-        LocationUtils.checkLocationPermission(this); // Mengecek izin lokasi pengguna
+        showLoading(); // Tampilkan animasi loading
 
-        // Menambahkan semua fragment ke FragmentManager dan menyembunyikan fragment yang tidak aktif
-        fragmentManager.beginTransaction().add(R.id.fragment_container, profileFragment, "5").hide(profileFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, trackingFragment, "4").hide(trackingFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, mapFragment, "3").hide(mapFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, reportFragment, "2").hide(reportFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "1").commit();
+        // Proses persiapan aplikasi
+        setupFragments(); // Menginisialisasi fragment
+        setupBottomNavigation(); // Mengatur navigasi bawah
 
-        // Cek apakah intent membawa data untuk navigasi langsung ke peta
-        if (getIntent().getBooleanExtra("navigateToMap", false)) {
-            switchFragment(mapFragment); // Berpindah ke fragment peta
-            bottomNavigationView.setSelectedItemId(R.id.nav_map); // Menyetel navigasi peta sebagai aktif
-            Bundle args = new Bundle();
-            args.putLong("emergencyId", getIntent().getLongExtra("emergencyId", -1)); // Memasukkan ID darurat
-            args.putDouble("latitude", getIntent().getDoubleExtra("latitude", 0)); // Memasukkan latitude lokasi
-            args.putDouble("longitude", getIntent().getDoubleExtra("longitude", 0)); // Memasukkan longitude lokasi
-            mapFragment.setArguments(args); // Mengirimkan data ke fragment peta
+        // Mengecek izin lokasi
+        if (LocationUtils.hasLocationPermission(this)) {
+            onLocationPermissionGranted();
+        } else {
+            LocationUtils.checkLocationPermission(this);
         }
+
+        hideLoading(); // Sembunyikan animasi loading setelah persiapan selesai
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation); // Menghubungkan dengan komponen navigasi bawah di layout
 
         // Menentukan aksi untuk setiap item navigasi bawah
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -86,13 +84,42 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
 
             return false; // Tidak ada aksi untuk item yang tidak dikenali
         });
+
+        // Cek apakah intent membawa data untuk navigasi langsung ke peta
+        if (getIntent().getBooleanExtra("navigateToMap", false)) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_map); // Menyetel navigasi peta sebagai aktif
+            switchFragment(mapFragment); // Berpindah ke fragment peta
+        }
     }
+
+    private void setupFragments() {
+        fragmentManager.beginTransaction().add(R.id.fragment_container, profileFragment, "5").hide(profileFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, trackingFragment, "4").hide(trackingFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, mapFragment, "3").hide(mapFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, reportFragment, "2").hide(reportFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, homeFragment, "1").commit();
+    }
+
+
+    private void showLoading() {
+        loadingAnimation.setVisibility(View.VISIBLE);
+        loadingAnimation.playAnimation();
+    }
+
+    private void hideLoading() {
+        loadingAnimation.setVisibility(View.GONE);
+        loadingAnimation.cancelAnimation();
+    }
+
 
     // Method untuk berpindah antar fragment
     private void switchFragment(Fragment fragment) {
-        fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit(); // Menyembunyikan fragment aktif dan menampilkan fragment baru
-        activeFragment = fragment; // Menyetel fragment baru sebagai aktif
+        showLoading(); // Tampilkan loading saat mulai navigasi
+        fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
+        activeFragment = fragment; // Set fragment baru sebagai aktif
+        hideLoading(); // Sembunyikan loading setelah navigasi selesai
     }
+
 
     @Override
     public void onLocationPermissionGranted() {
