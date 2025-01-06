@@ -53,8 +53,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             finish();
         }
 
-        // Setup toolbar
-        // Remove the cast to AppCompatActivity and use 'this' instead
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -188,7 +186,7 @@ public class ReportDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed(); // This will handle the back button press
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);

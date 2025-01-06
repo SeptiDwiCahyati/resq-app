@@ -17,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
     private LottieAnimationView lottieAnimation;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable navigateRunnable = () -> {
-        // Navigasi ke layar berikutnya setelah delay 3 detik
         if (AppUtils.isFirstTimeLaunch(this)) {
             startActivity(new Intent(MainActivity.this, LandingActivity.class));
         } else {
@@ -31,17 +30,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Mengatur warna status bar
         setStatusBarColor(R.color.colorPrimaryDark);
 
-        // Inisialisasi animasi loading
         lottieAnimation = findViewById(R.id.loading_animation);
-
-        // Tampilkan animasi loading
         showLoading();
 
-        // Tambahkan delay sebelum berpindah aktivitas
-        handler.postDelayed(navigateRunnable, 3000); // Delay 3 detik (3000 ms)
+        handler.postDelayed(navigateRunnable, 3000);
     }
 
     private void setStatusBarColor(int colorResId) {
@@ -53,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void showLoading() {
         lottieAnimation.setVisibility(View.VISIBLE);
-        lottieAnimation.playAnimation(); // Mainkan animasi
+        lottieAnimation.playAnimation();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacks(navigateRunnable); // Pastikan tidak ada callback tertunda
+        handler.removeCallbacks(navigateRunnable);
     }
 }

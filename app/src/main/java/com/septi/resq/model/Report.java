@@ -16,7 +16,6 @@ public class Report {
         this.longitude = longitude;
     }
 
-    // Getters
     public String getTitle() {
         return title;
     }

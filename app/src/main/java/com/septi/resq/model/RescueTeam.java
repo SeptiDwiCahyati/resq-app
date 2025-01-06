@@ -20,7 +20,6 @@ public class RescueTeam {
         this.isAvailable = isAvailable;
     }
 
-    // Getters and setters
     public long getId() { return id; }
     public String getName() { return name; }
     public double getLatitude() { return latitude; }

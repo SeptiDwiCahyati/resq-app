@@ -318,23 +318,15 @@ public class DashboardFragment extends Fragment {
      */
 
     private void setupQuickActionsRecyclerView() {
-        // Mengambil daftar tindakan cepat dari data dummy
         List<QuickAction> quickActions = DummyData.getQuickActions();
-
-        // Menyiapkan layout GridLayoutManager untuk tindakan cepat (4 kolom)
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
-
-        // Menetapkan adapter untuk tindakan cepat
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
-            // Menangani klik pada tombol "Lihat Semua" (posisi 7)
             if (position == 7) {
                 showAllActionsDialog();
             }
         });
-
-        // Menetapkan adapter ke RecyclerView
         rvQuickActions.setAdapter(adapter);
     }
 

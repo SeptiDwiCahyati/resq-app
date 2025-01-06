@@ -2,8 +2,6 @@
 package com.septi.resq.model;
 
 public class Emergency {
-
-    // Enum untuk status darurat
     public enum EmergencyStatus {
         MENUNGGU,
         PROSES,
@@ -19,7 +17,6 @@ public class Emergency {
     private String photoPath;
     private EmergencyStatus status;
 
-    // Constructor utama
     public Emergency(double latitude, double longitude, String type, String description, String timestamp, String photoPath) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -27,15 +24,13 @@ public class Emergency {
         this.description = description;
         this.timestamp = timestamp;
         this.photoPath = photoPath;
-        this.status = EmergencyStatus.MENUNGGU; // Default status
+        this.status = EmergencyStatus.MENUNGGU;
     }
 
-    // Constructor tanpa photoPath
     public Emergency(double latitude, double longitude, String type, String description, String timestamp) {
         this(latitude, longitude, type, description, timestamp, null);
     }
 
-    // Getters dan Setters
     public long getId() {
         return id;
     }

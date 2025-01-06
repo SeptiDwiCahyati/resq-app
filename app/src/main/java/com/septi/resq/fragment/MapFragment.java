@@ -80,7 +80,6 @@ public class MapFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
         viewModel.init(dbHelper);
 
-        // Initialize the camera launcher
         takePicture = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 result -> {
@@ -95,7 +94,6 @@ public class MapFragment extends Fragment {
             highlightedEmergencyId = getArguments().getLong("emergencyId", -1);
         }
 
-        // Check if we have navigation extras from MainActivity
         Activity activity = getActivity();
         if (activity != null) {
             Intent intent = activity.getIntent();
@@ -104,16 +102,9 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Observe new emergencies
         viewModel.getNewEmergency().observe(this, this::addEmergencyMarker);
-
-        // Observe updated emergencies
         viewModel.getUpdatedEmergency().observe(this, this::updateEmergencyMarker);
-
-        // Observe deleted emergencies
         viewModel.getDeletedEmergencyId().observe(this, this::removeEmergencyMarker);
-
-        // Observe full list updates
         viewModel.getEmergencies().observe(this, this::updateAllMarkers);
     }
 
@@ -150,9 +141,8 @@ public class MapFragment extends Fragment {
 
         setupMapClickListener();
         loadExistingMarkers();
-        // Add this after loading existing markers
         if (highlightedEmergencyId != -1) {
-            new Handler().postDelayed(() -> showHighlightedEmergency(highlightedEmergencyId), 500); // Small delay to ensure markers are loaded
+            new Handler().postDelayed(() -> showHighlightedEmergency(highlightedEmergencyId), 500);
         }
 
         return view;
@@ -163,11 +153,9 @@ public class MapFragment extends Fragment {
         if (emergency != null) {
             GeoPoint point = new GeoPoint(emergency.getLatitude(), emergency.getLongitude());
 
-            // Center map on the emergency location
             mapView.getController().animateTo(point);
             mapView.getController().setZoom(18.0);
 
-            // Find and show the marker's info window
             for (Marker marker : emergencyMarkers) {
                 if (findEmergencyForMarker(marker) != null &&
                         Objects.requireNonNull(findEmergencyForMarker(marker)).getId() == emergencyId) {
@@ -203,11 +191,9 @@ public class MapFragment extends Fragment {
         if (emergency == null) return;
 
         for (Marker marker : emergencyMarkers) {
-            String markerId = marker.getId(); // or however you're storing the emergency ID
+            String markerId = marker.getId();
             if (markerId != null && markerId.equals(String.valueOf(emergency.getId()))) {
-                // Update marker
                 marker.setPosition(new GeoPoint(emergency.getLatitude(), emergency.getLongitude()));
-                // Update other marker properties
                 mapView.invalidate();
                 break;
             }
@@ -388,7 +374,6 @@ public class MapFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeSpinner.setAdapter(adapter);
 
-        // Setup camera button
         takePhotoButton.setOnClickListener(v -> {
             if (checkCameraPermission()) {
                 launchCamera();

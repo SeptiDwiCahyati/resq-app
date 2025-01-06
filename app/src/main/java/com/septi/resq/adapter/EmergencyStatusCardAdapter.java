@@ -189,6 +189,7 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         }
         notifyDataSetChanged();
     }
+
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);

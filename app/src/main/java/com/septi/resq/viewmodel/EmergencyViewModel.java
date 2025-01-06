@@ -1,4 +1,3 @@
-// EmergencyViewModel.java
 package com.septi.resq.viewmodel;
 
 import androidx.lifecycle.LiveData;
@@ -97,7 +96,6 @@ public class EmergencyViewModel extends ViewModel {
         }
     }
 
-    // Add this method to EmergencyViewModel:
     public Emergency getEmergencyById(long emergencyId) {
         for (Emergency emergency : getEmergencies().getValue()) {
             if (emergency.getId() == emergencyId) {

@@ -1,5 +1,6 @@
 package com.septi.resq.adapter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
         this.isVerticalLayout = false;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<RescueTeam> newTeams, boolean isVertical) {
         this.rescueTeams = newTeams;
         this.isVerticalLayout = isVertical;
@@ -86,9 +88,8 @@ public class ActiveTeamsAdapter extends RecyclerView.Adapter<ActiveTeamsAdapter.
         void bind(RescueTeam team) {
             nameView.setText(team.getName());
 
-            // Format distance
             Double distance = team.getDistance();
-            String distanceText = distance != null ?
+            @SuppressLint("DefaultLocale") String distanceText = distance != null ?
                     String.format("%.1f km", distance) : "Calculating...";
             distanceView.setText(distanceText);
 

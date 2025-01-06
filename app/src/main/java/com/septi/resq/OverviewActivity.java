@@ -3,8 +3,6 @@ package com.septi.resq;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -21,18 +19,16 @@ import com.septi.resq.utils.LocationUtils;
 
 public class OverviewActivity extends AppCompatActivity implements LocationUtils.LocationPermissionCallback {
 
-    // Fragment Manager
-    private final FragmentManager fragmentManager = getSupportFragmentManager(); // Mengelola fragment untuk berpindah antar layar
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
 
-    // Deklarasi fragment yang digunakan dalam aplikasi
-    private final Fragment homeFragment = new DashboardFragment(); // Fragment untuk dashboard
-    private final Fragment reportFragment = new ReportFragment(); // Fragment untuk laporan
-    private final Fragment mapFragment = new MapFragment(); // Fragment untuk peta
-    private final Fragment trackingFragment = new TrackingFragment(); // Fragment untuk pelacakan
-    private final Fragment profileFragment = new ProfileFragment(); // Fragment untuk profil pengguna
+    private final Fragment homeFragment = new DashboardFragment();
+    private final Fragment reportFragment = new ReportFragment();
+    private final Fragment mapFragment = new MapFragment();
+    private final Fragment trackingFragment = new TrackingFragment();
+    private final Fragment profileFragment = new ProfileFragment();
     private LottieAnimationView loadingAnimation;
 
-    private Fragment activeFragment = homeFragment; // Fragment yang sedang aktif ditampilkan
+    private Fragment activeFragment = homeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +38,7 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         // Inisialisasi Loading Animation
         loadingAnimation = findViewById(R.id.loading_animation);
 
-        showLoading(); // Tampilkan animasi loading
+        showLoading();
 
         // Proses persiapan aplikasi
         setupFragments(); // Menginisialisasi fragment
@@ -55,13 +51,11 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
             LocationUtils.checkLocationPermission(this);
         }
 
-        hideLoading(); // Sembunyikan animasi loading setelah persiapan selesai
+        hideLoading();
     }
 
     private void setupBottomNavigation() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation); // Menghubungkan dengan komponen navigasi bawah di layout
-
-        // Menentukan aksi untuk setiap item navigasi bawah
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
@@ -82,13 +76,12 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
                 return true;
             }
 
-            return false; // Tidak ada aksi untuk item yang tidak dikenali
+            return false;
         });
 
-        // Cek apakah intent membawa data untuk navigasi langsung ke peta
         if (getIntent().getBooleanExtra("navigateToMap", false)) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_map); // Menyetel navigasi peta sebagai aktif
-            switchFragment(mapFragment); // Berpindah ke fragment peta
+            bottomNavigationView.setSelectedItemId(R.id.nav_map);
+            switchFragment(mapFragment);
         }
     }
 
@@ -114,29 +107,28 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
 
     // Method untuk berpindah antar fragment
     private void switchFragment(Fragment fragment) {
-        showLoading(); // Tampilkan loading saat mulai navigasi
+        showLoading();
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();
-        activeFragment = fragment; // Set fragment baru sebagai aktif
-        hideLoading(); // Sembunyikan loading setelah navigasi selesai
+        activeFragment = fragment;
+        hideLoading();
     }
 
 
     @Override
     public void onLocationPermissionGranted() {
-        // Hanya memperbarui jika fragment aktif adalah DashboardFragment
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
         if (currentFragment instanceof DashboardFragment) {
             DashboardFragment dashboardFragment = (DashboardFragment) currentFragment;
-            dashboardFragment.updateTeamDistances(); // Memperbarui jarak tim di dashboard
+            dashboardFragment.updateTeamDistances();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LocationUtils.PERMISSION_REQUEST_CODE) { // Mengecek apakah request code sesuai
+        if (requestCode == LocationUtils.PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                onLocationPermissionGranted(); // Memanggil callback jika izin diberikan
+                onLocationPermissionGranted();
             }
         }
     }
@@ -144,8 +136,8 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
     @Override
     protected void onResume() {
         super.onResume();
-        if (LocationUtils.hasLocationPermission(this)) { // Mengecek apakah izin lokasi telah diberikan
-            onLocationPermissionGranted(); // Memanggil callback jika izin sudah ada
+        if (LocationUtils.hasLocationPermission(this)) {
+            onLocationPermissionGranted();
         }
     }
 }

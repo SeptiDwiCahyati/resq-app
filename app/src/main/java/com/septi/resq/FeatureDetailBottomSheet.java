@@ -50,7 +50,6 @@ public class FeatureDetailBottomSheet extends BottomSheetDialogFragment {
             featureIcon.setImageResource(R.drawable.ic_tracking);
         }
 
-        // Tambahkan listener untuk tombol "Tutup"
         closeButton.setOnClickListener(v -> dismiss());
 
         return view;

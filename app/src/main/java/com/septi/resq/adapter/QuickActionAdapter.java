@@ -54,11 +54,11 @@ public class QuickActionAdapter extends RecyclerView.Adapter<QuickActionAdapter.
     static class QuickActionViewHolder extends RecyclerView.ViewHolder {
         ImageView iconView;
         TextView titleView;
-        List<QuickAction> quickActions;  // Store the quickActions list
+        List<QuickAction> quickActions;
 
         QuickActionViewHolder(View itemView, final OnItemClickListener listener, List<QuickAction> quickActions) {
             super(itemView);
-            this.quickActions = quickActions;  // Initialize the list
+            this.quickActions = quickActions;
             iconView = itemView.findViewById(R.id.iv_icon);
             titleView = itemView.findViewById(R.id.tv_title);
 

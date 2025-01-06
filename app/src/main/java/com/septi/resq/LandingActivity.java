@@ -15,13 +15,11 @@ public class LandingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Make status bar transparent
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         );
 
-        // Skip landing page if not first launch
         if (!AppUtils.isFirstTimeLaunch(this)) {
             startActivity(new Intent(LandingActivity.this, OverviewActivity.class));
             finish();
@@ -30,7 +28,6 @@ public class LandingActivity extends AppCompatActivity {
 
         setContentView(R.layout.landing_screen);
 
-        // Setup click listeners for cards
         View emergencyCard = findViewById(R.id.emergencyCard);
         View trackingCard = findViewById(R.id.trackingCard);
         MaterialButton getStartedButton = findViewById(R.id.getStartedButton);
@@ -46,7 +43,6 @@ public class LandingActivity extends AppCompatActivity {
     }
 
     private void showFeatureDetail(String feature) {
-        // Show feature detail bottom sheet or dialog
         FeatureDetailBottomSheet bottomSheet = new FeatureDetailBottomSheet(feature);
         bottomSheet.show(getSupportFragmentManager(), "FeatureDetail");
     }

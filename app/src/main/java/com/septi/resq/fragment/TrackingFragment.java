@@ -113,19 +113,15 @@ public class TrackingFragment extends Fragment {
         map.getController().setZoom(15.0);
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
 
-        // Initialize rescue team markers
         List<RescueTeam> allTeams = dbHelper.getAllTeams();
         for (RescueTeam team : allTeams) {
             Marker marker = new Marker(map);
 
-            // Cek status tracking terakhir untuk tim ini
             TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(team.getId());
 
             if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
-                // Jika ada tracking yang completed, gunakan posisi terakhir
                 marker.setPosition(new GeoPoint(lastStatus.getCurrentLat(), lastStatus.getCurrentLon()));
             } else {
-                // Jika tidak ada atau belum completed, gunakan posisi default
                 marker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
             }
 
@@ -136,7 +132,6 @@ public class TrackingFragment extends Fragment {
             Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
             marker.setIcon(resizedIcon);
 
-            // Update snippet berdasarkan status
             if (!team.isAvailable()) {
                 if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
                     marker.setSnippet("Selesai bertugas di lokasi");
@@ -201,10 +196,9 @@ public class TrackingFragment extends Fragment {
             Long nearestTeamId = findNearestTeam(emergencyLocation);
 
             if (nearestTeamId != null) {
-                // Tambahkan jeda 30 detik sebelum dispatch
                 new Handler().postDelayed(() -> {
                     dispatchRescueTeam(emergency, nearestTeamId, emergencyLocation);
-                }, 30000); // 30 detik dalam milidetik
+                }, 30000);
             } else {
                 Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
             }
@@ -214,11 +208,9 @@ public class TrackingFragment extends Fragment {
     private void dispatchRescueTeam(Emergency emergency, Long nearestTeamId, GeoPoint emergencyLocation) {
         Marker teamMarker = rescueTeamMarkers.get(nearestTeamId);
 
-        // Start tracking service
         Intent serviceIntent = new Intent(getContext(), TrackingService.class);
         requireContext().startForegroundService(serviceIntent);
 
-        // Save initial tracking status
         TrackingStatus status = new TrackingStatus();
         status.setTeamId(nearestTeamId);
         status.setEmergencyId(emergency.getId());
@@ -234,7 +226,6 @@ public class TrackingFragment extends Fragment {
         stopRescueTeamMovement(nearestTeamId);
         calculateRoute(nearestTeamId, teamMarker.getPosition(), emergencyLocation);
 
-        // Update team marker title and snippet
         teamMarker.setTitle(teamMarker.getTitle() + " (Responding)");
         teamMarker.setSnippet("Tidak tersedia / Dalam tugas");
 
@@ -251,9 +242,6 @@ public class TrackingFragment extends Fragment {
         map.invalidate();
     }
 
-
-
-
     private void updateAllMarkers(List<Emergency> emergencies) {
         for (Marker marker : emergencyMarkers) {
             map.getOverlays().remove(marker);
@@ -264,7 +252,6 @@ public class TrackingFragment extends Fragment {
             addEmergencyMarker(emergency);
         }
     }
-
 
     private void calculateRoute(Long teamId, GeoPoint start, GeoPoint end) {
         RouteCalculator.calculateRoute(getContext(), start, end, new RouteCalculator.RouteCalculationCallback() {
@@ -293,7 +280,6 @@ public class TrackingFragment extends Fragment {
             map.getOverlays().remove(existingRoute);
         }
 
-        // Hanya gambar rute dari posisi saat ini sampai akhir
         Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
         if (currentIndex == null) currentIndex = 0;
 
@@ -362,7 +348,6 @@ public class TrackingFragment extends Fragment {
         updateMarkerPosition(teamId, current);
         updateTrackingStatus(teamId, currentIndex, current, "IN_PROGRESS");
 
-        // Update the adapter when tracking status changes
         TrackingStatus tracking = dbHelperTracking.getActiveTracking(teamId);
         if (tracking != null) {
             adapter.updateEmergencyStatus(tracking.getEmergencyId(), "IN_PROGRESS");
@@ -465,20 +450,17 @@ public class TrackingFragment extends Fragment {
         map.onResume();
 
         if (dbHelperTracking != null) {
-            // Check untuk setiap tim
             for (Long teamId : rescueTeamMarkers.keySet()) {
                 TrackingStatus activeStatus = dbHelperTracking.getActiveTracking(teamId);
                 TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(teamId);
 
                 if (activeStatus != null) {
-                    // Ada tracking aktif, lanjutkan rute
                     GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
                     GeoPoint destination = new GeoPoint(activeStatus.getDestinationLat(), activeStatus.getDestinationLon());
 
                     rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
                     calculateRoute(teamId, currentPos, destination);
                 } else if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
-                    // Tracking sudah selesai, update posisi marker ke posisi terakhir
                     Marker marker = rescueTeamMarkers.get(teamId);
                     if (marker != null) {
                         marker.setPosition(new GeoPoint(lastStatus.getCurrentLat(), lastStatus.getCurrentLon()));
@@ -499,12 +481,10 @@ public class TrackingFragment extends Fragment {
 
     public void onDestroy() {
         super.onDestroy();
-        // Stop all team movements
         for (Long teamId : rescueTeamMarkers.keySet()) {
             stopRescueTeamMovement(teamId);
         }
 
-        // Clear all routes
         for (Polyline routeLine : rescueTeamRouteLines.values()) {
             if (routeLine != null) {
                 map.getOverlays().remove(routeLine);

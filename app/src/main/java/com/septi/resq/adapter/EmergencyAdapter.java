@@ -1,5 +1,6 @@
 package com.septi.resq.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -11,29 +12,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.septi.resq.R;
-import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.fragment.report.ReportDetailActivity;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.utils.GeocodingHelper;
-import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.EmergencyViewHolder> {
-    private Context context;
-    private EmergencyDBHelper dbHelper;
+    private final Context context;
     private List<Emergency> emergencies;
     private List<Emergency> allEmergencies;
-    private EmergencyViewModel viewModel;
 
-    // Simplified constructor - removed locationSelectionLauncher
-    public EmergencyAdapter(List<Emergency> emergencies, Context context, EmergencyViewModel viewModel) {
+    public EmergencyAdapter(List<Emergency> emergencies, Context context) {
         this.emergencies = new ArrayList<>(emergencies);
         this.allEmergencies = new ArrayList<>(emergencies);
         this.context = context;
-        this.dbHelper = new EmergencyDBHelper(context);
-        this.viewModel = viewModel;
     }
 
     @NonNull
@@ -44,23 +38,23 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         return new EmergencyViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
         holder.timestampTextView.setText(emergency.getTimestamp());
-
-        // Show the location as coordinates initially
         holder.locationTextView.setText(String.format("Location: %.6f, %.6f", emergency.getLatitude(), emergency.getLongitude()));
 
-        // Decode the address using GeocodingHelper
         GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(), new GeocodingHelper.GeocodingCallback() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onAddressReceived(String address) {
                 holder.locationTextView.setText("Location: " + address);
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onError(Exception e) {
                 holder.locationTextView.setText("Location: Unknown");
@@ -80,12 +74,14 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         return emergencies.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<Emergency> newEmergencies) {
         this.emergencies = new ArrayList<>(newEmergencies);
         this.allEmergencies = new ArrayList<>(newEmergencies);
         notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void filter(String query) {
         if (query.isEmpty()) {
             emergencies = new ArrayList<>(allEmergencies);

@@ -109,7 +109,6 @@ public class ProfileFragment extends Fragment {
                 imgProfile.setImageURI(Uri.parse(currentProfile.getPhotoUri()));
             }
         } else {
-            // Create new profile if none exists
             currentProfile = new UserProfile();
             currentProfile.setId(DEFAULT_USER_ID);
         }
@@ -131,12 +130,12 @@ public class ProfileFragment extends Fragment {
 
     private void checkAndRequestPermissions() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // For Android 13+ (API 33+)
+            // untuk Android 13+ (API 33+)
             requestPermissionLauncher.launch(new String[]{
                     android.Manifest.permission.READ_MEDIA_IMAGES
             });
         } else {
-            // For Android 12 and below
+            // Untuk Android 12 dibawahnya
             requestPermissionLauncher.launch(new String[]{
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
             });
@@ -165,7 +164,7 @@ public class ProfileFragment extends Fragment {
             }
 
             if (success) {
-                viewModel.updateUserProfile(currentProfile); // Update ViewModel
+                viewModel.updateUserProfile(currentProfile);
                 Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show();
