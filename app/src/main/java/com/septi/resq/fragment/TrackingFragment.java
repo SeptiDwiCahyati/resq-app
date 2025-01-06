@@ -106,8 +106,6 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
-
     private void initializeMap(View view) {
         map = view.findViewById(R.id.map);
         map.setMultiTouchControls(true);
@@ -431,12 +429,10 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
     private long calculateSegmentTime(GeoPoint current, GeoPoint next) {
         double distance = calculateDistance(current, next);
         return (long) ((distance / SPEED) * 3600000);
     }
-
 
 
     private double calculateDistance(GeoPoint p1, GeoPoint p2) {

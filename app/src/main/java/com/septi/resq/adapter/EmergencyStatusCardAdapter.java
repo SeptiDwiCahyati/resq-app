@@ -1,6 +1,7 @@
 package com.septi.resq.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
 import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.RescueTeamDBHelper;
@@ -32,6 +32,8 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     private RescueTeamDBHelper rescueTeamDBHelper;
     private TrackingDBHelper trackingDBHelper;
     private EmergencyViewModel viewModel;
+    private final Handler handler = new Handler();
+    private final Runnable updateTask;
 
     public EmergencyStatusCardAdapter(List<Emergency> emergencies, Context context, EmergencyViewModel viewModel) {
         this.emergencies = new ArrayList<>(emergencies);
@@ -41,7 +43,18 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         this.rescueTeamDBHelper = new RescueTeamDBHelper(context);
         this.trackingDBHelper = new TrackingDBHelper(context);
         this.viewModel = viewModel;
+
+        // Runnable untuk update setiap 5 detik
+        updateTask = new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged(); // Refresh RecyclerView
+                handler.postDelayed(this, 10000); // Jadwalkan ulang 5 detik kemudian
+            }
+        };
+        handler.postDelayed(updateTask, 5000); // Jadwalkan pertama kali
     }
+
 
     @NonNull
     @Override
@@ -54,7 +67,6 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     @Override
     public void onBindViewHolder(@NonNull EmergencyCardViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
-
         // Set emergency information
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
@@ -100,25 +112,19 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     }
 
     public void updateEmergencyStatus(long emergencyId, String trackingStatus) {
-        // Cari emergency dengan ID yang sesuai
-        for (int i = 0; i < emergencies.size(); i++) {
-            Emergency emergency = emergencies.get(i);
+        // Update list internal tanpa notify langsung
+        for (Emergency emergency : allEmergencies) {
             if (emergency.getId() == emergencyId) {
-                // Update status tracking di database
                 TrackingStatus status = trackingDBHelper.getActiveTracking(emergencyId);
                 if (status != null) {
                     status.setStatus(trackingStatus);
                     trackingDBHelper.updateTracking(status);
                 }
-
-                // Beritahu adapter untuk memperbarui item
-                notifyItemChanged(i);
                 break;
             }
         }
-
-        // Update juga di allEmergencies list
-        for (Emergency emergency : allEmergencies) {
+        for (int i = 0; i < emergencies.size(); i++) {
+            Emergency emergency = emergencies.get(i);
             if (emergency.getId() == emergencyId) {
                 TrackingStatus status = trackingDBHelper.getActiveTracking(emergencyId);
                 if (status != null) {
@@ -181,6 +187,12 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         }
         notifyDataSetChanged();
     }
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        handler.removeCallbacks(updateTask); // Hentikan pembaruan saat RecyclerView dilepas
+    }
+
 
     static class EmergencyCardViewHolder extends RecyclerView.ViewHolder {
         TextView typeTextView;
@@ -206,4 +218,6 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
             trackingStatusTextView = itemView.findViewById(R.id.tracking_status);
         }
     }
+
+
 }
