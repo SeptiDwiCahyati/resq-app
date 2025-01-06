@@ -15,8 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.septi.resq.R;
+import com.septi.resq.adapter.EmergencyStatusCardAdapter;
 import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
@@ -42,6 +45,9 @@ import java.util.Objects;
 
 public class TrackingFragment extends Fragment {
     private MapView map;
+
+    private EmergencyStatusCardAdapter adapter;
+    private RecyclerView recyclerView;
     private static final int MARKER_SIZE_DP = 40;
 
     private final Map<Long, Marker> rescueTeamMarkers = new HashMap<>();
@@ -52,7 +58,7 @@ public class TrackingFragment extends Fragment {
 
     private final List<Marker> emergencyMarkers = new ArrayList<>();
     private TrackingDBHelper dbHelperTracking;
-
+    private EmergencyViewModel viewModel;
     private static final float SPEED = 200.0f;
     private final Handler animationHandler = new Handler();
     private RescueTeamDBHelper dbHelper;
@@ -65,14 +71,21 @@ public class TrackingFragment extends Fragment {
         Configuration.getInstance().load(ctx, ctx.getSharedPreferences("osmdroid_prefs", Context.MODE_PRIVATE));
         dbHelper = new RescueTeamDBHelper(ctx);
         dbHelperTracking = new TrackingDBHelper(ctx);
+        viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracking, container, false);
+
         initializeMap(view);
-        EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-        viewModel.getEmergencies().observe(getViewLifecycleOwner(), this::updateAllMarkers);
+        initializeRecyclerView(view);
+
+        viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
+            updateAllMarkers(emergencies);
+            adapter.updateData(emergencies);
+        });
+
         viewModel.getNewEmergency().observe(getViewLifecycleOwner(), this::addEmergencyMarker);
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -84,6 +97,16 @@ public class TrackingFragment extends Fragment {
         }
         return view;
     }
+
+    private void initializeRecyclerView(View view) {
+        recyclerView = view.findViewById(R.id.emergency_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new EmergencyStatusCardAdapter(new ArrayList<>(), requireContext(), viewModel);
+        recyclerView.setAdapter(adapter);
+    }
+
+
+
 
     private void initializeMap(View view) {
         map = view.findViewById(R.id.map);
@@ -329,6 +352,12 @@ public class TrackingFragment extends Fragment {
         updateMarkerPosition(teamId, current);
         updateTrackingStatus(teamId, currentIndex, current, "IN_PROGRESS");
 
+        // Update the adapter when tracking status changes
+        TrackingStatus tracking = dbHelperTracking.getActiveTracking(teamId);
+        if (tracking != null) {
+            adapter.updateEmergencyStatus(tracking.getEmergencyId(), "IN_PROGRESS");
+        }
+
         drawRoute(teamId, route);
         map.invalidate();
 
@@ -400,6 +429,8 @@ public class TrackingFragment extends Fragment {
             map.invalidate();
         }
     }
+
+
 
     private long calculateSegmentTime(GeoPoint current, GeoPoint next) {
         double distance = calculateDistance(current, next);
