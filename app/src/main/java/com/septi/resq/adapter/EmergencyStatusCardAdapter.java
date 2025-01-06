@@ -67,6 +67,7 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     @Override
     public void onBindViewHolder(@NonNull EmergencyCardViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
+
         // Set emergency information
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
@@ -94,8 +95,8 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
                     }
                 });
 
-        // Check for assigned rescue team
-        TrackingStatus trackingStatus = trackingDBHelper.getActiveTracking(emergency.getId());
+        // Check for assigned rescue team and display even if status is COMPLETED
+        TrackingStatus trackingStatus = trackingDBHelper.getLastTrackingStatus(emergency.getId());
         if (trackingStatus != null) {
             RescueTeam team = rescueTeamDBHelper.getTeamById(trackingStatus.getTeamId());
             if (team != null) {
@@ -111,11 +112,12 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         }
     }
 
+
     public void updateEmergencyStatus(long emergencyId, String trackingStatus) {
         // Update list internal tanpa notify langsung
         for (Emergency emergency : allEmergencies) {
             if (emergency.getId() == emergencyId) {
-                TrackingStatus status = trackingDBHelper.getActiveTracking(emergencyId);
+                TrackingStatus status = trackingDBHelper.getActiveTeam(emergencyId);
                 if (status != null) {
                     status.setStatus(trackingStatus);
                     trackingDBHelper.updateTracking(status);
@@ -126,7 +128,7 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         for (int i = 0; i < emergencies.size(); i++) {
             Emergency emergency = emergencies.get(i);
             if (emergency.getId() == emergencyId) {
-                TrackingStatus status = trackingDBHelper.getActiveTracking(emergencyId);
+                TrackingStatus status = trackingDBHelper.getActiveTeam(emergencyId);
                 if (status != null) {
                     status.setStatus(trackingStatus);
                 }

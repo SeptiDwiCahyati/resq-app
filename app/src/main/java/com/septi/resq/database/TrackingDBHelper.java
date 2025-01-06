@@ -64,16 +64,13 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public TrackingStatus getLastTrackingStatus(long teamId) {
+    public TrackingStatus getLastTrackingStatus(long emergencyId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TRACKING,
                 null,
-                COLUMN_TEAM_ID + " = ?",
-                new String[]{String.valueOf(teamId)},
-                null,
-                null,
-                COLUMN_ID + " DESC",
-                "1");
+                COLUMN_EMERGENCY_ID + " = ?",
+                new String[]{String.valueOf(emergencyId)},
+                null, null, COLUMN_ID + " DESC", "1");
 
         TrackingStatus status = null;
         if (cursor.moveToFirst()) {
@@ -91,6 +88,7 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
         cursor.close();
         return status;
     }
+
 
     public void updateTracking(TrackingStatus status) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -129,6 +127,34 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
             status.setRouteIndex(cursor.getInt(cursor.getColumnIndex(COLUMN_ROUTE_INDEX)));
         }
         cursor.close();
+        return status;
+    }
+
+    @SuppressLint("Range")
+    public TrackingStatus getActiveTeam(long emergencyId) {  // Changed parameter name to be clear
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_TRACKING,
+                null,
+                COLUMN_EMERGENCY_ID + " = ? AND " + COLUMN_STATUS + " != ?",  // Changed to query by emergency_id
+                new String[]{String.valueOf(emergencyId), "COMPLETED"},
+                null, null, COLUMN_ID + " DESC", "1");  // Added ORDER BY and LIMIT 1
+
+        TrackingStatus status = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            status = new TrackingStatus();
+            status.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+            status.setTeamId(cursor.getLong(cursor.getColumnIndex(COLUMN_TEAM_ID)));
+            status.setEmergencyId(cursor.getLong(cursor.getColumnIndex(COLUMN_EMERGENCY_ID)));
+            status.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
+            status.setCurrentLat(cursor.getDouble(cursor.getColumnIndex(COLUMN_CURRENT_LAT)));
+            status.setCurrentLon(cursor.getDouble(cursor.getColumnIndex(COLUMN_CURRENT_LON)));
+            status.setDestinationLat(cursor.getDouble(cursor.getColumnIndex(COLUMN_DESTINATION_LAT)));
+            status.setDestinationLon(cursor.getDouble(cursor.getColumnIndex(COLUMN_DESTINATION_LON)));
+            status.setRouteIndex(cursor.getInt(cursor.getColumnIndex(COLUMN_ROUTE_INDEX)));
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
         return status;
     }
 }
