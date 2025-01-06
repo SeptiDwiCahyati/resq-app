@@ -131,13 +131,13 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public TrackingStatus getActiveTeam(long emergencyId) {  // Changed parameter name to be clear
+    public TrackingStatus getActiveTeam(long emergencyId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TRACKING,
                 null,
-                COLUMN_EMERGENCY_ID + " = ? AND " + COLUMN_STATUS + " != ?",  // Changed to query by emergency_id
+                COLUMN_EMERGENCY_ID + " = ? AND " + COLUMN_STATUS + " != ?",
                 new String[]{String.valueOf(emergencyId), "COMPLETED"},
-                null, null, COLUMN_ID + " DESC", "1");  // Added ORDER BY and LIMIT 1
+                null, null, COLUMN_ID + " DESC", "1");
 
         TrackingStatus status = null;
         if (cursor != null && cursor.moveToFirst()) {
