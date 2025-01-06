@@ -108,6 +108,7 @@ public class TrackingFragment extends Fragment {
 
     private void initializeMap(View view) {
         map = view.findViewById(R.id.map);
+        map.setBuiltInZoomControls(false);
         map.setMultiTouchControls(true);
         map.getController().setZoom(15.0);
         map.getController().setCenter(new GeoPoint(0.0530266, 111.4755201));
