@@ -313,84 +313,99 @@ public class TrackingFragment extends Fragment {
 
 
     private void moveRescueTeam(Long teamId) {
+        if (!isValidRescueTeamState(teamId)) return;
+
         List<GeoPoint> route = rescueTeamRoutes.get(teamId);
         Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
 
-        if (route == null || currentIndex == null) {
-            return;
-        }
-
-        if (!Boolean.TRUE.equals(rescueTeamMovingStatus.get(teamId)) ||
-                currentIndex >= route.size() - 1) {
-            rescueTeamMovingStatus.put(teamId, false);
-
-            // Hapus garis rute ketika sampai tujuan
-            Polyline existingRoute = rescueTeamRouteLines.get(teamId);
-            if (existingRoute != null) {
-                map.getOverlays().remove(existingRoute);
-                rescueTeamRouteLines.remove(teamId);
-                map.invalidate();
-            }
-
-            if (currentIndex >= route.size() - 1) {
-                TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
-                if (currentTracking != null) {
-                    TrackingStatus status = new TrackingStatus();
-                    status.setTeamId(teamId);
-                    status.setEmergencyId(currentTracking.getEmergencyId());
-                    status.setStatus("COMPLETED");
-                    status.setCurrentLat(route.get(currentIndex).getLatitude());
-                    status.setCurrentLon(route.get(currentIndex).getLongitude());
-                    status.setDestinationLat(currentTracking.getDestinationLat());
-                    status.setDestinationLon(currentTracking.getDestinationLon());
-                    status.setRouteIndex(currentIndex);
-                    dbHelperTracking.updateTracking(status);
-
-                    EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-                    Emergency emergency = viewModel.getEmergencyById(currentTracking.getEmergencyId());
-                    if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
-                        emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
-                        viewModel.updateEmergency(emergency);
-                    }
-                }
-            }
+        if (isDestinationReached(teamId, currentIndex, route)) {
+            handleCompletion(teamId, route, currentIndex);
             return;
         }
 
         GeoPoint current = route.get(currentIndex);
         GeoPoint next = route.get(currentIndex + 1);
 
-        double distance = calculateDistance(current, next);
-        long timeForSegment = (long) ((distance / SPEED) * 3600000);
+        updateMarkerPosition(teamId, current);
+        updateTrackingStatus(teamId, currentIndex, current, "IN_PROGRESS");
 
-        Marker marker = rescueTeamMarkers.get(teamId);
-        assert marker != null;
-        marker.setPosition(current);
-
-        // Update garis rute untuk menampilkan sisa rute
         drawRoute(teamId, route);
-
         map.invalidate();
 
-        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
-        if (currentTracking != null) {
-            TrackingStatus status = new TrackingStatus();
-            status.setTeamId(teamId);
-            status.setEmergencyId(currentTracking.getEmergencyId());
-            status.setStatus("IN_PROGRESS");
-            status.setCurrentLat(current.getLatitude());
-            status.setCurrentLon(current.getLongitude());
-            status.setDestinationLat(currentTracking.getDestinationLat());
-            status.setDestinationLon(currentTracking.getDestinationLon());
-            status.setRouteIndex(currentIndex);
-            dbHelperTracking.updateTracking(status);
-        }
+        long timeForSegment = calculateSegmentTime(current, next);
 
         animationHandler.postDelayed(() -> {
             rescueTeamRouteIndexes.put(teamId, currentIndex + 1);
             moveRescueTeam(teamId);
         }, Math.max(timeForSegment, 16));
     }
+
+    private boolean isValidRescueTeamState(Long teamId) {
+        List<GeoPoint> route = rescueTeamRoutes.get(teamId);
+        Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
+
+        return route != null && currentIndex != null &&
+                Boolean.TRUE.equals(rescueTeamMovingStatus.get(teamId));
+    }
+
+    private boolean isDestinationReached(Long teamId, Integer currentIndex, List<GeoPoint> route) {
+        return currentIndex >= route.size() - 1;
+    }
+
+    private void handleCompletion(Long teamId, List<GeoPoint> route, Integer currentIndex) {
+        rescueTeamMovingStatus.put(teamId, false);
+        removeRouteLine(teamId);
+        updateTrackingStatus(teamId, currentIndex, route.get(currentIndex), "COMPLETED");
+        updateEmergencyStatus(teamId);
+    }
+
+    private void updateMarkerPosition(Long teamId, GeoPoint position) {
+        Marker marker = rescueTeamMarkers.get(teamId);
+        if (marker != null) marker.setPosition(position);
+    }
+
+    private void updateTrackingStatus(Long teamId, int currentIndex, GeoPoint currentPosition, String status) {
+        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
+        if (currentTracking != null) {
+            TrackingStatus updatedStatus = new TrackingStatus();
+            updatedStatus.setTeamId(teamId);
+            updatedStatus.setEmergencyId(currentTracking.getEmergencyId());
+            updatedStatus.setStatus(status);
+            updatedStatus.setCurrentLat(currentPosition.getLatitude());
+            updatedStatus.setCurrentLon(currentPosition.getLongitude());
+            updatedStatus.setDestinationLat(currentTracking.getDestinationLat());
+            updatedStatus.setDestinationLon(currentTracking.getDestinationLon());
+            updatedStatus.setRouteIndex(currentIndex);
+            dbHelperTracking.updateTracking(updatedStatus);
+        }
+    }
+
+    private void updateEmergencyStatus(Long teamId) {
+        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
+        if (currentTracking != null) {
+            EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+            Emergency emergency = viewModel.getEmergencyById(currentTracking.getEmergencyId());
+            if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
+                emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
+                viewModel.updateEmergency(emergency);
+            }
+        }
+    }
+
+    private void removeRouteLine(Long teamId) {
+        Polyline existingRoute = rescueTeamRouteLines.get(teamId);
+        if (existingRoute != null) {
+            map.getOverlays().remove(existingRoute);
+            rescueTeamRouteLines.remove(teamId);
+            map.invalidate();
+        }
+    }
+
+    private long calculateSegmentTime(GeoPoint current, GeoPoint next) {
+        double distance = calculateDistance(current, next);
+        return (long) ((distance / SPEED) * 3600000);
+    }
+
 
 
     private double calculateDistance(GeoPoint p1, GeoPoint p2) {
