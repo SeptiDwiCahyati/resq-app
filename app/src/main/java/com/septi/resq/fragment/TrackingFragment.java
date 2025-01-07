@@ -345,7 +345,7 @@ public class TrackingFragment extends Fragment {
         Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
 
         if (isDestinationReached(teamId, currentIndex, route)) {
-            handleCompletion(teamId, route, currentIndex);
+            handleArrival(teamId, route, currentIndex);
             return;
         }
 
@@ -371,6 +371,29 @@ public class TrackingFragment extends Fragment {
         }, Math.max(timeForSegment, 16));
     }
 
+    private void handleArrival(Long teamId, List<GeoPoint> route, Integer currentIndex) {
+        GeoPoint finalPosition = route.get(currentIndex);
+        updateMarkerPosition(teamId, finalPosition);
+        updateTrackingStatus(teamId, currentIndex, finalPosition, "ARRIVED");
+
+        TrackingStatus tracking = dbHelperTracking.getActiveTracking(teamId);
+        if (tracking != null) {
+            adapter.updateTrackingStatus(tracking.getEmergencyId(), "ARRIVED");
+
+            // Set marker snippet to show arrived status
+            Marker marker = rescueTeamMarkers.get(teamId);
+            if (marker != null) {
+                marker.setSnippet("Telah tiba di lokasi");
+                map.invalidate();
+            }
+
+            // Wait for 30 seconds before setting to COMPLETED
+            new Handler().postDelayed(() -> {
+                handleCompletion(teamId, route, currentIndex, tracking.getEmergencyId());
+            }, 30000); // 30 seconds delay
+        }
+    }
+
     private boolean isValidRescueTeamState(Long teamId) {
         List<GeoPoint> route = rescueTeamRoutes.get(teamId);
         Integer currentIndex = rescueTeamRouteIndexes.get(teamId);
@@ -383,19 +406,35 @@ public class TrackingFragment extends Fragment {
         return currentIndex >= route.size() - 1;
     }
 
-    private void handleCompletion(Long teamId, List<GeoPoint> route, Integer currentIndex) {
+    private void handleCompletion(Long teamId, List<GeoPoint> route, Integer currentIndex, Long emergencyId) {
         rescueTeamMovingStatus.put(teamId, false);
         isTrackingStarted.put(teamId, false);
         removeRouteLine(teamId);
+
         GeoPoint finalPosition = route.get(currentIndex);
         updateTrackingStatus(teamId, currentIndex, finalPosition, "COMPLETED");
 
-        // Replace updateEmergencyStatus call with tracking update via ViewModel
-        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
-        if (currentTracking != null) {
-            viewModel.updateTrackingStatus(currentTracking.getEmergencyId(), "COMPLETED");
+        // Update tracking status and emergency status
+        if (emergencyId != null) {
+            viewModel.updateTrackingStatus(emergencyId, "COMPLETED");
+
+            // Update emergency status to SELESAI
+            EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
+            Emergency emergency = emergencyDBHelper.getEmergencyById(emergencyId.intValue());
+            if (emergency != null) {
+                emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
+                viewModel.updateEmergency(emergency);
+            }
+        }
+
+        // Update marker status
+        Marker marker = rescueTeamMarkers.get(teamId);
+        if (marker != null) {
+            marker.setSnippet("Selesai bertugas di lokasi");
+            map.invalidate();
         }
     }
+
     private void updateMarkerPosition(Long teamId, GeoPoint position) {
         Marker marker = rescueTeamMarkers.get(teamId);
         if (marker != null) marker.setPosition(position);
@@ -410,7 +449,6 @@ public class TrackingFragment extends Fragment {
 
         TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
         if (currentTracking != null) {
-            // Update tracking status via ViewModel
             if (!status.equals(currentTracking.getStatus()) ||
                     currentPosition.getLatitude() != currentTracking.getCurrentLat() ||
                     currentPosition.getLongitude() != currentTracking.getCurrentLon()) {
@@ -428,13 +466,18 @@ public class TrackingFragment extends Fragment {
                 dbHelperTracking.updateTracking(updatedStatus);
                 viewModel.updateTrackingStatus(currentTracking.getEmergencyId(), status);
 
-                // Update marker if status is COMPLETED
-                if ("COMPLETED".equals(status)) {
-                    Marker marker = rescueTeamMarkers.get(teamId);
-                    if (marker != null) {
-                        marker.setSnippet("Selesai bertugas di lokasi");
-                        map.invalidate();
+                // Update marker based on status
+                Marker marker = rescueTeamMarkers.get(teamId);
+                if (marker != null) {
+                    switch (status) {
+                        case "ARRIVED":
+                            marker.setSnippet("Telah tiba di lokasi");
+                            break;
+                        case "COMPLETED":
+                            marker.setSnippet("Selesai bertugas di lokasi");
+                            break;
                     }
+                    map.invalidate();
                 }
             }
         }
