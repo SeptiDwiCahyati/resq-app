@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.model.TrackingStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +18,38 @@ public class EmergencyViewModel extends ViewModel {
     private final MutableLiveData<Emergency> updatedEmergency = new MutableLiveData<>();
     private final MutableLiveData<Long> deletedEmergencyId = new MutableLiveData<>();
     private EmergencyDBHelper dbHelper;
+    private TrackingDBHelper trackingDBHelper;
+    private final MutableLiveData<TrackingStatus> trackingStatusUpdate = new MutableLiveData<>();
 
-    public void init(EmergencyDBHelper dbHelper) {
+    public void init(EmergencyDBHelper dbHelper, TrackingDBHelper trackingDBHelper) {
         this.dbHelper = dbHelper;
+        this.trackingDBHelper = trackingDBHelper;
         loadEmergencies();
     }
 
+    public LiveData<TrackingStatus> getTrackingStatusUpdate() {
+        return trackingStatusUpdate;
+    }
 
+    public void updateTrackingStatus(long emergencyId, String status) {
+        if (trackingDBHelper != null) {
+            TrackingStatus currentStatus = trackingDBHelper.getActiveTeam(emergencyId);
+            if (currentStatus != null) {
+                currentStatus.setStatus(status);
+                trackingDBHelper.updateTracking(currentStatus);
+                trackingStatusUpdate.setValue(currentStatus);
+
+                // Update emergency status if tracking is completed
+                if ("COMPLETED".equals(status)) {
+                    Emergency emergency = getEmergencyById(emergencyId);
+                    if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
+                        emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
+                        updateEmergency(emergency);
+                    }
+                }
+            }
+        }
+    }
     public LiveData<List<Emergency>> getEmergencies() {
         return emergencies;
     }
@@ -95,6 +122,8 @@ public class EmergencyViewModel extends ViewModel {
             }
         }
     }
+
+
 
     public Emergency getEmergencyById(long emergencyId) {
         for (Emergency emergency : getEmergencies().getValue()) {

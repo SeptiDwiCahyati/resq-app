@@ -19,6 +19,7 @@ import com.septi.resq.OverviewActivity;
 import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
@@ -35,6 +36,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_detail);
 
+        // Initialize views
         typeTextView = findViewById(R.id.typeTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
         locationTextView = findViewById(R.id.locationTextView);
@@ -43,8 +45,13 @@ public class ReportDetailActivity extends AppCompatActivity {
         Button btnEdit = findViewById(R.id.btnEdit);
         Button btnDelete = findViewById(R.id.btnDelete);
         Button btnViewOnMap = findViewById(R.id.btnViewOnMap);
+
+        // Initialize ViewModel with both database helpers
         viewModel = new ViewModelProvider(this).get(EmergencyViewModel.class);
-        viewModel.init(new EmergencyDBHelper(this));
+        viewModel.init(
+                new EmergencyDBHelper(this),
+                new TrackingDBHelper(this)
+        );
 
         long emergencyId = getIntent().getLongExtra("emergencyId", -1L);
 
@@ -53,14 +60,13 @@ public class ReportDetailActivity extends AppCompatActivity {
             finish();
         }
 
+        // Setup toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Report Detail");
         }
-
-
 
         dbHelper = new EmergencyDBHelper(this);
         currentEmergency = dbHelper.getEmergencyById((int) emergencyId);

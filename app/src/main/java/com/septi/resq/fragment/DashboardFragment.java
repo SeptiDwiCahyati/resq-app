@@ -1,5 +1,6 @@
 package com.septi.resq.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -27,6 +28,7 @@ import com.septi.resq.adapter.QuickActionAdapter;
 import com.septi.resq.adapter.RecentReportsAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.RescueTeamDBHelper;
+import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.database.UserProfileDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.model.QuickAction;
@@ -66,12 +68,17 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        rescueTeamDBHelper = new RescueTeamDBHelper(requireContext());
+        Context context = requireContext();
+        rescueTeamDBHelper = new RescueTeamDBHelper(context);
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
         emergencyViewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-        emergencyViewModel.init(new EmergencyDBHelper(requireContext()));
-    }
 
+        // Initialize with both required database helpers
+        emergencyViewModel.init(
+                new EmergencyDBHelper(context),
+                new TrackingDBHelper(context)
+        );
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

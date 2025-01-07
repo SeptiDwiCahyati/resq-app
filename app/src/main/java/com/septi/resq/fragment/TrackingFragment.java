@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyStatusCardAdapter;
+import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.RescueTeamDBHelper;
 import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
@@ -73,6 +74,7 @@ public class TrackingFragment extends Fragment {
         dbHelper = new RescueTeamDBHelper(ctx);
         dbHelperTracking = new TrackingDBHelper(ctx);
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
+        viewModel.init(new EmergencyDBHelper(ctx), dbHelperTracking);
     }
 
     @Override
@@ -355,7 +357,7 @@ public class TrackingFragment extends Fragment {
 
         TrackingStatus tracking = dbHelperTracking.getActiveTracking(teamId);
         if (tracking != null) {
-            adapter.updateEmergencyStatus(tracking.getEmergencyId(), "IN_PROGRESS");
+            adapter.updateTrackingStatus(tracking.getEmergencyId(), "IN_PROGRESS");
         }
 
         drawRoute(teamId, route);
@@ -387,7 +389,12 @@ public class TrackingFragment extends Fragment {
         removeRouteLine(teamId);
         GeoPoint finalPosition = route.get(currentIndex);
         updateTrackingStatus(teamId, currentIndex, finalPosition, "COMPLETED");
-        updateEmergencyStatus(teamId);
+
+        // Replace updateEmergencyStatus call with tracking update via ViewModel
+        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
+        if (currentTracking != null) {
+            viewModel.updateTrackingStatus(currentTracking.getEmergencyId(), "COMPLETED");
+        }
     }
     private void updateMarkerPosition(Long teamId, GeoPoint position) {
         Marker marker = rescueTeamMarkers.get(teamId);
@@ -403,7 +410,7 @@ public class TrackingFragment extends Fragment {
 
         TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
         if (currentTracking != null) {
-            // Hanya update jika status berbeda atau posisi berubah
+            // Update tracking status via ViewModel
             if (!status.equals(currentTracking.getStatus()) ||
                     currentPosition.getLatitude() != currentTracking.getCurrentLat() ||
                     currentPosition.getLongitude() != currentTracking.getCurrentLon()) {
@@ -419,8 +426,9 @@ public class TrackingFragment extends Fragment {
                 updatedStatus.setRouteIndex(currentIndex);
 
                 dbHelperTracking.updateTracking(updatedStatus);
+                viewModel.updateTrackingStatus(currentTracking.getEmergencyId(), status);
 
-                // Update UI jika status COMPLETED
+                // Update marker if status is COMPLETED
                 if ("COMPLETED".equals(status)) {
                     Marker marker = rescueTeamMarkers.get(teamId);
                     if (marker != null) {
@@ -428,21 +436,6 @@ public class TrackingFragment extends Fragment {
                         map.invalidate();
                     }
                 }
-            }
-        }
-    }
-
-    private void updateEmergencyStatus(Long teamId) {
-        TrackingStatus currentTracking = dbHelperTracking.getActiveTracking(teamId);
-        if (currentTracking != null) {
-            EmergencyViewModel viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-            Emergency emergency = viewModel.getEmergencyById(currentTracking.getEmergencyId());
-            if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
-                emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
-                viewModel.updateEmergency(emergency);
-
-                // Update adapter jika perlu
-                adapter.updateEmergencyStatus(emergency.getId(), "COMPLETED");
             }
         }
     }

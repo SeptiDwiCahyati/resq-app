@@ -33,6 +33,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.utils.MarkerUtils;
@@ -77,8 +78,13 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Context context = requireContext();
+
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-        viewModel.init(dbHelper);
+        viewModel.init(
+                new EmergencyDBHelper(context),
+                new TrackingDBHelper(context)
+        );
 
         takePicture = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),

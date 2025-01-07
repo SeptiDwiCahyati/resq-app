@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
+import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import java.util.ArrayList;
@@ -59,8 +60,10 @@ public class ReportFragment extends Fragment {
             }
         });
 
-        EmergencyDBHelper dbHelper = new EmergencyDBHelper(requireContext());
-        viewModel.init(dbHelper);
+        // Initialize ViewModel
+        EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
+        TrackingDBHelper trackingDBHelper = new TrackingDBHelper(requireContext());
+        viewModel.init(emergencyDBHelper, trackingDBHelper);
 
         adapter = new EmergencyAdapter(new ArrayList<>(), requireContext());
         recyclerView.setAdapter(adapter);
@@ -73,6 +76,7 @@ public class ReportFragment extends Fragment {
 
         return view;
     }
+
     @Override
     public void onResume() {
         super.onResume();

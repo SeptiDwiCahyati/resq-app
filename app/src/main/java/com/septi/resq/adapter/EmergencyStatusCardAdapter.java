@@ -113,28 +113,9 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     }
 
 
-    public void updateEmergencyStatus(long emergencyId, String trackingStatus) {
-        // Update list internal tanpa notify langsung
-        for (Emergency emergency : allEmergencies) {
-            if (emergency.getId() == emergencyId) {
-                TrackingStatus status = trackingDBHelper.getActiveTeam(emergencyId);
-                if (status != null) {
-                    status.setStatus(trackingStatus);
-                    trackingDBHelper.updateTracking(status);
-                }
-                break;
-            }
-        }
-        for (int i = 0; i < emergencies.size(); i++) {
-            Emergency emergency = emergencies.get(i);
-            if (emergency.getId() == emergencyId) {
-                TrackingStatus status = trackingDBHelper.getActiveTeam(emergencyId);
-                if (status != null) {
-                    status.setStatus(trackingStatus);
-                }
-                break;
-            }
-        }
+    public void updateTrackingStatus(long emergencyId, String trackingStatus) {
+        // Simply delegate to ViewModel
+        viewModel.updateTrackingStatus(emergencyId, trackingStatus);
     }
 
     private String getStatusText(Emergency.EmergencyStatus status) {
