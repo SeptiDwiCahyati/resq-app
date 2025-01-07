@@ -85,9 +85,18 @@ public class TrackingFragment extends Fragment {
         initializeRecyclerView(view);
 
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
-            updateAllMarkers(emergencies);
-            adapter.updateData(emergencies);
+            // Filter emergencies to exclude those with status 'SELESAI'
+            List<Emergency> filteredEmergencies = new ArrayList<>();
+            for (Emergency emergency : emergencies) {
+                if (emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
+                    filteredEmergencies.add(emergency);
+                }
+            }
+
+            updateAllMarkers(filteredEmergencies); // Update markers based on filtered data
+            adapter.updateData(filteredEmergencies); // Update adapter data
         });
+
 
         viewModel.getNewEmergency().observe(getViewLifecycleOwner(), this::addEmergencyMarker);
 
@@ -390,7 +399,7 @@ public class TrackingFragment extends Fragment {
             // Wait for 30 seconds before setting to COMPLETED
             new Handler().postDelayed(() -> {
                 handleCompletion(teamId, route, currentIndex, tracking.getEmergencyId());
-            }, 30000); // 30 seconds delay
+            }, 15000); // 30 seconds delay
         }
     }
 
@@ -427,14 +436,46 @@ public class TrackingFragment extends Fragment {
             }
         }
 
-        // Update marker status
+        // Remove marker from map and set team availability to true
         Marker marker = rescueTeamMarkers.get(teamId);
         if (marker != null) {
-            marker.setSnippet("Selesai bertugas di lokasi");
+            // Remove marker from map
+            map.getOverlays().remove(marker);
+            rescueTeamMarkers.remove(teamId);
+
+            // Update rescue team availability in database
+            RescueTeam team = dbHelper.getTeamById(teamId);
+            if (team != null) {
+                team.setIsAvailable(true);
+                dbHelper.updateTeamAvailability(team.getId(), true);
+            }
+
+            map.invalidate();
+        }
+
+        // Create new marker at base location for the rescue team
+        RescueTeam team = dbHelper.getTeamById(teamId);
+        if (team != null) {
+            Marker newMarker = new Marker(map);
+            newMarker.setPosition(new GeoPoint(team.getLatitude(), team.getLongitude()));
+            newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            newMarker.setTitle(team.getName());
+            newMarker.setSnippet("Contact: " + team.getContactNumber());
+
+            Drawable rescueIcon = getResources().getDrawable(R.drawable.ic_ambulance);
+            Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
+            newMarker.setIcon(resizedIcon);
+
+            newMarker.setOnMarkerClickListener((clickedMarker, mapView) -> {
+                clickedMarker.showInfoWindow();
+                return true;
+            });
+
+            map.getOverlays().add(newMarker);
+            rescueTeamMarkers.put(teamId, newMarker);
             map.invalidate();
         }
     }
-
     private void updateMarkerPosition(Long teamId, GeoPoint position) {
         Marker marker = rescueTeamMarkers.get(teamId);
         if (marker != null) marker.setPosition(position);
