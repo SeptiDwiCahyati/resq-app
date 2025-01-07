@@ -50,17 +50,22 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
     }
 
     public void insertTracking(TrackingStatus status) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TEAM_ID, status.getTeamId());
-        values.put(COLUMN_EMERGENCY_ID, status.getEmergencyId());
-        values.put(COLUMN_STATUS, status.getStatus());
-        values.put(COLUMN_CURRENT_LAT, status.getCurrentLat());
-        values.put(COLUMN_CURRENT_LON, status.getCurrentLon());
-        values.put(COLUMN_DESTINATION_LAT, status.getDestinationLat());
-        values.put(COLUMN_DESTINATION_LON, status.getDestinationLon());
-        values.put(COLUMN_ROUTE_INDEX, status.getRouteIndex());
-        db.insert(TABLE_TRACKING, null, values);
+        // Cek apakah sudah ada tracking aktif untuk tim dan emergency yang sama
+        TrackingStatus existingStatus = getActiveTracking(status.getTeamId());
+        if (existingStatus == null) {
+            // Baru insert jika belum ada
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_TEAM_ID, status.getTeamId());
+            values.put(COLUMN_EMERGENCY_ID, status.getEmergencyId());
+            values.put(COLUMN_STATUS, status.getStatus());
+            values.put(COLUMN_CURRENT_LAT, status.getCurrentLat());
+            values.put(COLUMN_CURRENT_LON, status.getCurrentLon());
+            values.put(COLUMN_DESTINATION_LAT, status.getDestinationLat());
+            values.put(COLUMN_DESTINATION_LON, status.getDestinationLon());
+            values.put(COLUMN_ROUTE_INDEX, status.getRouteIndex());
+            db.insert(TABLE_TRACKING, null, values);
+        }
     }
 
     @SuppressLint("Range")
