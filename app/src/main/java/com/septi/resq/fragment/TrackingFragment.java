@@ -559,6 +559,9 @@ public class TrackingFragment extends Fragment {
 
         RescueTeam team = dbHelper.getTeamById(teamId);
         if (team != null) {
+            // Store the original base location
+            final GeoPoint baseLocation = new GeoPoint(team.getLatitude(), team.getLongitude());
+
             Marker oldMarker = rescueTeamMarkers.get(teamId);
             if (oldMarker != null) {
                 map.getOverlays().remove(oldMarker);
@@ -570,10 +573,11 @@ public class TrackingFragment extends Fragment {
                 completedStatus.setTeamId(teamId);
                 completedStatus.setEmergencyId(activeTracking.getEmergencyId());
                 completedStatus.setStatus("COMPLETED");
-                completedStatus.setCurrentLat(team.getLatitude());
-                completedStatus.setCurrentLon(team.getLongitude());
-                completedStatus.setDestinationLat(team.getLatitude());
-                completedStatus.setDestinationLon(team.getLongitude());
+                // Always use the team's base location for completion
+                completedStatus.setCurrentLat(baseLocation.getLatitude());
+                completedStatus.setCurrentLon(baseLocation.getLongitude());
+                completedStatus.setDestinationLat(baseLocation.getLatitude());
+                completedStatus.setDestinationLon(baseLocation.getLongitude());
                 completedStatus.setRouteIndex(currentIndex);
 
                 dbHelperTracking.insertTracking(completedStatus);
@@ -601,9 +605,10 @@ public class TrackingFragment extends Fragment {
                     team.setIsAvailable(true);
                     dbHelper.updateTeamAvailability(team.getId(), true);
 
+                    // Create new marker at the original base location
                     Marker newMarker = createTeamMarker(
                             team,
-                            new GeoPoint(team.getLatitude(), team.getLongitude()),
+                            baseLocation, // Use original base location
                             "Contact: " + team.getContactNumber(),
                             completedStatus
                     );
@@ -614,10 +619,11 @@ public class TrackingFragment extends Fragment {
                     availableStatus.setTeamId(teamId);
                     availableStatus.setEmergencyId(-1);
                     availableStatus.setStatus("AVAILABLE");
-                    availableStatus.setCurrentLat(team.getLatitude());
-                    availableStatus.setCurrentLon(team.getLongitude());
-                    availableStatus.setDestinationLat(team.getLatitude());
-                    availableStatus.setDestinationLon(team.getLongitude());
+                    // Set both current and destination to base location
+                    availableStatus.setCurrentLat(baseLocation.getLatitude());
+                    availableStatus.setCurrentLon(baseLocation.getLongitude());
+                    availableStatus.setDestinationLat(baseLocation.getLatitude());
+                    availableStatus.setDestinationLon(baseLocation.getLongitude());
                     availableStatus.setRouteIndex(currentIndex);
 
                     dbHelperTracking.insertTracking(availableStatus);
@@ -633,6 +639,69 @@ public class TrackingFragment extends Fragment {
             }
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        map.onResume();
+
+        if (dbHelperTracking != null) {
+            for (Long teamId : rescueTeamMarkers.keySet()) {
+                TrackingStatus activeStatus = dbHelperTracking.getActiveTracking(teamId);
+                RescueTeam team = dbHelper.getTeamById(teamId);
+
+                if (team != null) {
+                    // Get the base location for this team
+                    GeoPoint baseLocation = new GeoPoint(team.getLatitude(), team.getLongitude());
+
+                    if (activeStatus != null && !Boolean.TRUE.equals(isTrackingStarted.get(teamId))) {
+                        if ("RETURNING".equals(activeStatus.getStatus())) {
+                            GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
+                            rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
+                            isTrackingStarted.put(teamId, true);
+                            calculateRoute(teamId, currentPos, baseLocation);
+                        } else if ("COMPLETED".equals(activeStatus.getStatus()) || "AVAILABLE".equals(activeStatus.getStatus())) {
+                            // If completed or available, always position at base location
+                            Marker existingMarker = rescueTeamMarkers.get(teamId);
+                            if (existingMarker != null) {
+                                map.getOverlays().remove(existingMarker);
+                            }
+
+                            Marker newMarker = createTeamMarker(
+                                    team,
+                                    baseLocation,
+                                    "Contact: " + team.getContactNumber(),
+                                    activeStatus
+                            );
+                            rescueTeamMarkers.put(teamId, newMarker);
+                        } else {
+                            GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
+                            GeoPoint destination = new GeoPoint(activeStatus.getDestinationLat(), activeStatus.getDestinationLon());
+                            rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
+                            isTrackingStarted.put(teamId, true);
+                            calculateRoute(teamId, currentPos, destination);
+                        }
+                    } else if (activeStatus == null) {
+                        // If no active status, ensure the team is at its base location
+                        Marker existingMarker = rescueTeamMarkers.get(teamId);
+                        if (existingMarker != null) {
+                            map.getOverlays().remove(existingMarker);
+                        }
+
+                        Marker newMarker = createTeamMarker(
+                                team,
+                                baseLocation,
+                                "Contact: " + team.getContactNumber(),
+                                null
+                        );
+                        rescueTeamMarkers.put(teamId, newMarker);
+                    }
+                }
+            }
+        }
+        map.invalidate();
+    }
+
 
     private void removeRouteLine(Long teamId) {
         Polyline existingRoute = rescueTeamRouteLines.get(teamId);
@@ -662,36 +731,7 @@ public class TrackingFragment extends Fragment {
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        map.onResume();
 
-        if (dbHelperTracking != null) {
-            for (Long teamId : rescueTeamMarkers.keySet()) {
-                TrackingStatus activeStatus = dbHelperTracking.getActiveTracking(teamId);
-                RescueTeam team = dbHelper.getTeamById(teamId);
-
-                if (activeStatus != null && !Boolean.TRUE.equals(isTrackingStarted.get(teamId))) {
-                    if ("RETURNING".equals(activeStatus.getStatus())) {
-                        GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
-                        GeoPoint baseLocation = new GeoPoint(team.getLatitude(), team.getLongitude());
-
-                        rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
-                        isTrackingStarted.put(teamId, true);
-                        calculateRoute(teamId, currentPos, baseLocation);
-                    } else {
-                        GeoPoint currentPos = new GeoPoint(activeStatus.getCurrentLat(), activeStatus.getCurrentLon());
-                        GeoPoint destination = new GeoPoint(activeStatus.getDestinationLat(), activeStatus.getDestinationLon());
-
-                        rescueTeamRouteIndexes.put(teamId, activeStatus.getRouteIndex());
-                        isTrackingStarted.put(teamId, true);
-                        calculateRoute(teamId, currentPos, destination);
-                    }
-                }
-            }
-        }
-    }
     private Marker createTeamMarker(RescueTeam team, GeoPoint position, String snippet, TrackingStatus status) {
         Marker marker = new Marker(map);
         marker.setPosition(position);
