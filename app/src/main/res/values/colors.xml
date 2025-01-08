@@ -31,4 +31,8 @@
     <!-- Text Colors -->
     <color name="text_secondary">#616161</color>
     <color name="background_color">#ECEFF1</color>
+    <color name="status_pending">#FFA000</color><!-- For MENUNGGU -->
+    <color name="status_in_progress">#1976D2</color><!-- For PROSES -->
+    <color name="status_resolved">#388E3C</color><!-- For SELESAI -->
+
 </resources>

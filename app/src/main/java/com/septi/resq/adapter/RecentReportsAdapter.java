@@ -1,14 +1,20 @@
 package com.septi.resq.adapter;
 
+import static com.septi.resq.model.Emergency.EmergencyStatus.MENUNGGU;
+import static com.septi.resq.model.Emergency.EmergencyStatus.PROSES;
+
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.septi.resq.R;
+import com.septi.resq.model.Emergency;
 import com.septi.resq.model.Report;
 
 import java.util.ArrayList;
@@ -19,12 +25,11 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
     private OnItemClickListener listener;
 
     public RecentReportsAdapter(List<Report> reports) {
-
-        this.reports = reports;
+        this.reports = reports != null ? reports : new ArrayList<>();
     }
 
     public void updateReports(List<Report> newReports) {
-        this.reports = newReports;
+        this.reports = newReports != null ? newReports : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -60,16 +65,17 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView titleView;
-        TextView locationView;
-        TextView timestampView;
-
+        private final TextView titleView;
+        private final TextView locationView;
+        private final TextView timestampView;
+        private final TextView statusView;
 
         ReportViewHolder(View itemView, final OnItemClickListener listener, List<Report> reports) {
             super(itemView);
             titleView = itemView.findViewById(R.id.tv_report_title);
             locationView = itemView.findViewById(R.id.tv_location);
             timestampView = itemView.findViewById(R.id.tv_timestamp);
+            statusView = itemView.findViewById(R.id.tv_status);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -80,9 +86,46 @@ public class RecentReportsAdapter extends RecyclerView.Adapter<RecentReportsAdap
         }
 
         void bind(Report report) {
-            titleView.setText(report.getTitle());
-            locationView.setText(report.getLocation());
-            timestampView.setText(report.getTimestamp());
+            if (report != null) {
+                if (titleView != null) titleView.setText(report.getTitle());
+                if (locationView != null) locationView.setText(report.getLocation());
+                if (timestampView != null) timestampView.setText(report.getTimestamp());
+                if (statusView != null) {
+                    statusView.setText(getStatusText(report.getStatus()));
+                    statusView.setTextColor(getStatusColor(report.getStatus()));
+                }
+            }
+        }
+
+        private String getStatusText(Emergency.EmergencyStatus status) {
+            if (status == null) return "";
+
+            switch (status) {
+                case MENUNGGU:
+                    return "Menunggu";
+                case PROSES:
+                    return "Dalam Proses";
+                case SELESAI:
+                    return "Selesai";
+                default:
+                    return "";
+            }
+        }
+
+        private int getStatusColor(Emergency.EmergencyStatus status) {
+            Context context = itemView.getContext();
+            if (status == null) return ContextCompat.getColor(context, R.color.text_secondary);
+
+            switch (status) {
+                case MENUNGGU:
+                    return ContextCompat.getColor(context, R.color.status_pending);
+                case PROSES:
+                    return ContextCompat.getColor(context, R.color.status_in_progress);
+                case SELESAI:
+                    return ContextCompat.getColor(context, R.color.status_resolved);
+                default:
+                    return ContextCompat.getColor(context, R.color.text_secondary);
+            }
         }
     }
 }

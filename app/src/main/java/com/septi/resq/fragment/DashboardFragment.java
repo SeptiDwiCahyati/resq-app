@@ -239,16 +239,16 @@ public class DashboardFragment extends Fragment {
                         "Loading address...",
                         timestamp,
                         emergency.getLatitude(),
-                        emergency.getLongitude()
+                        emergency.getLongitude(),
+                        emergency.getStatus() // Now correctly passes EmergencyStatus enum
                 );
                 reports.add(newReport);
-
                 fetchAddressForReport(newReport);
             }
             recentReportsAdapter.updateReports(reports);
         });
 
-        // Observe new emergencies
+        // Update new emergency observer
         emergencyViewModel.getNewEmergency().observe(getViewLifecycleOwner(), emergency -> {
             if (emergency != null) {
                 String timestamp = getRelativeTimeSpan(emergency.getTimestamp());
@@ -257,7 +257,8 @@ public class DashboardFragment extends Fragment {
                         "Loading address...",
                         timestamp,
                         emergency.getLatitude(),
-                        emergency.getLongitude()
+                        emergency.getLongitude(),
+                        emergency.getStatus() // Now correctly passes EmergencyStatus enum
                 );
 
                 List<Report> currentReports = new ArrayList<>(recentReportsAdapter.getReports());

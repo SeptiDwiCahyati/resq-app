@@ -7,15 +7,26 @@ public class Report {
     private String timestamp;
     private double latitude;
     private double longitude;
+    private Emergency.EmergencyStatus status; // Change to use EmergencyStatus enum
 
-    public Report(String title, String location, String timestamp, double latitude, double longitude) {
+
+    public Report(String title, String location, String timestamp, double latitude, double longitude, Emergency.EmergencyStatus status) {
         this.title = title;
         this.location = location;
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.status = status;
     }
 
+    // Update getter and setter for status
+    public Emergency.EmergencyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(Emergency.EmergencyStatus status) {
+        this.status = status;
+    }
     public String getTitle() {
         return title;
     }
