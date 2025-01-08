@@ -38,15 +38,6 @@ public class EmergencyViewModel extends ViewModel {
                 currentStatus.setStatus(status);
                 trackingDBHelper.updateTracking(currentStatus);
                 trackingStatusUpdate.setValue(currentStatus);
-
-                // Update emergency status if tracking is completed
-                if ("COMPLETED".equals(status)) {
-                    Emergency emergency = getEmergencyById(emergencyId);
-                    if (emergency != null && emergency.getStatus() != Emergency.EmergencyStatus.SELESAI) {
-                        emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
-                        updateEmergency(emergency);
-                    }
-                }
             }
         }
     }
