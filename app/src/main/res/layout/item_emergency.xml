@@ -1,57 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/stroke_color">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/emergencyTypeTextView"
+        <!-- Top Row: Type and Status -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/emergencyTypeChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="14sp"
+            app:chipBackgroundColor="@color/type_chip_background"
+            tools:text="Fire Emergency"/>
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/statusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="12sp"
+            tools:text="MENUNGGU"/>
+
+        <!-- Description -->
         <TextView
             android:id="@+id/emergencyDescriptionTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/darker_gray" />
+            android:layout_marginTop="12dp"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/emergencyTypeChip"
+            tools:text="Description of the emergency situation"/>
 
-        <TextView
-            android:id="@+id/emergencyTimestampTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textStyle="italic"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray" />
+        <!-- Location with Icon -->
+        <ImageView
+            android:id="@+id/locationIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/locationTextView"
+            app:layout_constraintBottom_toBottomOf="@id/locationTextView"
+            app:tint="@color/text_secondary"/>
 
         <TextView
             android:id="@+id/locationTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/locationIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/emergencyDescriptionTextView"
+            tools:text="123 Emergency Street, City"/>
 
+        <!-- Timestamp with Icon -->
+        <ImageView
+            android:id="@+id/timeIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/emergencyTimestampTextView"
+            app:layout_constraintBottom_toBottomOf="@id/emergencyTimestampTextView"
+            app:tint="@color/text_secondary"/>
 
+        <TextView
+            android:id="@+id/emergencyTimestampTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/timeIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/locationTextView"
+            tools:text="2024-01-09 14:30"/>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
-    </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

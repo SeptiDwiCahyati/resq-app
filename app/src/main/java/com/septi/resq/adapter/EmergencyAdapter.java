@@ -3,14 +3,18 @@ package com.septi.resq.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 import com.septi.resq.R;
 import com.septi.resq.fragment.report.ReportDetailActivity;
 import com.septi.resq.model.Emergency;
@@ -42,31 +46,66 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     @Override
     public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
-        holder.typeTextView.setText(emergency.getType());
+
+        // Set emergency type with icon
+        holder.typeChip.setText(emergency.getType());
+
+        // Set description
         holder.descriptionTextView.setText(emergency.getDescription());
+
+        // Set timestamp
         holder.timestampTextView.setText(emergency.getTimestamp());
-        holder.locationTextView.setText(String.format("Location: %.6f, %.6f", emergency.getLatitude(), emergency.getLongitude()));
 
-        GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(), new GeocodingHelper.GeocodingCallback() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onAddressReceived(String address) {
-                holder.locationTextView.setText("Location: " + address);
-            }
+        // Set status chip appearance based on status
+        setStatusChipAppearance(holder.statusChip, emergency.getStatus());
 
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onError(Exception e) {
-                holder.locationTextView.setText("Location: Unknown");
-            }
-        });
+        // Set location with Geocoding
+        GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(),
+                new GeocodingHelper.GeocodingCallback() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onAddressReceived(String address) {
+                        holder.locationTextView.setText(address);
+                    }
 
-        // Add OnClickListener to the entire CardView
-        holder.itemView.setOnClickListener(v -> {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onError(Exception e) {
+                        holder.locationTextView.setText(String.format("%.6f, %.6f",
+                                emergency.getLatitude(), emergency.getLongitude()));
+                    }
+                });
+
+        // Set card click listener
+        holder.cardView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ReportDetailActivity.class);
             intent.putExtra("emergencyId", emergency.getId());
             context.startActivity(intent);
         });
+    }
+
+    private void setStatusChipAppearance(Chip chip, Emergency.EmergencyStatus status) {
+        int colorResId; // Resource ID for the color
+        int textColor = ContextCompat.getColor(context, R.color.white);
+
+        switch (status) {
+            case MENUNGGU:
+                colorResId = R.color.status_pending;
+                break;
+            case PROSES:
+                colorResId = R.color.status_in_progress;
+                break;
+            case SELESAI:
+                colorResId = R.color.status_resolved;
+                break;
+            default:
+                colorResId = R.color.status_inactive;
+                break;
+        }
+
+        chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(context, colorResId)));
+        chip.setTextColor(textColor);
+        chip.setText(status.name());
     }
 
     @Override
@@ -99,14 +138,18 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     }
 
     static class EmergencyViewHolder extends RecyclerView.ViewHolder {
-        TextView typeTextView;
+        MaterialCardView cardView;
+        Chip typeChip;
+        Chip statusChip;
         TextView descriptionTextView;
         TextView timestampTextView;
         TextView locationTextView;
 
         EmergencyViewHolder(View itemView) {
             super(itemView);
-            typeTextView = itemView.findViewById(R.id.emergencyTypeTextView);
+            cardView = (MaterialCardView) itemView;
+            typeChip = itemView.findViewById(R.id.emergencyTypeChip);
+            statusChip = itemView.findViewById(R.id.statusChip);
             descriptionTextView = itemView.findViewById(R.id.emergencyDescriptionTextView);
             timestampTextView = itemView.findViewById(R.id.emergencyTimestampTextView);
             locationTextView = itemView.findViewById(R.id.locationTextView);

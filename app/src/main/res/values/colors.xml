@@ -1,24 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary Theme Colors -->
     <color name="colorPrimary">#C62828</color>
     <color name="colorPrimaryDark">#8E0000</color>
     <color name="colorAccent">#FF5252</color>
 
-    <!-- Status Colors -->
-    <color name="status_available">#43A047</color>
-    <color name="status_busy">#FF8A65</color>
-    <color name="status_active">#1976D2</color>
-    <color name="status_inactive">#9E9E9E</color>
-    <color name="status_completed">#616161</color>
-
-    <!-- General Colors -->
+    <!-- Base Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="grey_light">#F5F5F5</color>
     <color name="grey">#757575</color>
     <color name="background">#FAFAFA</color>
+    <color name="background_color">#ECEFF1</color>
+    <color name="stroke_color">#E0E0E0</color>
 
-    <!-- Emergency Specific Colors -->
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#616161</color>
+
+    <!-- Emergency Status Colors -->
+    <color name="status_pending">#FFA000</color><!-- MENUNGGU -->
+    <color name="status_in_progress">#1976D2</color><!-- PROSES -->
+    <color name="status_resolved">#388E3C</color><!-- SELESAI -->
+    <color name="status_inactive">#9E9E9E</color><!-- Default/Unknown -->
+
+    <!-- Other Status Colors -->
+    <color name="status_available">#43A047</color>
+    <color name="status_busy">#FF8A65</color>
+    <color name="status_active">#1976D2</color>
+
+    <!-- Type Chip Colors -->
+    <color name="type_chip_background">#E3F2FD</color>
+    <color name="type_chip_text">#1976D2</color>
+
+    <!-- Emergency UI Colors -->
     <color name="red">#D32F2F</color>
     <color name="gradient_start">#B71C1C</color>
     <color name="gradient_end">#80000000</color>
@@ -27,12 +42,4 @@
     <color name="route_color">#FF6F00</color>
     <color name="progress_line_active">#1565C0</color>
     <color name="progress_line_inactive">#B0BEC5</color>
-
-    <!-- Text Colors -->
-    <color name="text_secondary">#616161</color>
-    <color name="background_color">#ECEFF1</color>
-    <color name="status_pending">#FFA000</color><!-- For MENUNGGU -->
-    <color name="status_in_progress">#1976D2</color><!-- For PROSES -->
-    <color name="status_resolved">#388E3C</color><!-- For SELESAI -->
-
 </resources>
