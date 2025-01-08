@@ -65,6 +65,8 @@ public class EmergencyViewModel extends ViewModel {
         }
     }
 
+
+
     public void addEmergency(Emergency emergency) {
         if (dbHelper != null) {
             long id = dbHelper.insertEmergency(emergency);

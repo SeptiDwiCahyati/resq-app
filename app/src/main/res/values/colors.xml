@@ -37,6 +37,7 @@
     <color name="red">#D32F2F</color>
     <color name="gradient_start">#B71C1C</color>
     <color name="gradient_end">#80000000</color>
+    <color name="hint_color">#B0B0B0</color> <!-- Light gray for hint text -->
 
     <!-- Route and Progress Colors -->
     <color name="route_color">#FF6F00</color>

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.TrackingDBHelper;
+import com.septi.resq.model.Emergency;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class ReportFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
-        // Setup toolbar
+        // Toolbar Setup
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
@@ -37,45 +39,54 @@ public class ReportFragment extends Fragment {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
         }
 
-        // Setup RecyclerView
+        // RecyclerView Setup
         RecyclerView recyclerView = view.findViewById(R.id.emergencyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
 
+        // ViewModel Setup
         viewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
-
-        // Setup SearchView
-        SearchView searchView = view.findViewById(R.id.searchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                adapter.filter(query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                adapter.filter(newText);
-                return true;
-            }
-        });
-
-        // Initialize ViewModel
-        EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
-        TrackingDBHelper trackingDBHelper = new TrackingDBHelper(requireContext());
-        viewModel.init(emergencyDBHelper, trackingDBHelper);
-
         adapter = new EmergencyAdapter(new ArrayList<>(), requireContext());
         recyclerView.setAdapter(adapter);
+
+        // Status Card Views
+        TextView statusWaiting = view.findViewById(R.id.statusWaiting);
+        TextView statusInProgress = view.findViewById(R.id.statusInProgress);
+        TextView statusCompleted = view.findViewById(R.id.statusCompleted);
 
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
                 adapter.updateData(emergencies);
+
+                // Calculate status counts
+                long waiting = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.MENUNGGU).count();
+                long inProgress = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.PROSES).count();
+                long completed = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.SELESAI).count();
+
+                statusWaiting.setText("Menunggu: " + waiting);
+                statusInProgress.setText("Proses: " + inProgress);
+                statusCompleted.setText("Selesai: " + completed);
+            }
+        });
+        SearchView searchView = view.findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false; // Tidak perlu menangani submit
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (adapter != null) {
+                    adapter.filter(newText);
+                }
+                return true;
             }
         });
 
         return view;
     }
+
 
     @Override
     public void onResume() {

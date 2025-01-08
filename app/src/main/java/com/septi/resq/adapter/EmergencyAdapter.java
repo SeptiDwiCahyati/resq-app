@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,7 +123,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
 
     @SuppressLint("NotifyDataSetChanged")
     public void filter(String query) {
-        if (query.isEmpty()) {
+        if (TextUtils.isEmpty(query)) { // Gunakan TextUtils untuk memeriksa string kosong
             emergencies = new ArrayList<>(allEmergencies);
         } else {
             List<Emergency> filteredList = new ArrayList<>();
@@ -136,6 +137,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
         }
         notifyDataSetChanged();
     }
+
 
     static class EmergencyViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardView;
