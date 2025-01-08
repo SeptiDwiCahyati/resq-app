@@ -15,6 +15,7 @@ import com.septi.resq.fragment.MapFragment;
 import com.septi.resq.fragment.ProfileFragment;
 import com.septi.resq.fragment.TrackingFragment;
 import com.septi.resq.fragment.report.ReportFragment;
+import com.septi.resq.model.RescueTeam;
 import com.septi.resq.utils.LocationUtils;
 
 public class OverviewActivity extends AppCompatActivity implements LocationUtils.LocationPermissionCallback {
@@ -103,7 +104,15 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         loadingAnimation.setVisibility(View.GONE);
         loadingAnimation.cancelAnimation();
     }
+    public void navigateToTrackingWithTeam(RescueTeam team) {
+        // Switch to tracking fragment
+        switchFragment(trackingFragment);
 
+        // Pass team data to tracking fragment
+        if (trackingFragment instanceof TrackingFragment) {
+            ((TrackingFragment) trackingFragment).showTeamInfo(team);
+        }
+    }
 
     // Method untuk berpindah antar fragment
     private void switchFragment(Fragment fragment) {

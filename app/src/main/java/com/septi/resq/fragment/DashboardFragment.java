@@ -22,6 +22,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.septi.resq.OverviewActivity;
 import com.septi.resq.R;
 import com.septi.resq.adapter.ActiveTeamsAdapter;
 import com.septi.resq.adapter.QuickActionAdapter;
@@ -194,13 +195,23 @@ public class DashboardFragment extends Fragment {
 
         List<RescueTeam> availableTeams = rescueTeamDBHelper.getAvailableTeams();
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
+
+        // Add click listener
+        activeTeamsAdapter.setOnItemClickListener((team, position) -> {
+            // Navigate to tracking fragment
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+            bottomNav.setSelectedItemId(R.id.nav_tracking);
+
+            // Send team data through activity
+            ((OverviewActivity) requireActivity()).navigateToTrackingWithTeam(team);
+        });
+
         rvActiveTeams.setAdapter(activeTeamsAdapter);
 
         if (LocationUtils.hasLocationPermission(requireContext())) {
             updateTeamDistances();
         }
     }
-
 
     /**
      * Menyiapkan RecyclerView untuk Laporan Terbaru.

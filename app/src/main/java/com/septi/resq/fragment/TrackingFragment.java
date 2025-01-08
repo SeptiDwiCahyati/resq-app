@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.septi.resq.CustomTeamInfoWindow;
 import com.septi.resq.R;
 import com.septi.resq.adapter.EmergencyStatusCardAdapter;
 import com.septi.resq.database.EmergencyDBHelper;
@@ -109,7 +110,24 @@ public class TrackingFragment extends Fragment {
         }
         return view;
     }
+    public void showTeamInfo(RescueTeam team) {
+        if (map != null && rescueTeamMarkers.containsKey(team.getId())) {
+            Marker teamMarker = rescueTeamMarkers.get(team.getId());
+            if (teamMarker != null) {
+                TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(team.getId());
+                CustomTeamInfoWindow infoWindow = new CustomTeamInfoWindow(
+                        R.layout.team_info_window,
+                        map,
+                        team,
+                        lastStatus
+                );
 
+                teamMarker.setInfoWindow(infoWindow);
+                infoWindow.open(teamMarker, teamMarker.getPosition(), 0, -teamMarker.getIcon().getIntrinsicHeight());
+                map.getController().animateTo(teamMarker.getPosition());
+            }
+        }
+    }
     private void initializeRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.emergency_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -128,7 +146,6 @@ public class TrackingFragment extends Fragment {
         List<RescueTeam> allTeams = dbHelper.getAllTeams();
         for (RescueTeam team : allTeams) {
             Marker marker = new Marker(map);
-
             TrackingStatus lastStatus = dbHelperTracking.getLastTrackingStatus(team.getId());
 
             if (lastStatus != null && "COMPLETED".equals(lastStatus.getStatus())) {
@@ -154,10 +171,19 @@ public class TrackingFragment extends Fragment {
                 marker.setSnippet("Contact: " + team.getContactNumber());
             }
 
+            CustomTeamInfoWindow infoWindow = new CustomTeamInfoWindow(
+                    R.layout.team_info_window,
+                    map,
+                    team,
+                    lastStatus
+            );
+            marker.setInfoWindow(infoWindow);
+
             marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
-                clickedMarker.showInfoWindow();
+                infoWindow.open(marker, marker.getPosition(), 0, -marker.getIcon().getIntrinsicHeight());
                 return true;
             });
+
 
             map.getOverlays().add(marker);
             rescueTeamMarkers.put(team.getId(), marker);
