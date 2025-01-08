@@ -1,23 +1,34 @@
 <resources>
-    <color name="colorPrimary">#D32F2F</color>
-    <color name="colorPrimaryDark">#B71C1C</color>
-    <color name="colorAccent">#FF7043</color>
-    <color name="status_available">#4CAF50</color>
-    <color name="status_busy">#FF7043</color>
+    <!-- Primary Theme Colors -->
+    <color name="colorPrimary">#C62828</color>
+    <color name="colorPrimaryDark">#8E0000</color>
+    <color name="colorAccent">#FF5252</color>
+
+    <!-- Status Colors -->
+    <color name="status_available">#43A047</color>
+    <color name="status_busy">#FF8A65</color>
+    <color name="status_active">#1976D2</color>
+    <color name="status_inactive">#9E9E9E</color>
+    <color name="status_completed">#616161</color>
+
+    <!-- General Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="grey_light">#EEEEEE</color>
-    <color name="grey">#9E9E9E</color>
+    <color name="grey_light">#F5F5F5</color>
+    <color name="grey">#757575</color>
     <color name="background">#FAFAFA</color>
+
+    <!-- Emergency Specific Colors -->
     <color name="red">#D32F2F</color>
-    <color name="gradient_start">#80000000</color>
-    <color name="gradient_end">#00000000</color>
-    <color name="route_color">#4285F4</color>
-    <color name="background_color">#F5F5F5</color>
-    <color name="text_secondary">#757575</color>
-    <color name="status_active">#2196F3</color>
-    <color name="status_inactive">#BDBDBD</color>
-    <color name="status_completed">#BDBDBD</color>
-    <color name="progress_line_active">#2196F3</color>
-    <color name="progress_line_inactive">#BDBDBD</color>
+    <color name="gradient_start">#B71C1C</color>
+    <color name="gradient_end">#80000000</color>
+
+    <!-- Route and Progress Colors -->
+    <color name="route_color">#FF6F00</color>
+    <color name="progress_line_active">#1565C0</color>
+    <color name="progress_line_inactive">#B0BEC5</color>
+
+    <!-- Text Colors -->
+    <color name="text_secondary">#616161</color>
+    <color name="background_color">#ECEFF1</color>
 </resources>
