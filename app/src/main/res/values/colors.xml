@@ -15,4 +15,9 @@
     <color name="route_color">#4285F4</color>
     <color name="background_color">#F5F5F5</color>
     <color name="text_secondary">#757575</color>
+    <color name="status_active">#2196F3</color>
+    <color name="status_inactive">#BDBDBD</color>
+    <color name="status_completed">#BDBDBD</color>
+    <color name="progress_line_active">#2196F3</color>
+    <color name="progress_line_inactive">#BDBDBD</color>
 </resources>

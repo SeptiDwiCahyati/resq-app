@@ -18,6 +18,7 @@ import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.model.RescueTeam;
 import com.septi.resq.model.TrackingStatus;
+import com.septi.resq.utils.EmergencyStatusHelper;
 import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
@@ -44,17 +45,15 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         this.trackingDBHelper = new TrackingDBHelper(context);
         this.viewModel = viewModel;
 
-        // Runnable untuk update setiap 5 detik
         updateTask = new Runnable() {
             @Override
             public void run() {
-                notifyDataSetChanged(); // Refresh RecyclerView
-                handler.postDelayed(this, 10000); // Jadwalkan ulang 5 detik kemudian
+                notifyDataSetChanged();
+                handler.postDelayed(this, 10000);
             }
         };
-        handler.postDelayed(updateTask, 5000); // Jadwalkan pertama kali
+        handler.postDelayed(updateTask, 5000);
     }
-
 
     @NonNull
     @Override
@@ -72,7 +71,18 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
         holder.timestampTextView.setText(emergency.getTimestamp());
+
+        // Set emergency status
         holder.statusTextView.setText(getStatusText(emergency.getStatus()));
+
+        // Update progress status using helper
+        String statusToShow = emergency.getStatus().toString();
+        TrackingStatus trackingStatus = trackingDBHelper.getLastTrackingStatus(emergency.getId());
+        if (trackingStatus != null) {
+            statusToShow = trackingStatus.getStatus();
+            holder.trackingStatusTextView.setText(getTrackingStatusText(trackingStatus.getStatus()));
+        }
+        EmergencyStatusHelper.updateProgressStatus(holder.itemView, statusToShow);
 
         // Show location initially as coordinates
         String locationText = String.format("Location: %.6f, %.6f",
@@ -95,27 +105,19 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
                     }
                 });
 
-        // Check for assigned rescue team and display even if status is COMPLETED
-        TrackingStatus trackingStatus = trackingDBHelper.getLastTrackingStatus(emergency.getId());
+        // Check for assigned rescue team and display
         if (trackingStatus != null) {
             RescueTeam team = rescueTeamDBHelper.getTeamById(trackingStatus.getTeamId());
             if (team != null) {
                 holder.rescueTeamInfo.setVisibility(View.VISIBLE);
                 holder.teamNameTextView.setText(team.getName());
                 holder.teamContactTextView.setText("Contact: " + team.getContactNumber());
-                holder.trackingStatusTextView.setText(getTrackingStatusText(trackingStatus.getStatus()));
             } else {
                 holder.rescueTeamInfo.setVisibility(View.GONE);
             }
         } else {
             holder.rescueTeamInfo.setVisibility(View.GONE);
         }
-    }
-
-
-    public void updateTrackingStatus(long emergencyId, String trackingStatus) {
-        // Simply delegate to ViewModel
-        viewModel.updateTrackingStatus(emergencyId, trackingStatus);
     }
 
     private String getStatusText(Emergency.EmergencyStatus status) {
@@ -133,15 +135,21 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
 
     private String getTrackingStatusText(String status) {
         switch (status) {
+            case "MENUNGGU":
+                return "Status: Menunggu Tim";
             case "IN_PROGRESS":
-                return "Tim Sedang Menuju Lokasi";
+                return "Status: Tim Sedang Menuju Lokasi";
             case "ARRIVED":
-                return "Tim Telah Tiba di Lokasi";
-            case "COMPLETED":
-                return "Penanganan Selesai";
+                return "Status: Tim Telah Tiba di Lokasi";
+            case "RETURNING":
+                return "Status: Tim Sedang Kembali";
             default:
-                return "Status Tidak Diketahui";
+                return "Status: Tidak Diketahui";
         }
+    }
+
+    public void updateTrackingStatus(long emergencyId, String trackingStatus) {
+        viewModel.updateTrackingStatus(emergencyId, trackingStatus);
     }
 
     @Override
@@ -174,20 +182,19 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        handler.removeCallbacks(updateTask); // Hentikan pembaruan saat RecyclerView dilepas
+        handler.removeCallbacks(updateTask);
     }
-
 
     static class EmergencyCardViewHolder extends RecyclerView.ViewHolder {
         TextView typeTextView;
         TextView descriptionTextView;
         TextView timestampTextView;
         TextView locationTextView;
-        TextView statusTextView;
+        TextView statusTextView;      // Added back
         LinearLayout rescueTeamInfo;
         TextView teamNameTextView;
         TextView teamContactTextView;
-        TextView trackingStatusTextView;
+        TextView trackingStatusTextView;  // Added back
 
         EmergencyCardViewHolder(View itemView) {
             super(itemView);
@@ -202,6 +209,4 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
             trackingStatusTextView = itemView.findViewById(R.id.tracking_status);
         }
     }
-
-
 }
