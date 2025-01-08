@@ -53,8 +53,7 @@
             android:src="@drawable/ic_my_location"
             app:tint="@color/grey" />
 
-        <!-- Search Bar -->
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/search_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,6 +61,8 @@
             android:background="@android:color/transparent"
             android:hint="Cari lokasi"
             android:inputType="text"
+            android:completionThreshold="3"
+            android:imeOptions="actionSearch"
             android:textColor="@android:color/black"
             android:textColorHint="@android:color/darker_gray"
             android:textSize="14sp" />

@@ -11,11 +11,17 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -35,6 +41,7 @@ import com.septi.resq.R;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.utils.LocationSearchManager;
 import com.septi.resq.utils.LocationUtils;
 import com.septi.resq.utils.MarkerUtils;
 import com.septi.resq.utils.PulsingLocationOverlay;
@@ -57,6 +64,7 @@ import java.util.Objects;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
+    private LocationSearchManager searchManager;
     private EmergencyDBHelper dbHelper;
     private Marker selectedLocation;
     private Marker currentLocationMarker;
@@ -120,10 +128,11 @@ public class MapFragment extends Fragment {
         dbHelper = new EmergencyDBHelper(requireContext());
         emergencyMarkers = new ArrayList<>();
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
-
+        searchManager = new LocationSearchManager(requireContext(), mapView);
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = view.findViewById(R.id.map_view);
-
+        searchManager = new LocationSearchManager(requireContext(), mapView);
+        setupSearchBar(view);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setMultiTouchControls(true);
         mapView.setTilesScaledToDpi(true);
@@ -236,6 +245,84 @@ public class MapFragment extends Fragment {
 
         MaterialButton reportButton = view.findViewById(R.id.report_button);
         reportButton.setOnClickListener(v -> reportEmergency());
+        EditText searchBar = view.findViewById(R.id.search_bar);
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = searchBar.getText().toString();
+                if (!query.isEmpty()) {
+                    searchManager.searchLocation(query);
+                    // Hide keyboard
+                    InputMethodManager imm = (InputMethodManager) requireContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+                }
+                return true;
+            }
+            return false;
+        });
+    }
+
+
+    // In your MapFragment class
+    private void setupSearchBar(View rootView) {  // Add View parameter
+        EditText searchBar = rootView.findViewById(R.id.search_bar);  // Use rootView instead of view
+        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) searchBar;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        autoCompleteTextView.setAdapter(adapter);
+
+        // Set up search suggestions
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() >= 3) {
+                    searchManager.searchSuggestions(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Set up listener for search suggestions
+        searchManager.setOnSearchResultListener(suggestions -> {
+            adapter.clear();
+            adapter.addAll(suggestions);
+            adapter.notifyDataSetChanged();
+        });
+
+        // Handle location selection
+        autoCompleteTextView.setOnItemClickListener((parent, viewItem, position, id) -> {  // Renamed view to viewItem to avoid confusion
+            String selectedLocation = (String) parent.getItemAtPosition(position);
+            searchManager.searchLocation(selectedLocation);
+
+            // Hide keyboard
+            InputMethodManager imm = (InputMethodManager) requireContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        });
+
+        // Handle manual search
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+
+                String query = searchBar.getText().toString().trim();
+                if (!query.isEmpty()) {
+                    searchManager.searchLocation(query);
+
+                    // Hide keyboard
+                    InputMethodManager imm = (InputMethodManager) requireContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+                }
+                return true;
+            }
+            return false;
+        });
     }
 
     private void setupMapClickListener() {
