@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/emergency_card_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:alpha="0.95"
     app:cardCornerRadius="8dp"
-    app:cardElevation="8dp"
-    android:alpha="0.95">
+    app:cardElevation="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,81 +19,83 @@
             android:id="@+id/emergency_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
+            android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:textColor="@android:color/black"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/emergency_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/emergency_timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/emergency_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="14sp"/>
+            android:textSize="14sp" />
 
-        <!-- Progress Status Section -->
+        <TextView
+            android:id="@+id/emergency_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/holo_red_dark"
+            android:textStyle="bold" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <!-- Waiting Status -->
                 <ImageView
                     android:id="@+id/status_dot_waiting"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/circle_progress_inactive"/>
+                    android:src="@drawable/circle_progress_inactive" />
 
-                <!-- Line to OTW -->
                 <View
                     android:id="@+id/line_waiting_to_otw"
                     android:layout_width="0dp"
                     android:layout_height="2dp"
                     android:layout_weight="1"
-                    android:background="@color/progress_line_inactive"/>
+                    android:background="@color/progress_line_inactive" />
 
-                <!-- On The Way Status -->
                 <ImageView
                     android:id="@+id/status_dot_otw"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/circle_progress_inactive"/>
+                    android:src="@drawable/circle_progress_inactive" />
 
-                <!-- Line to Arrived -->
                 <View
                     android:id="@+id/line_otw_to_arrived"
                     android:layout_width="0dp"
                     android:layout_height="2dp"
                     android:layout_weight="1"
-                    android:background="@color/progress_line_inactive"/>
+                    android:background="@color/progress_line_inactive" />
 
-                <!-- Arrived Status -->
                 <ImageView
                     android:id="@+id/status_dot_arrived"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/circle_progress_inactive"/>
+                    android:src="@drawable/circle_progress_inactive" />
 
                 <!-- Line to Returning -->
                 <View
@@ -102,62 +103,60 @@
                     android:layout_width="0dp"
                     android:layout_height="2dp"
                     android:layout_weight="1"
-                    android:background="@color/progress_line_inactive"/>
+                    android:background="@color/progress_line_inactive" />
 
-                <!-- Returning Status -->
                 <ImageView
                     android:id="@+id/status_dot_returning"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/circle_progress_inactive"/>
+                    android:src="@drawable/circle_progress_inactive" />
             </LinearLayout>
 
-            <!-- Status Labels -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/status_text_waiting"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Waiting"
-                    android:textSize="12sp"
                     android:gravity="center"
-                    android:textColor="@color/status_inactive"/>
+                    android:text="Menunggu"
+                    android:textColor="@color/status_inactive"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/status_text_otw"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="On the Way"
-                    android:textSize="12sp"
                     android:gravity="center"
-                    android:textColor="@color/status_inactive"/>
+                    android:text="Dalam Perjalanan"
+                    android:textColor="@color/status_inactive"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/status_text_arrived"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Arrived"
-                    android:textSize="12sp"
                     android:gravity="center"
-                    android:textColor="@color/status_inactive"/>
+                    android:text="Sampai"
+                    android:textColor="@color/status_inactive"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/status_text_returning"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Returning"
-                    android:textSize="12sp"
                     android:gravity="center"
-                    android:textColor="@color/status_inactive"/>
+                    android:text="Kembali"
+                    android:textColor="@color/status_inactive"
+                    android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -166,15 +165,15 @@
             android:layout_height="1dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
-            android:background="#DDDDDD"/>
+            android:background="#DDDDDD" />
 
         <LinearLayout
             android:id="@+id/rescue_team_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone"
-            android:padding="8dp">
+            android:padding="8dp"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/team_name"
@@ -194,15 +193,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Status: xxx" />
-
-            <TextView
-                android:id="@+id/emergency_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textStyle="bold"
-                android:textColor="@android:color/holo_red_dark"/>
-
 
 
         </LinearLayout>
