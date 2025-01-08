@@ -605,10 +605,9 @@ public class TrackingFragment extends Fragment {
                     team.setIsAvailable(true);
                     dbHelper.updateTeamAvailability(team.getId(), true);
 
-                    // Create new marker at the original base location
                     Marker newMarker = createTeamMarker(
                             team,
-                            baseLocation, // Use original base location
+                            baseLocation,
                             "Contact: " + team.getContactNumber(),
                             completedStatus
                     );
@@ -619,7 +618,6 @@ public class TrackingFragment extends Fragment {
                     availableStatus.setTeamId(teamId);
                     availableStatus.setEmergencyId(-1);
                     availableStatus.setStatus("AVAILABLE");
-                    // Set both current and destination to base location
                     availableStatus.setCurrentLat(baseLocation.getLatitude());
                     availableStatus.setCurrentLon(baseLocation.getLongitude());
                     availableStatus.setDestinationLat(baseLocation.getLatitude());
@@ -651,7 +649,6 @@ public class TrackingFragment extends Fragment {
                 RescueTeam team = dbHelper.getTeamById(teamId);
 
                 if (team != null) {
-                    // Get the base location for this team
                     GeoPoint baseLocation = new GeoPoint(team.getLatitude(), team.getLongitude());
 
                     if (activeStatus != null && !Boolean.TRUE.equals(isTrackingStarted.get(teamId))) {
@@ -661,7 +658,6 @@ public class TrackingFragment extends Fragment {
                             isTrackingStarted.put(teamId, true);
                             calculateRoute(teamId, currentPos, baseLocation);
                         } else if ("COMPLETED".equals(activeStatus.getStatus()) || "AVAILABLE".equals(activeStatus.getStatus())) {
-                            // If completed or available, always position at base location
                             Marker existingMarker = rescueTeamMarkers.get(teamId);
                             if (existingMarker != null) {
                                 map.getOverlays().remove(existingMarker);
@@ -682,7 +678,6 @@ public class TrackingFragment extends Fragment {
                             calculateRoute(teamId, currentPos, destination);
                         }
                     } else if (activeStatus == null) {
-                        // If no active status, ensure the team is at its base location
                         Marker existingMarker = rescueTeamMarkers.get(teamId);
                         if (existingMarker != null) {
                             map.getOverlays().remove(existingMarker);
@@ -744,7 +739,6 @@ public class TrackingFragment extends Fragment {
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
         marker.setIcon(resizedIcon);
 
-        // Create and set info window
         CustomTeamInfoWindow infoWindow = new CustomTeamInfoWindow(
                 R.layout.team_info_window,
                 map,
@@ -753,13 +747,11 @@ public class TrackingFragment extends Fragment {
         );
         marker.setInfoWindow(infoWindow);
 
-        // Set click listener
         marker.setOnMarkerClickListener((clickedMarker, mapView) -> {
             infoWindow.open(marker, marker.getPosition(), 0, -marker.getIcon().getIntrinsicHeight());
             return true;
         });
 
-        // Add marker to map
         map.getOverlays().add(marker);
 
         return marker;
