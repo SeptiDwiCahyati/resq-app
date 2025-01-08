@@ -83,6 +83,8 @@
                 android:layout_marginTop="8dp"
                 android:text="View on Map" />
 
+
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

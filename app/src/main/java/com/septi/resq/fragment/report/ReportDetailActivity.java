@@ -2,6 +2,7 @@ package com.septi.resq.fragment.report;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,11 @@ import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class ReportDetailActivity extends AppCompatActivity {
     private TextView typeTextView, descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
@@ -30,13 +36,14 @@ public class ReportDetailActivity extends AppCompatActivity {
     private Emergency currentEmergency;
     private static final int LOCATION_REQUEST_CODE = 1001;
     private EmergencyViewModel viewModel;
-
+    private static final int PICK_IMAGE_REQUEST = 1002;
+    private ImageView previewImageView;
+    private String newImagePath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_detail);
 
-        // Initialize views
         typeTextView = findViewById(R.id.typeTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
         locationTextView = findViewById(R.id.locationTextView);
@@ -46,7 +53,6 @@ public class ReportDetailActivity extends AppCompatActivity {
         Button btnDelete = findViewById(R.id.btnDelete);
         Button btnViewOnMap = findViewById(R.id.btnViewOnMap);
 
-        // Initialize ViewModel with both database helpers
         viewModel = new ViewModelProvider(this).get(EmergencyViewModel.class);
         viewModel.init(
                 new EmergencyDBHelper(this),
@@ -108,9 +114,21 @@ public class ReportDetailActivity extends AppCompatActivity {
         EditText etType = dialogView.findViewById(R.id.etType);
         EditText etDescription = dialogView.findViewById(R.id.etDescription);
         Button btnEditLocation = dialogView.findViewById(R.id.btnEditLocation);
+        Button btnEditImage = dialogView.findViewById(R.id.btnEditImage);
+        previewImageView = dialogView.findViewById(R.id.ivPreview);
 
         etType.setText(currentEmergency.getType());
         etDescription.setText(currentEmergency.getDescription());
+
+        // Load existing image if available
+        if (currentEmergency.getPhotoPath() != null && !currentEmergency.getPhotoPath().isEmpty()) {
+            previewImageView.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(currentEmergency.getPhotoPath())
+                    .placeholder(R.drawable.error_image)
+                    .error(R.drawable.error_image)
+                    .into(previewImageView);
+        }
 
         AlertDialog dialog = builder.setView(dialogView)
                 .setTitle("Edit Emergency")
@@ -123,6 +141,10 @@ public class ReportDetailActivity extends AppCompatActivity {
             openLocationSelection();
         });
 
+        btnEditImage.setOnClickListener(v -> {
+            openImagePicker();
+        });
+
         dialog.setOnShowListener(dialogInterface -> {
             Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             button.setOnClickListener(view -> {
@@ -132,6 +154,9 @@ public class ReportDetailActivity extends AppCompatActivity {
                 if (!newType.isEmpty()) {
                     currentEmergency.setType(newType);
                     currentEmergency.setDescription(newDescription);
+                    if (newImagePath != null) {
+                        currentEmergency.setPhotoPath(newImagePath);
+                    }
                     viewModel.updateEmergency(currentEmergency);
                     populateViews();
                     Toast.makeText(ReportDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
@@ -145,6 +170,12 @@ public class ReportDetailActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void openImagePicker() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
 
     private void navigateToMap() {
         Intent intent = new Intent(this, OverviewActivity.class);
@@ -165,7 +196,19 @@ public class ReportDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == LOCATION_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+            // Save the image to app's private storage and get the path
+            newImagePath = saveImageToPrivateStorage(imageUri);
+            if (newImagePath != null && previewImageView != null) {
+                previewImageView.setVisibility(View.VISIBLE);
+                Glide.with(this)
+                        .load(newImagePath)
+                        .placeholder(R.drawable.error_image)
+                        .error(R.drawable.error_image)
+                        .into(previewImageView);
+            }
+        } else if (requestCode == LOCATION_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             double latitude = data.getDoubleExtra("latitude", 0);
             double longitude = data.getDoubleExtra("longitude", 0);
 
@@ -176,6 +219,39 @@ public class ReportDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private String saveImageToPrivateStorage(Uri imageUri) {
+        try {
+            // Create a file in the app's private directory
+            File directory;
+            directory = new File(getFilesDir(), "emergency_images");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(new java.util.Date());
+            String imageFileName = "IMG_" + timeStamp + ".jpg";
+            File file = new File(directory, imageFileName);
+
+            // Copy the selected image to the new file
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            OutputStream outputStream = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            outputStream.close();
+            inputStream.close();
+
+            return file.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
+
 
     private void showDeleteConfirmation() {
         new AlertDialog.Builder(this)

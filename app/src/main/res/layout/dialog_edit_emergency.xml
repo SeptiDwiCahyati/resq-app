@@ -9,20 +9,37 @@
         android:id="@+id/etType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Emergency Type" />
+        android:hint="Type"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/etDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:hint="Description"
-        android:layout_marginTop="8dp" />
+        android:inputType="textMultiLine"
+        android:minLines="3" />
+
+    <ImageView
+        android:id="@+id/ivPreview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnEditImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Edit Image" />
 
     <Button
         android:id="@+id/btnEditLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit Location"
-        android:layout_marginTop="8dp" />
-
+        android:layout_marginTop="8dp"
+        android:text="Edit Location" />
 </LinearLayout>
