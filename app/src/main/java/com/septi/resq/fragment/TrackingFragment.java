@@ -647,9 +647,27 @@ public class TrackingFragment extends Fragment {
                 completedStatus.setRouteIndex(currentIndex);
                 dbHelperTracking.insertTracking(completedStatus);
 
-                // Update emergency status if needed
+                // Update emergency status to SELESAI
                 if (activeTracking.getEmergencyId() != -1) {
+                    // Update tracking status
                     viewModel.updateTrackingStatus(activeTracking.getEmergencyId(), "COMPLETED");
+
+                    // Get and update emergency status to SELESAI
+                    EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
+                    Emergency emergency = emergencyDBHelper.getEmergencyById(activeTracking.getEmergencyId());
+                    if (emergency != null) {
+                        emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
+                        viewModel.updateEmergency(emergency);
+
+                        // Remove emergency marker if it exists
+                        for (Marker marker : emergencyMarkers) {
+                            if (marker.getId().equals("emergency_" + emergency.getId())) {
+                                map.getOverlays().remove(marker);
+                                emergencyMarkers.remove(marker);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 // Set team as available after completion
