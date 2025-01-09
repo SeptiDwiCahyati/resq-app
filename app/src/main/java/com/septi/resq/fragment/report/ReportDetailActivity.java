@@ -35,7 +35,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ReportDetailActivity extends AppCompatActivity {
-    private Chip typeChip;
+    private Chip typeChip, statusChip;
     private TextView descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
     private EmergencyDBHelper dbHelper;
@@ -45,6 +45,7 @@ public class ReportDetailActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1002;
     private ImageView previewImageView;
     private String newImagePath;
+    private Button btnEdit, btnDelete;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,12 +56,13 @@ public class ReportDetailActivity extends AppCompatActivity {
         collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(this, android.R.color.white));
 
         typeChip = findViewById(R.id.typeChip);
+        statusChip = findViewById(R.id.statusChip);
         descriptionTextView = findViewById(R.id.descriptionTextView);
         locationTextView = findViewById(R.id.locationTextView);
         timestampTextView = findViewById(R.id.timestampTextView);
         imageView = findViewById(R.id.imageView);
-        Button btnEdit = findViewById(R.id.btnEdit);
-        Button btnDelete = findViewById(R.id.btnDelete);
+        btnEdit = findViewById(R.id.btnEdit);
+        btnDelete = findViewById(R.id.btnDelete);
         Button btnViewOnMap = findViewById(R.id.btnViewOnMap);
 
         viewModel = new ViewModelProvider(this).get(EmergencyViewModel.class);
@@ -88,19 +90,65 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         if (currentEmergency != null) {
             populateViews();
+            updateButtonsVisibility();
         } else {
             Toast.makeText(this, "Laporan tidak ditemukan", Toast.LENGTH_SHORT).show();
             finish();
         }
 
-        btnEdit.setOnClickListener(v -> showEditDialog());
-        btnDelete.setOnClickListener(v -> showDeleteConfirmation());
+        btnEdit.setOnClickListener(v -> {
+            if (currentEmergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU) {
+                showEditDialog();
+            } else {
+                Toast.makeText(this, "Hanya laporan dengan status MENUNGGU yang dapat diedit", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            if (currentEmergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU) {
+                showDeleteConfirmation();
+            } else {
+                Toast.makeText(this, "Hanya laporan dengan status MENUNGGU yang dapat dihapus", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         btnViewOnMap.setOnClickListener(v -> navigateToMap());
     }
 
+    private void updateButtonsVisibility() {
+        boolean isEditable = currentEmergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU;
+        btnEdit.setEnabled(isEditable);
+        btnDelete.setEnabled(isEditable);
+
+        // Optional: Update button appearance for disabled state
+        if (!isEditable) {
+            btnEdit.setAlpha(0.5f);
+            btnDelete.setAlpha(0.5f);
+        } else {
+            btnEdit.setAlpha(1.0f);
+            btnDelete.setAlpha(1.0f);
+        }
+    }
     @SuppressLint("DefaultLocale")
     private void populateViews() {
         typeChip.setText(currentEmergency.getType());
+        statusChip.setText(currentEmergency.getStatus().toString());
+
+        // Set status chip color based on status
+        int statusColor;
+        switch (currentEmergency.getStatus()) {
+            case PROSES:
+                statusColor = ContextCompat.getColor(this, R.color.status_in_progress);
+                break;
+            case SELESAI:
+                statusColor = ContextCompat.getColor(this, R.color.status_resolved);
+                break;
+            default:
+                statusColor = ContextCompat.getColor(this, R.color.status_pending);
+                break;
+        }
+        statusChip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(statusColor));
+
         descriptionTextView.setText(currentEmergency.getDescription());
 
         double latitude = currentEmergency.getLatitude();
@@ -157,7 +205,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             imageView.setVisibility(View.GONE);
         }
     }
-
 
     private void showEditDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

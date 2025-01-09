@@ -63,14 +63,17 @@
         android:layout_marginTop="-40dp"
         android:background="@drawable/rounded_top_background"
         android:elevation="8dp"
+
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Horizontal layout for chips -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/chipContainer"
+            android:layout_marginHorizontal="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Emergency Type Chip (modernized from TextView) -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/typeChip"
                 android:layout_width="wrap_content"
@@ -83,6 +86,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Fire Emergency" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/statusChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:chipCornerRadius="16dp"
+                app:chipStrokeWidth="0dp"
+                app:layout_constraintStart_toEndOf="@id/typeChip"
+                app:layout_constraintTop_toTopOf="@id/typeChip"
+                tools:text="MENUNGGU"
+                tools:chipBackgroundColor="@color/status_waiting" />
+
+
 
             <!-- Description Section -->
             <com.google.android.material.card.MaterialCardView
