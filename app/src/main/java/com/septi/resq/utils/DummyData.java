@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DummyData {
-    // Single source of actions data
     private static final List<QuickAction> ALL_ACTIONS;
     static {
         ALL_ACTIONS = new ArrayList<QuickAction>();
@@ -26,7 +25,6 @@ public class DummyData {
 
     public static List<QuickAction> getQuickActions() {
         List<QuickAction> quickActions = new ArrayList<>();
-        // Ambil 7 item pertama
         for (int i = 0; i < Math.min(7, ALL_ACTIONS.size()); i++) {
             QuickAction action = ALL_ACTIONS.get(i);
             quickActions.add(new QuickAction(
@@ -35,13 +33,12 @@ public class DummyData {
                     action.getPhoneNumber()
             ));
         }
-        // Tambah tombol "Lihat Semua"
         quickActions.add(new QuickAction("Lihat Semua", R.drawable.ic_chevron_right, null));
         return quickActions;
     }
 
     public static List<QuickAction> getAllActions() {
-        return new ArrayList<>(ALL_ACTIONS); // Return semua actions
+        return new ArrayList<>(ALL_ACTIONS);
     }
 
     private static String truncateText(String text) {

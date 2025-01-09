@@ -337,7 +337,7 @@ public class DashboardFragment extends Fragment {
         rvQuickActions.setLayoutManager(gridLayoutManager);
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
-            if (position == 7) { // Lihat Semua button
+            if (position == 7) {
                 showAllActionsDialog();
             } else {
                 handleActionClick(quickAction);
