@@ -332,16 +332,63 @@ public class DashboardFragment extends Fragment {
      */
 
     private void setupQuickActionsRecyclerView() {
-        List<QuickAction> quickActions = DummyData.getQuickActions();
+        List<QuickAction> quickActions = DummyData.getQuickActions(); // Akan mendapat 8 item (7 action + Lihat Semua)
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
-            if (position == 7) {
+            if (position == 7) { // Index ke-7 adalah tombol "Lihat Semua"
                 showAllActionsDialog();
+            } else {
+                // Handle click untuk action lainnya
+                handleActionClick(quickAction);
             }
         });
         rvQuickActions.setAdapter(adapter);
+    }
+
+    private void showAllActionsDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_all_actions, null);
+
+        RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
+        Button btnClose = dialogView.findViewById(R.id.dialog_button_close);
+
+        // Buat dialog terlebih dahulu
+        final androidx.appcompat.app.AlertDialog dialog = builder.setView(dialogView).create();
+
+        // Gunakan semua actions untuk dialog
+        List<QuickAction> allActions = DummyData.getAllActions();
+        dialogRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        QuickActionAdapter dialogAdapter = new QuickActionAdapter(allActions);
+        dialogAdapter.setOnItemClickListener((quickAction, position) -> {
+            handleActionClick(quickAction);
+            dialog.dismiss(); // Sekarang dialog sudah terdefine
+        });
+        dialogRecyclerView.setAdapter(dialogAdapter);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void handleActionClick(QuickAction quickAction) {
+        // Implementasi handling untuk setiap action
+        String title = quickAction.getTitle();
+        // Handle setiap action berdasarkan title
+        switch (title) {
+            case "Lapor Kecelakaan":
+                // Handle lapor kecelakaan
+                break;
+            case "Panggil Ambulans":
+                // Handle panggil ambulans
+                break;
+            // tambahkan case lainnya sesuai kebutuhan
+        }
     }
 
 
@@ -371,25 +418,7 @@ public class DashboardFragment extends Fragment {
     }
 
 
-    private void showAllActionsDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_all_actions, null);
 
-        RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
-        Button btnClose = dialogView.findViewById(R.id.dialog_button_close);
-
-        dialogRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        dialogRecyclerView.setAdapter(new QuickActionAdapter(DummyData.getAllActions()));
-
-        androidx.appcompat.app.AlertDialog dialog = builder.setView(dialogView).create();
-        dialog.show();
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-
-        btnClose.setOnClickListener(v -> dialog.dismiss());
-    }
 
     private void setupClickListeners() {
         btnEmergency.setOnClickListener(v -> {
