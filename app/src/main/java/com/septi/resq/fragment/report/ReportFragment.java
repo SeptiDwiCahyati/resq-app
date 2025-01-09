@@ -71,6 +71,7 @@ public class ReportFragment extends Fragment {
 
         // Search functionality
         SearchView searchView = view.findViewById(R.id.searchView);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

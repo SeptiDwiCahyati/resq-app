@@ -37,9 +37,12 @@
                 android:iconifiedByDefault="false"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
-                android:queryHint="Search emergency reports..."
+                app:queryHint="Search emergency reports..."
+                app:defaultQueryHint="Search emergency reports..."
                 android:textColorHint="@color/hint_color"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:queryBackground="@android:color/transparent" />
+
 
         </com.google.android.material.card.MaterialCardView>
 
