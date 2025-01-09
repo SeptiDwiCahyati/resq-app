@@ -50,7 +50,7 @@
             android:layout_height="24dp"
             android:layout_marginEnd="8dp"
             android:contentDescription="Marker Icon"
-            android:src="@drawable/ic_my_location"
+            android:src="@drawable/ic_place"
             app:tint="@color/grey" />
 
         <AutoCompleteTextView
