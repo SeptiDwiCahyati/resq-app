@@ -26,6 +26,7 @@ import com.septi.resq.SelectLocationActivity;
 import com.septi.resq.database.EmergencyDBHelper;
 import com.septi.resq.database.TrackingDBHelper;
 import com.septi.resq.model.Emergency;
+import com.septi.resq.utils.GeocodingHelper;
 import com.septi.resq.viewmodel.EmergencyViewModel;
 
 import java.io.File;
@@ -102,7 +103,26 @@ public class ReportDetailActivity extends AppCompatActivity {
     private void populateViews() {
         typeChip.setText(currentEmergency.getType());
         descriptionTextView.setText(currentEmergency.getDescription());
-        locationTextView.setText(String.format("Location: %.6f, %.6f", currentEmergency.getLatitude(), currentEmergency.getLongitude()));
+
+        double latitude = currentEmergency.getLatitude();
+        double longitude = currentEmergency.getLongitude();
+
+        // Default location text with coordinates
+        locationTextView.setText(String.format("Location: %.6f, %.6f", latitude, longitude));
+
+        // Use GeocodingHelper to get the address
+        GeocodingHelper.getAddressFromLocation(this, latitude, longitude, new GeocodingHelper.GeocodingCallback() {
+            @Override
+            public void onAddressReceived(String address) {
+                locationTextView.setText(address);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(ReportDetailActivity.this, "Failed to fetch address", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         timestampTextView.setText(currentEmergency.getTimestamp());
 
         String photoPath = currentEmergency.getPhotoPath();
@@ -140,6 +160,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             imageView.setVisibility(View.GONE);
         }
     }
+
 
     private void showEditDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

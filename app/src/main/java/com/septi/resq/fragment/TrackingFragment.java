@@ -573,7 +573,6 @@ public class TrackingFragment extends Fragment {
                 completedStatus.setTeamId(teamId);
                 completedStatus.setEmergencyId(activeTracking.getEmergencyId());
                 completedStatus.setStatus("COMPLETED");
-                // Always use the team's base location for completion
                 completedStatus.setCurrentLat(baseLocation.getLatitude());
                 completedStatus.setCurrentLon(baseLocation.getLongitude());
                 completedStatus.setDestinationLat(baseLocation.getLatitude());
