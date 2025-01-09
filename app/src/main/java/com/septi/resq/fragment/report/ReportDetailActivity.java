@@ -96,11 +96,14 @@ public class ReportDetailActivity extends AppCompatActivity {
         locationTextView.setText(String.format("Location: %.6f, %.6f", currentEmergency.getLatitude(), currentEmergency.getLongitude()));
         timestampTextView.setText(currentEmergency.getTimestamp());
 
-        if (currentEmergency.getPhotoPath() != null && !currentEmergency.getPhotoPath().isEmpty()) {
+        String photoPath = currentEmergency.getPhotoPath();
+        if (photoPath != null && !photoPath.isEmpty()) {
+            imageView.setVisibility(View.VISIBLE);
             Glide.with(this)
-                    .load(currentEmergency.getPhotoPath())
+                    .load(new File(photoPath))
                     .placeholder(R.drawable.error_image)
                     .error(R.drawable.error_image)
+                    .centerCrop()
                     .into(imageView);
         } else {
             imageView.setVisibility(View.GONE);
@@ -120,7 +123,6 @@ public class ReportDetailActivity extends AppCompatActivity {
         etType.setText(currentEmergency.getType());
         etDescription.setText(currentEmergency.getDescription());
 
-        // Load existing image if available
         if (currentEmergency.getPhotoPath() != null && !currentEmergency.getPhotoPath().isEmpty()) {
             previewImageView.setVisibility(View.VISIBLE);
             Glide.with(this)
@@ -198,7 +200,6 @@ public class ReportDetailActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri imageUri = data.getData();
-            // Save the image to app's private storage and get the path
             newImagePath = saveImageToPrivateStorage(imageUri);
             if (newImagePath != null && previewImageView != null) {
                 previewImageView.setVisibility(View.VISIBLE);
@@ -222,7 +223,6 @@ public class ReportDetailActivity extends AppCompatActivity {
 
     private String saveImageToPrivateStorage(Uri imageUri) {
         try {
-            // Create a file in the app's private directory
             File directory;
             directory = new File(getFilesDir(), "emergency_images");
             if (!directory.exists()) {
@@ -233,7 +233,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             String imageFileName = "IMG_" + timeStamp + ".jpg";
             File file = new File(directory, imageFileName);
 
-            // Copy the selected image to the new file
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
             OutputStream outputStream = new FileOutputStream(file);
             byte[] buffer = new byte[1024];
