@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,47 +11,61 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:fitsSystemWindows="true">
+        android:layout_height="300dp"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbarLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="@color/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:expandedTitleMarginEnd="64dp"
+            app:expandedTitleMarginStart="16dp"
+            app:expandedTitleGravity="bottom|start"
+            app:collapsedTitleGravity="center|start"
+
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="parallax">
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7">
 
+                <!-- Updated ImageView to fill space -->
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:adjustViewBounds="true"
-                    android:scaleType="centerCrop" />
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:background="@color/grey"
+                    tools:src="@tools:sample/backgrounds/scenic"/>
 
+                <!-- Gradient overlay for better text visibility -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/gradient_overlay" />
+                    android:background="@drawable/gradient_overlay"/>
             </FrameLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Content -->
+
+    <!-- Rest of the content remains the same -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/background_color"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -58,15 +73,18 @@
             android:layout_height="wrap_content"
             android:padding="20dp">
 
-            <!-- Emergency Type TextView (changed from Chip) -->
+
+        <!-- Emergency Type TextView (changed from Chip) -->
             <TextView
                 android:id="@+id/typeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/type_chip_background"
-                android:padding="8dp"
+
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
                 android:textColor="@color/type_chip_text"
                 android:textSize="14sp"
+                android:fontFamily="@font/roboto_medium"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Fire Emergency" />

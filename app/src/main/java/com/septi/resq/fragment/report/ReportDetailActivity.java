@@ -13,9 +13,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.septi.resq.OverviewActivity;
 import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
@@ -43,6 +46,9 @@ public class ReportDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_detail);
+        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsingToolbarLayout);
+        collapsingToolbarLayout.setCollapsedTitleTextColor(ContextCompat.getColor(this, android.R.color.white)); // Warna teks collapsed
+        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(this, android.R.color.white)); // Warna teks expanded
 
         typeTextView = findViewById(R.id.typeTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
@@ -99,12 +105,37 @@ public class ReportDetailActivity extends AppCompatActivity {
         String photoPath = currentEmergency.getPhotoPath();
         if (photoPath != null && !photoPath.isEmpty()) {
             imageView.setVisibility(View.VISIBLE);
-            Glide.with(this)
-                    .load(new File(photoPath))
-                    .placeholder(R.drawable.error_image)
-                    .error(R.drawable.error_image)
-                    .centerCrop()
-                    .into(imageView);
+
+            try {
+                // First try loading as a content URI
+                Uri photoUri;
+                if (photoPath.startsWith("content://")) {
+                    photoUri = Uri.parse(photoPath);
+                } else {
+                    // If it's a file path, create a content URI using FileProvider
+                    File photoFile = new File(photoPath);
+                    photoUri = FileProvider.getUriForFile(this,
+                            getPackageName() + ".fileprovider",
+                            photoFile);
+                }
+
+                Glide.with(this)
+                        .load(photoUri)
+                        .placeholder(R.drawable.error_image)
+                        .error(R.drawable.error_image)
+                        .centerCrop()
+                        .into(imageView);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Fallback to direct file loading if FileProvider fails
+                Glide.with(this)
+                        .load(new File(photoPath))
+                        .placeholder(R.drawable.error_image)
+                        .error(R.drawable.error_image)
+                        .centerCrop()
+                        .into(imageView);
+            }
         } else {
             imageView.setVisibility(View.GONE);
         }
