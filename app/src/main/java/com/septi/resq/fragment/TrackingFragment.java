@@ -440,6 +440,22 @@ public class TrackingFragment extends Fragment {
 
                 dbHelperTracking.insertTracking(returnStatus);
                 adapter.updateTrackingStatus(emergencyId, "RETURNING");
+
+                // Remove emergency marker when team starts returning
+                EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
+                Emergency emergency = emergencyDBHelper.getEmergencyById(emergencyId);
+                if (emergency != null) {
+                    emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
+                    viewModel.updateEmergency(emergency);
+
+                    for (Marker marker : emergencyMarkers) {
+                        if (marker.getId().equals("emergency_" + emergency.getId())) {
+                            map.getOverlays().remove(marker);
+                            emergencyMarkers.remove(marker);
+                            break;
+                        }
+                    }
+                }
             }
 
             RouteCalculator.calculateRoute(getContext(), currentLocation, baseLocation, new RouteCalculator.RouteCalculationCallback() {
@@ -477,7 +493,6 @@ public class TrackingFragment extends Fragment {
             });
         }
     }
-
 
     private boolean isValidRescueTeamState(Long teamId) {
         List<GeoPoint> route = rescueTeamRoutes.get(teamId);
@@ -581,21 +596,6 @@ public class TrackingFragment extends Fragment {
 
                 if (activeTracking.getEmergencyId() != -1) {
                     viewModel.updateTrackingStatus(activeTracking.getEmergencyId(), "COMPLETED");
-
-                    EmergencyDBHelper emergencyDBHelper = new EmergencyDBHelper(requireContext());
-                    Emergency emergency = emergencyDBHelper.getEmergencyById(activeTracking.getEmergencyId());
-                    if (emergency != null) {
-                        emergency.setStatus(Emergency.EmergencyStatus.SELESAI);
-                        viewModel.updateEmergency(emergency);
-
-                        for (Marker marker : emergencyMarkers) {
-                            if (marker.getId().equals("emergency_" + emergency.getId())) {
-                                map.getOverlays().remove(marker);
-                                emergencyMarkers.remove(marker);
-                                break;
-                            }
-                        }
-                    }
                 }
 
                 new Handler().postDelayed(() -> {
