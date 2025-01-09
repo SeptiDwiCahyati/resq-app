@@ -122,7 +122,6 @@ public class ReportDetailActivity extends AppCompatActivity {
     }
 
     private void setupLiveDataObservers(long emergencyId) {
-        // Observe updates to the emergency
         viewModel.getUpdatedEmergency().observe(this, emergency -> {
             if (emergency != null && emergency.getId() == emergencyId) {
                 currentEmergency = emergency;
@@ -131,7 +130,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             }
         });
 
-        // Observe deletions
         viewModel.getDeletedEmergencyId().observe(this, deletedId -> {
             if (deletedId != null && deletedId == emergencyId) {
                 Toast.makeText(this, "Laporan telah dihapus", Toast.LENGTH_SHORT).show();
@@ -154,7 +152,6 @@ public class ReportDetailActivity extends AppCompatActivity {
         btnEdit.setEnabled(isEditable);
         btnDelete.setEnabled(isEditable);
 
-        // Optional: Update button appearance for disabled state
         if (!isEditable) {
             btnEdit.setAlpha(0.5f);
             btnDelete.setAlpha(0.5f);
@@ -168,8 +165,6 @@ public class ReportDetailActivity extends AppCompatActivity {
     private void populateViews() {
         typeChip.setText(currentEmergency.getType());
         statusChip.setText(currentEmergency.getStatus().toString());
-
-        // Set status chip color based on status
         int statusColor;
         switch (currentEmergency.getStatus()) {
             case PROSES:
@@ -186,7 +181,6 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         descriptionTextView.setText(currentEmergency.getDescription());
 
-        // Only initialize location once
         if (!isLocationInitialized) {
             initializeLocation();
         }
@@ -245,7 +239,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             @Override
             public void onError(Exception e) {
                 Toast.makeText(ReportDetailActivity.this, "Gagal mendapatkan alamat", Toast.LENGTH_SHORT).show();
-                isLocationInitialized = true;  // Mark as initialized even on error to prevent continuous retries
+                isLocationInitialized = true;
             }
         });
     }
@@ -299,7 +293,6 @@ public class ReportDetailActivity extends AppCompatActivity {
                         currentEmergency.setPhotoPath(newImagePath);
                     }
                     viewModel.updateEmergency(currentEmergency);
-                    // Remove populateViews() as observer will handle it
                     Toast.makeText(ReportDetailActivity.this, "Laporan berhasil di update", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 } else {
@@ -356,8 +349,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             currentEmergency.setLatitude(latitude);
             currentEmergency.setLongitude(longitude);
             viewModel.updateEmergency(currentEmergency);
-
-            // Reset location initialization flag to force refresh with new coordinates
             isLocationInitialized = false;
             initializeLocation();
 
