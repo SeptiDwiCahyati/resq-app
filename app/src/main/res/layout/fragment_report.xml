@@ -19,12 +19,12 @@
 
         <!-- Search Bar -->
         <com.google.android.material.card.MaterialCardView
-            app:cardBackgroundColor="@android:color/white"
             android:id="@+id/searchCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             app:layout_constraintTop_toTopOf="parent">
@@ -35,66 +35,134 @@
                 android:layout_height="wrap_content"
                 android:background="@null"
                 android:iconifiedByDefault="false"
-                android:queryHint="Search emergency reports..."
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
+                android:queryHint="Search emergency reports..."
                 android:textColorHint="@color/hint_color"
                 app:queryBackground="@android:color/transparent" />
 
-
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Status Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/statusCard"
-            app:cardBackgroundColor="@android:color/white"
+        <!-- Status Cards Container -->
+        <LinearLayout
+            android:id="@+id/statusCardsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
             app:layout_constraintTop_toBottomOf="@id/searchCard">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Waiting Status Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/waitingCard"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/status_pending"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
 
-                <TextView
-                    android:id="@+id/statusWaiting"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Menunggu: 0"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                    android:textColor="@color/text_primary" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/statusInProgress"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Menunggu"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/statusWaiting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- In Progress Status Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/inProgressCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/status_in_progress"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Proses: 0"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                    android:textColor="@color/text_primary" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/statusCompleted"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Proses"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/statusInProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Completed Status Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/completedCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/status_resolved"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Selesai: 0"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                    android:textColor="@color/text_primary" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Selesai"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/statusCompleted"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
 
         <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
@@ -103,9 +171,9 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:padding="16dp"
-            app:layout_constraintTop_toBottomOf="@id/statusCard"
+            android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:scrollbars="vertical" />
+            app:layout_constraintTop_toBottomOf="@id/statusCardsContainer" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
