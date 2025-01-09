@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
-    <!-- AppBar with Collapsing Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="340dp"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -20,12 +18,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
+            app:collapsedTitleGravity="center|start"
             app:contentScrim="@color/colorPrimary"
+            app:expandedTitleGravity="bottom|start"
+            app:expandedTitleMarginBottom="72dp"
             app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="16dp"
-            app:expandedTitleGravity="bottom|start"
-            app:collapsedTitleGravity="center|start"
-
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <FrameLayout
@@ -34,70 +32,68 @@
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.7">
 
-                <!-- Updated ImageView to fill space -->
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
                     android:background="@color/grey"
-                    tools:src="@tools:sample/backgrounds/scenic"/>
+                    android:scaleType="centerCrop"
+                    tools:src="@tools:sample/backgrounds/scenic" />
 
-                <!-- Gradient overlay for better text visibility -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/gradient_overlay"/>
+                    android:background="@drawable/gradient_overlay" />
             </FrameLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_marginBottom="40dp"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-
-    <!-- Rest of the content remains the same -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background_color"
+        android:layout_marginTop="-40dp"
+        android:background="@drawable/rounded_top_background"
+        android:elevation="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp">
+            android:padding="24dp">
 
-
-        <!-- Emergency Type TextView (changed from Chip) -->
-            <TextView
-                android:id="@+id/typeTextView"
+            <!-- Emergency Type Chip (modernized from TextView) -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/typeChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:textColor="@color/type_chip_text"
+                android:textColor="@color/white"
                 android:textSize="14sp"
-                android:fontFamily="@font/roboto_medium"
+                app:chipBackgroundColor="@color/colorPrimary"
+                app:chipCornerRadius="16dp"
+                app:chipStrokeWidth="0dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Fire Emergency" />
 
-            <!-- Description Card -->
+            <!-- Description Section -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/descriptionCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:layout_constraintTop_toBottomOf="@id/typeTextView"
+                app:layout_constraintTop_toBottomOf="@id/typeChip"
                 app:strokeColor="@color/stroke_color"
                 app:strokeWidth="1dp">
 
@@ -105,7 +101,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -113,28 +109,29 @@
                         android:fontFamily="@font/roboto_medium"
                         android:text="Description"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/descriptionTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="12dp"
                         android:fontFamily="@font/roboto_regular"
-                        android:lineSpacingExtra="4dp"
+                        android:lineSpacingExtra="6dp"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        tools:text="Detailed emergency description goes here" />
+                        tools:text="Detailed emergency description goes here with proper line spacing for better readability" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Location and Time Info -->
+            <!-- Info Card with Location and Time -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/infoCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:layout_constraintTop_toBottomOf="@id/descriptionCard"
                 app:strokeColor="@color/stroke_color"
@@ -144,60 +141,89 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
-                    <!-- Location Row -->
+                    <!-- Location Row with enhanced styling -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/ripple_background"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:padding="12dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_location"
-                            app:tint="@color/colorPrimary" />
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            app:cardBackgroundColor="@color/icon_background"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_location"
+                                app:tint="@color/colorPrimary" />
+                        </com.google.android.material.card.MaterialCardView>
 
                         <TextView
                             android:id="@+id/locationTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:fontFamily="@font/roboto_regular"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/roboto_medium"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             tools:text="123 Emergency Street" />
                     </LinearLayout>
 
-                    <!-- Time Row -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="@color/divider_color" />
+
+                    <!-- Time Row with enhanced styling -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:background="@drawable/ripple_background"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:padding="12dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_time"
-                            app:tint="@color/colorPrimary" />
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            app:cardBackgroundColor="@color/icon_background"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_time"
+                                app:tint="@color/colorPrimary" />
+                        </com.google.android.material.card.MaterialCardView>
 
                         <TextView
                             android:id="@+id/timestampTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:fontFamily="@font/roboto_regular"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/roboto_medium"
                             android:textColor="@color/text_primary"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             tools:text="January 9, 2024 14:30" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons with enhanced styling -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -211,19 +237,30 @@
                     android:layout_height="56dp"
                     android:text="View on Map"
                     android:textAllCaps="false"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_map" />
+                    app:cornerRadius="16dp"
+                    app:elevation="0dp"
+                    app:icon="@drawable/ic_map"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconSize="24dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEdit"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="12dp"
                     android:text="Edit Emergency"
                     android:textAllCaps="false"
-                    app:cornerRadius="12dp"
-                    app:strokeColor="@color/colorPrimary" />
+                    android:textColor="@color/black"
+                    app:backgroundTint="@color/yellow"
+                    app:cornerRadius="16dp"
+                    app:elevation="0dp"
+                    app:icon="@drawable/ic_edit"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/black" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDelete"
@@ -231,11 +268,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="12dp"
-                    android:text="Delete"
+                    android:text="Delete Emergency"
                     android:textAllCaps="false"
                     android:textColor="@color/red"
-                    app:cornerRadius="12dp"
-                    app:strokeColor="@color/red" />
+                    app:cornerRadius="16dp"
+                    app:elevation="0dp"
+                    app:icon="@drawable/ic_delete"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/red"
+                    app:strokeColor="@color/red"
+                    app:strokeWidth="1dp" />
+
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

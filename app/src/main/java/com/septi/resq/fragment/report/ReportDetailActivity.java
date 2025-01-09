@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.chip.Chip;
 import com.septi.resq.OverviewActivity;
 import com.septi.resq.R;
 import com.septi.resq.SelectLocationActivity;
@@ -33,7 +34,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ReportDetailActivity extends AppCompatActivity {
-    private TextView typeTextView, descriptionTextView, locationTextView, timestampTextView;
+    private Chip typeChip;
+    private TextView descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
     private EmergencyDBHelper dbHelper;
     private Emergency currentEmergency;
@@ -46,11 +48,12 @@ public class ReportDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_detail);
-        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsingToolbarLayout);
-        collapsingToolbarLayout.setCollapsedTitleTextColor(ContextCompat.getColor(this, android.R.color.white)); // Warna teks collapsed
-        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(this, android.R.color.white)); // Warna teks expanded
 
-        typeTextView = findViewById(R.id.typeTextView);
+        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsingToolbarLayout);
+        collapsingToolbarLayout.setCollapsedTitleTextColor(ContextCompat.getColor(this, android.R.color.white));
+        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(this, android.R.color.white));
+
+        typeChip = findViewById(R.id.typeChip);
         descriptionTextView = findViewById(R.id.descriptionTextView);
         locationTextView = findViewById(R.id.locationTextView);
         timestampTextView = findViewById(R.id.timestampTextView);
@@ -97,7 +100,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
     @SuppressLint("DefaultLocale")
     private void populateViews() {
-        typeTextView.setText(currentEmergency.getType());
+        typeChip.setText(currentEmergency.getType());
         descriptionTextView.setText(currentEmergency.getDescription());
         locationTextView.setText(String.format("Location: %.6f, %.6f", currentEmergency.getLatitude(), currentEmergency.getLongitude()));
         timestampTextView.setText(currentEmergency.getTimestamp());
@@ -107,12 +110,10 @@ public class ReportDetailActivity extends AppCompatActivity {
             imageView.setVisibility(View.VISIBLE);
 
             try {
-                // First try loading as a content URI
                 Uri photoUri;
                 if (photoPath.startsWith("content://")) {
                     photoUri = Uri.parse(photoPath);
                 } else {
-                    // If it's a file path, create a content URI using FileProvider
                     File photoFile = new File(photoPath);
                     photoUri = FileProvider.getUriForFile(this,
                             getPackageName() + ".fileprovider",
@@ -128,7 +129,6 @@ public class ReportDetailActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                // Fallback to direct file loading if FileProvider fails
                 Glide.with(this)
                         .load(new File(photoPath))
                         .placeholder(R.drawable.error_image)
@@ -174,9 +174,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             openLocationSelection();
         });
 
-        btnEditImage.setOnClickListener(v -> {
-            openImagePicker();
-        });
+        btnEditImage.setOnClickListener(v -> openImagePicker());
 
         dialog.setOnShowListener(dialogInterface -> {
             Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -202,7 +200,6 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         dialog.show();
     }
-
     private void openImagePicker() {
         Intent intent = new Intent();
         intent.setType("image/*");
