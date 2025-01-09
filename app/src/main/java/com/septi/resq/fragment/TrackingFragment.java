@@ -214,7 +214,7 @@ public class TrackingFragment extends Fragment {
             if (nearestTeamId != null) {
                 new Handler().postDelayed(() -> {
                     dispatchRescueTeam(emergency, nearestTeamId, emergencyLocation);
-                }, 60000);
+                }, 30000);
             } else {
                 Toast.makeText(getContext(), "Semua tim sedang dalam tugas!", Toast.LENGTH_LONG).show();
             }

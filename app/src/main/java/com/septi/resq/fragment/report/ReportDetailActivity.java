@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,14 +39,19 @@ public class ReportDetailActivity extends AppCompatActivity {
     private Chip typeChip, statusChip;
     private TextView descriptionTextView, locationTextView, timestampTextView;
     private ImageView imageView;
+    private boolean isLocationInitialized = false;
+
     private EmergencyDBHelper dbHelper;
     private Emergency currentEmergency;
+    private Handler refreshHandler = new Handler();
+    private final int REFRESH_INTERVAL = 3000;
     private static final int LOCATION_REQUEST_CODE = 1001;
     private EmergencyViewModel viewModel;
     private static final int PICK_IMAGE_REQUEST = 1002;
     private ImageView previewImageView;
     private String newImagePath;
     private Button btnEdit, btnDelete;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +78,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         );
 
         long emergencyId = getIntent().getLongExtra("emergencyId", -1L);
-
+        setupLiveDataObservers(emergencyId);
         if (emergencyId == -1L) {
             Toast.makeText(this, "Laporan tidak Valid", Toast.LENGTH_SHORT).show();
             finish();
@@ -115,6 +121,34 @@ public class ReportDetailActivity extends AppCompatActivity {
         btnViewOnMap.setOnClickListener(v -> navigateToMap());
     }
 
+    private void setupLiveDataObservers(long emergencyId) {
+        // Observe updates to the emergency
+        viewModel.getUpdatedEmergency().observe(this, emergency -> {
+            if (emergency != null && emergency.getId() == emergencyId) {
+                currentEmergency = emergency;
+                populateViews();
+                updateButtonsVisibility();
+            }
+        });
+
+        // Observe deletions
+        viewModel.getDeletedEmergencyId().observe(this, deletedId -> {
+            if (deletedId != null && deletedId == emergencyId) {
+                Toast.makeText(this, "Laporan telah dihapus", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+    }
+
+
+    private Runnable refreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            refreshEmergencyData();
+            refreshHandler.postDelayed(this, REFRESH_INTERVAL);
+        }
+    };
+
     private void updateButtonsVisibility() {
         boolean isEditable = currentEmergency.getStatus() == Emergency.EmergencyStatus.MENUNGGU;
         btnEdit.setEnabled(isEditable);
@@ -129,6 +163,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             btnDelete.setAlpha(1.0f);
         }
     }
+
     @SuppressLint("DefaultLocale")
     private void populateViews() {
         typeChip.setText(currentEmergency.getType());
@@ -151,22 +186,10 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         descriptionTextView.setText(currentEmergency.getDescription());
 
-        double latitude = currentEmergency.getLatitude();
-        double longitude = currentEmergency.getLongitude();
-
-        locationTextView.setText(String.format("Location: %.6f, %.6f", latitude, longitude));
-
-        GeocodingHelper.getAddressFromLocation(this, latitude, longitude, new GeocodingHelper.GeocodingCallback() {
-            @Override
-            public void onAddressReceived(String address) {
-                locationTextView.setText(address);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Toast.makeText(ReportDetailActivity.this, "Gagal mendapatkan alamat", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Only initialize location once
+        if (!isLocationInitialized) {
+            initializeLocation();
+        }
 
         timestampTextView.setText(currentEmergency.getTimestamp());
 
@@ -205,6 +228,28 @@ public class ReportDetailActivity extends AppCompatActivity {
             imageView.setVisibility(View.GONE);
         }
     }
+
+    private void initializeLocation() {
+        double latitude = currentEmergency.getLatitude();
+        double longitude = currentEmergency.getLongitude();
+
+        locationTextView.setText(String.format("Location: %.6f, %.6f", latitude, longitude));
+
+        GeocodingHelper.getAddressFromLocation(this, latitude, longitude, new GeocodingHelper.GeocodingCallback() {
+            @Override
+            public void onAddressReceived(String address) {
+                locationTextView.setText(address);
+                isLocationInitialized = true;
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(ReportDetailActivity.this, "Gagal mendapatkan alamat", Toast.LENGTH_SHORT).show();
+                isLocationInitialized = true;  // Mark as initialized even on error to prevent continuous retries
+            }
+        });
+    }
+
 
     private void showEditDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -254,7 +299,7 @@ public class ReportDetailActivity extends AppCompatActivity {
                         currentEmergency.setPhotoPath(newImagePath);
                     }
                     viewModel.updateEmergency(currentEmergency);
-                    populateViews();
+                    // Remove populateViews() as observer will handle it
                     Toast.makeText(ReportDetailActivity.this, "Laporan berhasil di update", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 } else {
@@ -265,6 +310,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         dialog.show();
     }
+
     private void openImagePicker() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -281,6 +327,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
     private void openLocationSelection() {
         Intent intent = new Intent(this, SelectLocationActivity.class);
         intent.putExtra("latitude", currentEmergency.getLatitude());
@@ -308,9 +355,24 @@ public class ReportDetailActivity extends AppCompatActivity {
 
             currentEmergency.setLatitude(latitude);
             currentEmergency.setLongitude(longitude);
-            dbHelper.updateEmergency(currentEmergency);
-            populateViews();
+            viewModel.updateEmergency(currentEmergency);
+
+            // Reset location initialization flag to force refresh with new coordinates
+            isLocationInitialized = false;
+            initializeLocation();
+
             Toast.makeText(this, "Lokasi berhasil diupdate", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void refreshEmergencyData() {
+        if (currentEmergency != null) {
+            Emergency refreshedEmergency = dbHelper.getEmergencyById((int) currentEmergency.getId());
+            if (refreshedEmergency != null) {
+                currentEmergency = refreshedEmergency;
+                populateViews();
+                updateButtonsVisibility();
+            }
         }
     }
 
@@ -351,12 +413,12 @@ public class ReportDetailActivity extends AppCompatActivity {
                 .setMessage("Apa kamu yakin ingin menghapus Laporan")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     viewModel.deleteEmergency(currentEmergency.getId());
-                    Toast.makeText(this, "Laporan dihapus", Toast.LENGTH_SHORT).show();
-                    finish();
+                    // Remove Toast and finish() as observer will handle it
                 })
                 .setNegativeButton("Tidak", null)
                 .show();
     }
+
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -364,5 +426,18 @@ public class ReportDetailActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshEmergencyData();
+        refreshHandler.postDelayed(refreshRunnable, REFRESH_INTERVAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        refreshHandler.removeCallbacks(refreshRunnable);
     }
 }
