@@ -27,7 +27,7 @@
     <!-- Other Status Colors -->
     <color name="status_available">#43A047</color>
     <color name="status_busy">#FF8A65</color>
-    <color name="status_active">#1976D2</color>
+    <color name="status_active">#212121</color>
 
     <!-- Type Chip Colors -->
     <color name="type_chip_background">#E3F2FD</color>

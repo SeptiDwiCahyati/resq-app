@@ -11,10 +11,10 @@ public class DummyData {
     private static final List<QuickAction> ALL_ACTIONS;
     static {
         ALL_ACTIONS = new ArrayList<QuickAction>();
-        ALL_ACTIONS.add(new QuickAction("Kecelakaan", R.drawable.ic_accident, "119"));
+        ALL_ACTIONS.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident, "119"));
         ALL_ACTIONS.add(new QuickAction("Panggil Ambulan", R.drawable.ic_ambulance, "118"));
         ALL_ACTIONS.add(new QuickAction("Panggil Polisi", R.drawable.ic_police, "110"));
-        ALL_ACTIONS.add(new QuickAction("Kebakaran", R.drawable.ic_fire, "113"));
+        ALL_ACTIONS.add(new QuickAction("Lapor Kebakaran", R.drawable.ic_fire, "113"));
         ALL_ACTIONS.add(new QuickAction("Bencana Alam", R.drawable.ic_disaster, "115"));
         ALL_ACTIONS.add(new QuickAction("Pertolongan Pertama", R.drawable.ic_first_aid, "119"));
         ALL_ACTIONS.add(new QuickAction("Evakuasi Segera", R.drawable.ic_evacuate, "115"));
