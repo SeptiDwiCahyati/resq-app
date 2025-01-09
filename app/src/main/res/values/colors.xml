@@ -43,6 +43,6 @@
     <color name="divider_color">#E0E0E0</color>
     <!-- Route and Progress Colors -->
     <color name="route_color">#FF6F00</color>
-    <color name="progress_line_active">#1565C0</color>
+    <color name="progress_line_active">#212121</color>
     <color name="progress_line_inactive">#B0BEC5</color>
 </resources>
