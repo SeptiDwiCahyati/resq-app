@@ -72,7 +72,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         long emergencyId = getIntent().getLongExtra("emergencyId", -1L);
 
         if (emergencyId == -1L) {
-            Toast.makeText(this, "Invalid emergency ID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Laporan tidak Valid", Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -80,7 +80,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Report Detail");
+            getSupportActionBar().setTitle("Detail Laporan");
         }
 
         dbHelper = new EmergencyDBHelper(this);
@@ -89,7 +89,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         if (currentEmergency != null) {
             populateViews();
         } else {
-            Toast.makeText(this, "Emergency not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Laporan tidak ditemukan", Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -116,7 +116,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(ReportDetailActivity.this, "Failed to fetch address", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ReportDetailActivity.this, "Gagal mendapatkan alamat", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -183,8 +183,8 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.setView(dialogView)
                 .setTitle("Edit Emergency")
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Simpan", null)
+                .setNegativeButton("Batal", null)
                 .create();
 
         btnEditLocation.setOnClickListener(v -> {
@@ -208,10 +208,10 @@ public class ReportDetailActivity extends AppCompatActivity {
                     }
                     viewModel.updateEmergency(currentEmergency);
                     populateViews();
-                    Toast.makeText(ReportDetailActivity.this, "Emergency updated", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReportDetailActivity.this, "Laporan berhasil di update", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(ReportDetailActivity.this, "Type cannot be empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReportDetailActivity.this, "Bagian ini tidak boleh kosong!", Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -222,7 +222,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Pilih Gambar"), PICK_IMAGE_REQUEST);
     }
 
     private void navigateToMap() {
@@ -263,7 +263,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             currentEmergency.setLongitude(longitude);
             dbHelper.updateEmergency(currentEmergency);
             populateViews();
-            Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lokasi berhasil diupdate", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -292,7 +292,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             return file.getAbsolutePath();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Gagal menyimpan gambar", Toast.LENGTH_SHORT).show();
             return null;
         }
     }
@@ -300,14 +300,14 @@ public class ReportDetailActivity extends AppCompatActivity {
 
     private void showDeleteConfirmation() {
         new AlertDialog.Builder(this)
-                .setTitle("Delete Emergency")
-                .setMessage("Are you sure you want to delete this emergency?")
+                .setTitle("Menghapus Laporan")
+                .setMessage("Apa kamu yakin ingin menghapus Laporan")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     viewModel.deleteEmergency(currentEmergency.getId());
-                    Toast.makeText(this, "Emergency deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Laporan dihapus", Toast.LENGTH_SHORT).show();
                     finish();
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton("Tidak", null)
                 .show();
     }
     @Override

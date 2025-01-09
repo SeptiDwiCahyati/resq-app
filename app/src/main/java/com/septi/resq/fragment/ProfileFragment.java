@@ -123,7 +123,7 @@ public class ProfileFragment extends Fragment {
                 if (readGranted || mediaGranted) {
                     openImagePicker();
                 } else {
-                    Toast.makeText(requireContext(), "Permission denied. Cannot access photos.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Izin ditolak tidak dapat mengakses gambar", Toast.LENGTH_SHORT).show();
                 }
             }
     );
@@ -165,24 +165,24 @@ public class ProfileFragment extends Fragment {
 
             if (success) {
                 viewModel.updateUserProfile(currentProfile);
-                Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Profil berhasil disimpan", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Gagal menyimpan profil", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private boolean validateInput(String name, String email, String phone) {
         if (name.isEmpty()) {
-            etName.setError("Name is required");
+            etName.setError("Nama diperlukan");
             return false;
         }
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Valid email is required");
+            etEmail.setError("Email tidak Valid");
             return false;
         }
         if (phone.isEmpty()) {
-            etPhone.setError("Phone number is required");
+            etPhone.setError("Nomor HP diperlukan");
             return false;
         }
         return true;

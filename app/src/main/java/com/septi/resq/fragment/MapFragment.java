@@ -675,7 +675,7 @@ public class MapFragment extends Fragment {
                 launchCamera();
             } else {
                 Toast.makeText(requireContext(),
-                        "Camera permission is required to take photos",
+                        "Izin Camera diperlukan",
                         Toast.LENGTH_SHORT).show();
             }
         }

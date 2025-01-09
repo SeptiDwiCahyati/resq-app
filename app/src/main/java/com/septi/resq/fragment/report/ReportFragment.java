@@ -34,7 +34,7 @@ public class ReportFragment extends Fragment {
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Emergency Reports");
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle("Laporan Darurat");
         }
 
         // RecyclerView Setup
