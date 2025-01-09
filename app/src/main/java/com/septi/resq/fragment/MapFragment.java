@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
@@ -251,7 +252,6 @@ public class MapFragment extends Fragment {
                 String query = searchBar.getText().toString();
                 if (!query.isEmpty()) {
                     searchManager.searchLocation(query);
-                    // Hide keyboard
                     InputMethodManager imm = (InputMethodManager) requireContext()
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
@@ -263,15 +263,13 @@ public class MapFragment extends Fragment {
     }
 
 
-    // In your MapFragment class
-    private void setupSearchBar(View rootView) {  // Add View parameter
-        EditText searchBar = rootView.findViewById(R.id.search_bar);  // Use rootView instead of view
+    private void setupSearchBar(View rootView) {
+        EditText searchBar = rootView.findViewById(R.id.search_bar);
         AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) searchBar;
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         autoCompleteTextView.setAdapter(adapter);
 
-        // Set up search suggestions
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -289,25 +287,22 @@ public class MapFragment extends Fragment {
             }
         });
 
-        // Set up listener for search suggestions
+
         searchManager.setOnSearchResultListener(suggestions -> {
             adapter.clear();
             adapter.addAll(suggestions);
             adapter.notifyDataSetChanged();
         });
 
-        // Handle location selection
-        autoCompleteTextView.setOnItemClickListener((parent, viewItem, position, id) -> {  // Renamed view to viewItem to avoid confusion
+        autoCompleteTextView.setOnItemClickListener((parent, viewItem, position, id) -> {
             String selectedLocation = (String) parent.getItemAtPosition(position);
             searchManager.searchLocation(selectedLocation);
 
-            // Hide keyboard
             InputMethodManager imm = (InputMethodManager) requireContext()
                     .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
         });
 
-        // Handle manual search
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
@@ -316,7 +311,6 @@ public class MapFragment extends Fragment {
                 if (!query.isEmpty()) {
                     searchManager.searchLocation(query);
 
-                    // Hide keyboard
                     InputMethodManager imm = (InputMethodManager) requireContext()
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
@@ -456,7 +450,37 @@ public class MapFragment extends Fragment {
 
 
     private void showReportDialog(final double latitude, final double longitude) {
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_report_emergency, null);
+        List<Emergency> unfinishedEmergencies = dbHelper.getAllEmergencies().stream()
+                .filter(e -> e.getStatus() == Emergency.EmergencyStatus.MENUNGGU ||
+                        e.getStatus() == Emergency.EmergencyStatus.PROSES)
+                .collect(Collectors.toList());
+
+        if (!unfinishedEmergencies.isEmpty()) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Peringatan")
+                    .setMessage("Anda memiliki laporan darurat yang belum selesai. " +
+                            "Harap tunggu hingga laporan sebelumnya ditangani.")
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        Emergency firstUnfinished = unfinishedEmergencies.get(0);
+                        GeoPoint point = new GeoPoint(firstUnfinished.getLatitude(),
+                                firstUnfinished.getLongitude());
+                        mapView.getController().animateTo(point);
+
+                        for (Marker marker : emergencyMarkers) {
+                            Emergency markerEmergency = findEmergencyForMarker(marker);
+                            if (markerEmergency != null &&
+                                    markerEmergency.getId() == firstUnfinished.getId()) {
+                                marker.showInfoWindow();
+                                break;
+                            }
+                        }
+                    })
+                    .show();
+            return;
+        }
+
+        View dialogView = LayoutInflater.from(getContext())
+                .inflate(R.layout.dialog_report_emergency, null);
 
         Spinner typeSpinner = dialogView.findViewById(R.id.spinner_emergency_type);
         EditText descriptionEdit = dialogView.findViewById(R.id.edit_description);
@@ -483,17 +507,19 @@ public class MapFragment extends Fragment {
                 .setPositiveButton("Laporkan", (dialog, which) -> {
                     String type = typeSpinner.getSelectedItem().toString();
                     String description = descriptionEdit.getText().toString();
-                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                    String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                            Locale.getDefault())
                             .format(new Date());
                     String photoPath = photoUri != null ? photoUri.toString() : null;
 
-                    Emergency emergency = new Emergency(latitude, longitude, type, description, timestamp, photoPath);
-
+                    Emergency emergency = new Emergency(latitude, longitude, type,
+                            description, timestamp, photoPath);
                     viewModel.addEmergency(emergency);
-
                     updateMapMarker(emergency);
 
-                    Toast.makeText(requireContext(), "Kejadian berhasil dilaporkan", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),
+                            "Kejadian berhasil dilaporkan",
+                            Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Batal", null)
                 .show();
