@@ -115,7 +115,7 @@ public class EmergencyDBHelper extends SQLiteOpenHelper {
 
 
     @SuppressLint("Range")
-    public Emergency getEmergencyById(long id) { // Changed from int to long
+    public Emergency getEmergencyById(long id) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_EMERGENCY, null, COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)}, null, null, null);

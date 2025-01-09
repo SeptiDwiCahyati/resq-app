@@ -22,7 +22,6 @@ public class EmergencyStatusHelper {
         TextView textArrived = view.findViewById(R.id.status_text_arrived);
         TextView textReturning = view.findViewById(R.id.status_text_returning);
 
-        // Reset all to inactive
         dotWaiting.setImageResource(R.drawable.circle_progress_inactive);
         dotOtw.setImageResource(R.drawable.circle_progress_inactive);
         dotArrived.setImageResource(R.drawable.circle_progress_inactive);

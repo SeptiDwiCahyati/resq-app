@@ -1,7 +1,5 @@
 package com.septi.resq;
 
-import static android.system.Os.close;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;

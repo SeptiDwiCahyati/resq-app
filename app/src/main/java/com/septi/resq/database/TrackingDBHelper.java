@@ -1,4 +1,3 @@
-// TrackingDBHelper.java
 package com.septi.resq.database;
 
 import android.annotation.SuppressLint;
@@ -7,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import com.septi.resq.model.TrackingStatus;
 
 public class TrackingDBHelper extends SQLiteOpenHelper {
@@ -50,10 +50,8 @@ public class TrackingDBHelper extends SQLiteOpenHelper {
     }
 
     public void insertTracking(TrackingStatus status) {
-        // Cek apakah sudah ada tracking aktif untuk tim dan emergency yang sama
         TrackingStatus existingStatus = getActiveTracking(status.getTeamId());
         if (existingStatus == null) {
-            // Baru insert jika belum ada
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(COLUMN_TEAM_ID, status.getTeamId());

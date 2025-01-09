@@ -47,29 +47,25 @@ public class ReportFragment extends Fragment {
         adapter = new EmergencyAdapter(new ArrayList<>(), requireContext());
         recyclerView.setAdapter(adapter);
 
-        // Status Card Views - Get references to just the number TextViews
+        // Status Card Views
         TextView statusWaitingCount = view.findViewById(R.id.statusWaiting);
         TextView statusInProgressCount = view.findViewById(R.id.statusInProgress);
         TextView statusCompletedCount = view.findViewById(R.id.statusCompleted);
 
-        // Observe emergency data changes
         viewModel.getEmergencies().observe(getViewLifecycleOwner(), emergencies -> {
             if (emergencies != null) {
                 adapter.updateData(emergencies);
 
-                // Calculate status counts
                 long waiting = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.MENUNGGU).count();
                 long inProgress = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.PROSES).count();
                 long completed = emergencies.stream().filter(e -> e.getStatus() == Emergency.EmergencyStatus.SELESAI).count();
 
-                // Update just the count numbers
                 statusWaitingCount.setText(String.valueOf(waiting));
                 statusInProgressCount.setText(String.valueOf(inProgress));
                 statusCompletedCount.setText(String.valueOf(completed));
             }
         });
 
-        // Search functionality
         SearchView searchView = view.findViewById(R.id.searchView);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

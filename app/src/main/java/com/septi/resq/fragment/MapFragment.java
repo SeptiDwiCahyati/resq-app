@@ -274,7 +274,8 @@ public class MapFragment extends Fragment {
         // Set up search suggestions
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -284,7 +285,8 @@ public class MapFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         // Set up listener for search suggestions
@@ -542,12 +544,8 @@ public class MapFragment extends Fragment {
     private void updateMarkerInfo(Marker marker, Emergency emergency) {
         marker.setTitle(emergency.getType());
         marker.setSnippet("Waktu: " + emergency.getTimestamp() + "\n" + "Deskripsi: " + emergency.getDescription());
-
-        // Set fixed anchor points
         marker.setAnchor(0.5f, 1.0f);
         marker.setDraggable(false);
-
-        // Set and resize icon
         int iconDrawable;
         switch (emergency.getType()) {
             case "Kecelakaan":

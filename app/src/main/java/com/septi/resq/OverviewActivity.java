@@ -36,16 +36,12 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
 
-        // Inisialisasi Loading Animation
         loadingAnimation = findViewById(R.id.loading_animation);
 
         showLoading();
+        setupFragments();
+        setupBottomNavigation();
 
-        // Proses persiapan aplikasi
-        setupFragments(); // Menginisialisasi fragment
-        setupBottomNavigation(); // Mengatur navigasi bawah
-
-        // Mengecek izin lokasi
         if (LocationUtils.hasLocationPermission(this)) {
             onLocationPermissionGranted();
         } else {
@@ -61,19 +57,19 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
-                switchFragment(homeFragment); // Berpindah ke fragment dashboard
+                switchFragment(homeFragment); // fragment dashboard
                 return true;
             } else if (itemId == R.id.nav_report) {
-                switchFragment(reportFragment); // Berpindah ke fragment laporan
+                switchFragment(reportFragment); // fragment laporan
                 return true;
             } else if (itemId == R.id.nav_map) {
-                switchFragment(mapFragment); // Berpindah ke fragment peta
+                switchFragment(mapFragment); // fragment peta
                 return true;
             } else if (itemId == R.id.nav_tracking) {
-                switchFragment(trackingFragment); // Berpindah ke fragment pelacakan
+                switchFragment(trackingFragment); // fragment pelacakan
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                switchFragment(profileFragment); // Berpindah ke fragment profil
+                switchFragment(profileFragment); // fragment profil
                 return true;
             }
 
@@ -104,17 +100,14 @@ public class OverviewActivity extends AppCompatActivity implements LocationUtils
         loadingAnimation.setVisibility(View.GONE);
         loadingAnimation.cancelAnimation();
     }
-    public void navigateToTrackingWithTeam(RescueTeam team) {
-        // Switch to tracking fragment
-        switchFragment(trackingFragment);
 
-        // Pass team data to tracking fragment
+    public void navigateToTrackingWithTeam(RescueTeam team) {
+        switchFragment(trackingFragment);
         if (trackingFragment instanceof TrackingFragment) {
             ((TrackingFragment) trackingFragment).showTeamInfo(team);
         }
     }
 
-    // Method untuk berpindah antar fragment
     private void switchFragment(Fragment fragment) {
         showLoading();
         fragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit();

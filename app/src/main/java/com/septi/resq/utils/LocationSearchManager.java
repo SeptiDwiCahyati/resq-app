@@ -13,7 +13,6 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class LocationSearchManager {
     }
 
     public void searchSuggestions(String query) {
-        if (query.length() < 3) return; // Wait for at least 3 characters
+        if (query.length() < 3) return;
         new SearchSuggestionsTask().execute(query);
     }
 
@@ -140,27 +139,18 @@ public class LocationSearchManager {
         @Override
         protected void onPostExecute(GeoPoint location) {
             if (location != null) {
-                clearSearch(); // Remove existing marker
-
-                // Add new marker
+                clearSearch();
                 searchMarker = new Marker(mapView);
                 searchMarker.setPosition(location);
                 searchMarker.setAnchor(0.5f, 1.0f);
                 searchMarker.setTitle(locationName);
-
-                // Set marker icon
                 Drawable icon = context.getResources().getDrawable(R.drawable.ic_my_location);
                 Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(context, icon, 40);
                 searchMarker.setIcon(resizedIcon);
-
                 mapView.getOverlays().add(searchMarker);
-
-                // Animate to location
                 mapView.getController().animateTo(location);
                 mapView.getController().setZoom(16.0);
                 mapView.invalidate();
-
-                // Show marker info
                 searchMarker.showInfoWindow();
             } else {
                 Toast.makeText(context, "Lokasi tidak ditemukan", Toast.LENGTH_SHORT).show();

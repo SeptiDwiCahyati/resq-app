@@ -57,7 +57,7 @@ public class TrackingFragment extends Fragment {
     private final Map<Long, Boolean> rescueTeamMovingStatus = new HashMap<>();
     private final Map<Long, Polyline> rescueTeamRouteLines = new HashMap<>();
     private long lastUpdateTime = 0;
-    private static final long UPDATE_INTERVAL = 1000; // 1 detik
+    private static final long UPDATE_INTERVAL = 1000;
     private final List<Marker> emergencyMarkers = new ArrayList<>();
     private TrackingDBHelper dbHelperTracking;
     private EmergencyViewModel viewModel;
@@ -492,7 +492,6 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
     private void updateMarkerPosition(Long teamId, GeoPoint position) {
         Marker marker = rescueTeamMarkers.get(teamId);
         if (marker != null) marker.setPosition(position);
@@ -559,7 +558,6 @@ public class TrackingFragment extends Fragment {
 
         RescueTeam team = dbHelper.getTeamById(teamId);
         if (team != null) {
-            // Store the original base location
             final GeoPoint baseLocation = new GeoPoint(team.getLatitude(), team.getLongitude());
 
             Marker oldMarker = rescueTeamMarkers.get(teamId);
@@ -725,15 +723,12 @@ public class TrackingFragment extends Fragment {
     }
 
 
-
     private Marker createTeamMarker(RescueTeam team, GeoPoint position, String snippet, TrackingStatus status) {
         Marker marker = new Marker(map);
         marker.setPosition(position);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setTitle(team.getName());
         marker.setSnippet(snippet);
-
-        // Set marker icon
         Drawable rescueIcon = getResources().getDrawable(R.drawable.ic_ambulance);
         Drawable resizedIcon = MarkerUtils.resizeMarkerIcon(getContext(), rescueIcon, MARKER_SIZE_DP);
         marker.setIcon(resizedIcon);

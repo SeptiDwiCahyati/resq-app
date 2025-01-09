@@ -12,7 +12,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 
-// GeocodingHelper.java
 public class GeocodingHelper {
     private static final String NOMINATIM_API = "https://nominatim.openstreetmap.org/reverse";
 

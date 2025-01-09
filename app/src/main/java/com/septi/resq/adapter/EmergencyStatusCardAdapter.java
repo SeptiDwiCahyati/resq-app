@@ -1,5 +1,6 @@
 package com.septi.resq.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -66,16 +67,10 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
     @Override
     public void onBindViewHolder(@NonNull EmergencyCardViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
-
-        // Set emergency information
         holder.typeTextView.setText(emergency.getType());
         holder.descriptionTextView.setText(emergency.getDescription());
         holder.timestampTextView.setText(emergency.getTimestamp());
-
-        // Set emergency status
         holder.statusTextView.setText(getStatusText(emergency.getStatus()));
-
-        // Update progress status using helper
         String statusToShow = emergency.getStatus().toString();
         TrackingStatus trackingStatus = trackingDBHelper.getLastTrackingStatus(emergency.getId());
         if (trackingStatus != null) {
@@ -83,29 +78,27 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
             holder.trackingStatusTextView.setText(getTrackingStatusText(trackingStatus.getStatus()));
         }
         EmergencyStatusHelper.updateProgressStatus(holder.itemView, statusToShow);
-
-        // Show location initially as coordinates
-        String locationText = String.format("Location: %.6f, %.6f",
+        @SuppressLint("DefaultLocale") String locationText = String.format("Location: %.6f, %.6f",
                 emergency.getLatitude(), emergency.getLongitude());
         holder.locationTextView.setText(locationText);
 
-        // Get address using GeocodingHelper
         GeocodingHelper.getAddressFromLocation(context,
                 emergency.getLatitude(),
                 emergency.getLongitude(),
                 new GeocodingHelper.GeocodingCallback() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onAddressReceived(String address) {
                         holder.locationTextView.setText("Location: " + address);
                     }
 
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onError(Exception e) {
                         holder.locationTextView.setText("Location: Unknown");
                     }
                 });
 
-        // Check for assigned rescue team and display
         if (trackingStatus != null) {
             RescueTeam team = rescueTeamDBHelper.getTeamById(trackingStatus.getTeamId());
             if (team != null) {
@@ -157,12 +150,14 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         return emergencies.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<Emergency> newEmergencies) {
         this.emergencies = new ArrayList<>(newEmergencies);
         this.allEmergencies = new ArrayList<>(newEmergencies);
         notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void filter(String query) {
         if (query.isEmpty()) {
             emergencies = new ArrayList<>(allEmergencies);
@@ -190,11 +185,11 @@ public class EmergencyStatusCardAdapter extends RecyclerView.Adapter<EmergencySt
         TextView descriptionTextView;
         TextView timestampTextView;
         TextView locationTextView;
-        TextView statusTextView;      // Added back
+        TextView statusTextView;
         LinearLayout rescueTeamInfo;
         TextView teamNameTextView;
         TextView teamContactTextView;
-        TextView trackingStatusTextView;  // Added back
+        TextView trackingStatusTextView;
 
         EmergencyCardViewHolder(View itemView) {
             super(itemView);

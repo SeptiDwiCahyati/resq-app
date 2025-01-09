@@ -11,15 +11,6 @@ import java.util.List;
 
 public class PolylineUtils {
 
-    /**
-     * Draw a route on the map using a list of GeoPoints.
-     *
-     * @param map     the MapView instance where the route will be drawn.
-     * @param points  the list of GeoPoints representing the route.
-     * @param color   the color of the polyline.
-     * @param width   the width of the polyline.
-     * @return the Polyline instance added to the map.
-     */
     public static Polyline drawRoute(MapView map, List<GeoPoint> points, int color, float width) {
         Polyline routeLine = new Polyline();
         routeLine.setPoints(points);
@@ -31,12 +22,6 @@ public class PolylineUtils {
         return routeLine;
     }
 
-    /**
-     * Decode a polyline string into a list of GeoPoints.
-     *
-     * @param encoded the encoded polyline string.
-     * @return a list of GeoPoints representing the polyline.
-     */
     public static List<GeoPoint> decodePolyline(String encoded) {
         List<GeoPoint> points = new ArrayList<>();
         int index = 0, len = encoded.length();

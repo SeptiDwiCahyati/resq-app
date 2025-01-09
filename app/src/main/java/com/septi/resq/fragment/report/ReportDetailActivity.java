@@ -76,7 +76,6 @@ public class ReportDetailActivity extends AppCompatActivity {
             finish();
         }
 
-        // Setup toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -107,10 +106,8 @@ public class ReportDetailActivity extends AppCompatActivity {
         double latitude = currentEmergency.getLatitude();
         double longitude = currentEmergency.getLongitude();
 
-        // Default location text with coordinates
         locationTextView.setText(String.format("Location: %.6f, %.6f", latitude, longitude));
 
-        // Use GeocodingHelper to get the address
         GeocodingHelper.getAddressFromLocation(this, latitude, longitude, new GeocodingHelper.GeocodingCallback() {
             @Override
             public void onAddressReceived(String address) {
@@ -321,7 +318,4 @@ public class ReportDetailActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
-
 }

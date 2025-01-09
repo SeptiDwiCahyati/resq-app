@@ -42,7 +42,6 @@ public class UserProfileDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // CRUD Operations
     public long insertProfile( UserProfile profile) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -94,5 +93,4 @@ public class UserProfileDBHelper extends SQLiteOpenHelper {
         db.close();
         return rowsAffected > 0;
     }
-
 }

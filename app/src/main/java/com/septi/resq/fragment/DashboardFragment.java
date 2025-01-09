@@ -74,7 +74,6 @@ public class DashboardFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(UserProfileViewModel.class);
         emergencyViewModel = new ViewModelProvider(requireActivity()).get(EmergencyViewModel.class);
 
-        // Initialize with both required database helpers
         emergencyViewModel.init(
                 new EmergencyDBHelper(context),
                 new TrackingDBHelper(context)
@@ -196,13 +195,10 @@ public class DashboardFragment extends Fragment {
         List<RescueTeam> availableTeams = rescueTeamDBHelper.getAvailableTeams();
         activeTeamsAdapter = new ActiveTeamsAdapter(availableTeams);
 
-        // Add click listener
         activeTeamsAdapter.setOnItemClickListener((team, position) -> {
-            // Navigate to tracking fragment
             BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
             bottomNav.setSelectedItemId(R.id.nav_tracking);
 
-            // Send team data through activity
             ((OverviewActivity) requireActivity()).navigateToTrackingWithTeam(team);
         });
 
@@ -356,7 +352,7 @@ public class DashboardFragment extends Fragment {
 
     private void toggleTeamsView() {
         isShowingAllTeams = !isShowingAllTeams;
-        btnToggleTeams.setText(isShowingAllTeams ? "Kecilkan" : "Tampilkan Semua");
+        btnToggleTeams.setText(isShowingAllTeams ? "Sembunyikan" : "Tampilkan Semua");
 
         rvActiveTeams.setLayoutManager(new LinearLayoutManager(getContext(),
                 isShowingAllTeams ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL,

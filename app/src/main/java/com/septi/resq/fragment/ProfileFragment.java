@@ -171,6 +171,7 @@ public class ProfileFragment extends Fragment {
             }
         }
     }
+
     private boolean validateInput(String name, String email, String phone) {
         if (name.isEmpty()) {
             etName.setError("Name is required");

@@ -1,8 +1,5 @@
 package com.septi.resq.adapter;
 
-import static com.septi.resq.model.Emergency.EmergencyStatus.MENUNGGU;
-import static com.septi.resq.model.Emergency.EmergencyStatus.PROSES;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

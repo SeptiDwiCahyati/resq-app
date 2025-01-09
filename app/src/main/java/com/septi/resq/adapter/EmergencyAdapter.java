@@ -47,20 +47,10 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     @Override
     public void onBindViewHolder(@NonNull EmergencyViewHolder holder, int position) {
         Emergency emergency = emergencies.get(position);
-
-        // Set emergency type with icon
         holder.typeChip.setText(emergency.getType());
-
-        // Set description
         holder.descriptionTextView.setText(emergency.getDescription());
-
-        // Set timestamp
         holder.timestampTextView.setText(emergency.getTimestamp());
-
-        // Set status chip appearance based on status
         setStatusChipAppearance(holder.statusChip, emergency.getStatus());
-
-        // Set location with Geocoding
         GeocodingHelper.getAddressFromLocation(context, emergency.getLatitude(), emergency.getLongitude(),
                 new GeocodingHelper.GeocodingCallback() {
                     @SuppressLint("SetTextI18n")
@@ -77,7 +67,6 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
                     }
                 });
 
-        // Set card click listener
         holder.cardView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ReportDetailActivity.class);
             intent.putExtra("emergencyId", emergency.getId());
@@ -86,7 +75,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
     }
 
     private void setStatusChipAppearance(Chip chip, Emergency.EmergencyStatus status) {
-        int colorResId; // Resource ID for the color
+        int colorResId;
         int textColor = ContextCompat.getColor(context, R.color.white);
 
         switch (status) {
@@ -123,7 +112,7 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Emer
 
     @SuppressLint("NotifyDataSetChanged")
     public void filter(String query) {
-        if (TextUtils.isEmpty(query)) { // Gunakan TextUtils untuk memeriksa string kosong
+        if (TextUtils.isEmpty(query)) {
             emergencies = new ArrayList<>(allEmergencies);
         } else {
             List<Emergency> filteredList = new ArrayList<>();

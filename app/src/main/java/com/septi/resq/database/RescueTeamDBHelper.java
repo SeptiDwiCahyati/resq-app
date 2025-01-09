@@ -73,8 +73,6 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
     }
 
 
-
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESCUE_TEAMS);
@@ -129,6 +127,7 @@ public class RescueTeamDBHelper extends SQLiteOpenHelper {
         cursor.close();
         return team;
     }
+
     public void updateTeamAvailability(long id, boolean isAvailable) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
