@@ -332,15 +332,14 @@ public class DashboardFragment extends Fragment {
      */
 
     private void setupQuickActionsRecyclerView() {
-        List<QuickAction> quickActions = DummyData.getQuickActions(); // Akan mendapat 8 item (7 action + Lihat Semua)
+        List<QuickAction> quickActions = DummyData.getQuickActions();
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 4);
         rvQuickActions.setLayoutManager(gridLayoutManager);
         QuickActionAdapter adapter = new QuickActionAdapter(quickActions);
         adapter.setOnItemClickListener((quickAction, position) -> {
-            if (position == 7) { // Index ke-7 adalah tombol "Lihat Semua"
+            if (position == 7) { // Lihat Semua button
                 showAllActionsDialog();
             } else {
-                // Handle click untuk action lainnya
                 handleActionClick(quickAction);
             }
         });
@@ -354,16 +353,14 @@ public class DashboardFragment extends Fragment {
         RecyclerView dialogRecyclerView = dialogView.findViewById(R.id.dialog_recycler_view);
         Button btnClose = dialogView.findViewById(R.id.dialog_button_close);
 
-        // Buat dialog terlebih dahulu
         final androidx.appcompat.app.AlertDialog dialog = builder.setView(dialogView).create();
 
-        // Gunakan semua actions untuk dialog
         List<QuickAction> allActions = DummyData.getAllActions();
         dialogRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         QuickActionAdapter dialogAdapter = new QuickActionAdapter(allActions);
         dialogAdapter.setOnItemClickListener((quickAction, position) -> {
             handleActionClick(quickAction);
-            dialog.dismiss(); // Sekarang dialog sudah terdefine
+            dialog.dismiss();
         });
         dialogRecyclerView.setAdapter(dialogAdapter);
 
@@ -377,17 +374,10 @@ public class DashboardFragment extends Fragment {
     }
 
     private void handleActionClick(QuickAction quickAction) {
-        // Implementasi handling untuk setiap action
-        String title = quickAction.getTitle();
-        // Handle setiap action berdasarkan title
-        switch (title) {
-            case "Lapor Kecelakaan":
-                // Handle lapor kecelakaan
-                break;
-            case "Panggil Ambulans":
-                // Handle panggil ambulans
-                break;
-            // tambahkan case lainnya sesuai kebutuhan
+        if (quickAction.getPhoneNumber() != null) {
+            Intent callIntent = new Intent(Intent.ACTION_DIAL);
+            callIntent.setData(Uri.parse("tel:" + quickAction.getPhoneNumber()));
+            startActivity(callIntent);
         }
     }
 

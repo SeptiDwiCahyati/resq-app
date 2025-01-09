@@ -12,16 +12,16 @@ public class DummyData {
     private static final List<QuickAction> ALL_ACTIONS;
     static {
         ALL_ACTIONS = new ArrayList<QuickAction>();
-        ALL_ACTIONS.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident));
-        ALL_ACTIONS.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance));
-        ALL_ACTIONS.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police));
-        ALL_ACTIONS.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire));
-        ALL_ACTIONS.add(new QuickAction("Lapor Bencana", R.drawable.ic_disaster));
-        ALL_ACTIONS.add(new QuickAction("Pertolongan Pertama", R.drawable.ic_first_aid));
-        ALL_ACTIONS.add(new QuickAction("Evakuasi Segera", R.drawable.ic_evacuate));
-        ALL_ACTIONS.add(new QuickAction("Bantuan Medis", R.drawable.ic_accident));
-        ALL_ACTIONS.add(new QuickAction("Pencarian Orang", R.drawable.ic_search));
-        ALL_ACTIONS.add(new QuickAction("Tim SAR", R.drawable.ic_accident));
+        ALL_ACTIONS.add(new QuickAction("Lapor Kecelakaan", R.drawable.ic_accident, "119"));
+        ALL_ACTIONS.add(new QuickAction("Panggil Ambulans", R.drawable.ic_ambulance, "118"));
+        ALL_ACTIONS.add(new QuickAction("Hubungi Polisi", R.drawable.ic_police, "110"));
+        ALL_ACTIONS.add(new QuickAction("Pemadam Kebakaran", R.drawable.ic_fire, "113"));
+        ALL_ACTIONS.add(new QuickAction("Lapor Bencana", R.drawable.ic_disaster, "115"));
+        ALL_ACTIONS.add(new QuickAction("Pertolongan Pertama", R.drawable.ic_first_aid, "119"));
+        ALL_ACTIONS.add(new QuickAction("Evakuasi Segera", R.drawable.ic_evacuate, "115"));
+        ALL_ACTIONS.add(new QuickAction("Bantuan Medis", R.drawable.ic_accident, "119"));
+        ALL_ACTIONS.add(new QuickAction("Pencarian Orang", R.drawable.ic_search, "110"));
+        ALL_ACTIONS.add(new QuickAction("Tim SAR", R.drawable.ic_accident, "115"));
     }
 
     public static List<QuickAction> getQuickActions() {
@@ -31,11 +31,12 @@ public class DummyData {
             QuickAction action = ALL_ACTIONS.get(i);
             quickActions.add(new QuickAction(
                     truncateText(action.getTitle()),
-                    action.getIconResource()
+                    action.getIconResource(),
+                    action.getPhoneNumber()
             ));
         }
         // Tambah tombol "Lihat Semua"
-        quickActions.add(new QuickAction("Lihat Semua", R.drawable.ic_chevron_right));
+        quickActions.add(new QuickAction("Lihat Semua", R.drawable.ic_chevron_right, null));
         return quickActions;
     }
 
