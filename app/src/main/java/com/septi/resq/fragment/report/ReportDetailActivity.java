@@ -345,7 +345,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         } else if (requestCode == LOCATION_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             double latitude = data.getDoubleExtra("latitude", 0);
             double longitude = data.getDoubleExtra("longitude", 0);
-
+            //tes
             currentEmergency.setLatitude(latitude);
             currentEmergency.setLongitude(longitude);
             viewModel.updateEmergency(currentEmergency);
